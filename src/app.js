@@ -104,6 +104,7 @@ const elements = {
   chatMessages: document.getElementById("chatMessages"),
   chatInput: document.getElementById("chatInput"),
   sendBtn: document.getElementById("sendBtn"),
+  micBtn: document.getElementById("micBtn"),
   chipsWrapper: document.getElementById("chipsWrapper"),
 
   // Matching
@@ -318,6 +319,11 @@ function setupEventListeners() {
   // Matching Form Submission
   elements.matchingForm.addEventListener("submit", handleMatchingSubmit);
 
+  // Microphone voice input
+  if (elements.micBtn) {
+    elements.micBtn.addEventListener("click", handleMicClick);
+  }
+
   // Chat sending
   elements.sendBtn.addEventListener("click", handleSendMessage);
   elements.chatInput.addEventListener("keydown", e => {
@@ -368,7 +374,36 @@ function switchNavTab(tabName) {
   if (tabName === "shaadi") renderShaadiRadar();
 }
 
-// Voice Functions
+// Microphone input handler
+function handleMicClick() {
+  if (voiceEngine.isListening) {
+    voiceEngine.stopListening();
+    elements.micBtn.classList.remove("listening");
+    elements.chatInput.placeholder = TRANSLATIONS[state.currentLang].placeholderAsk;
+    return;
+  }
+
+  voiceEngine.startListening(
+    state.currentLang,
+    // On Result
+    (transcript) => {
+      elements.chatInput.value = transcript;
+      elements.micBtn.classList.remove("listening");
+      elements.chatInput.placeholder = TRANSLATIONS[state.currentLang].placeholderAsk;
+      handleSendMessage();
+    },
+    // On Start
+    () => {
+      elements.micBtn.classList.add("listening");
+      elements.chatInput.placeholder = state.currentLang === "hi" ? "सुन रहे हैं... बोलिए..." : "Listening to you... Speak now...";
+    },
+    // On End
+    () => {
+      elements.micBtn.classList.remove("listening");
+      elements.chatInput.placeholder = TRANSLATIONS[state.currentLang].placeholderAsk;
+    }
+  );
+}
 function toggleVoice() {
   const isEnabled = voiceEngine.toggleVoice();
   elements.voiceIcon.innerText = isEnabled ? "🔊" : "🔇";
@@ -463,15 +498,23 @@ function renderShaadiRadar() {
         </div>
       </div>
 
-      <div style="text-align: center; margin-top: 2rem;">
+      <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 2rem; flex-wrap: wrap;">
+        <button id="btnDownloadSoulmateCard" class="btn-share-story" style="background: linear-gradient(135deg, #ec4899, #8b5cf6);">
+          📸 Download Soulmate Story Card (PNG)
+        </button>
         <button id="btnShareShaadiWhatsApp" class="btn-celestial" style="background: linear-gradient(135deg, #25D366, #128C7E); color: #fff;">
-          📲 Share Soulmate Prediction to WhatsApp
+          📲 Share on WhatsApp Status
         </button>
       </div>
     </div>
   `;
 
   elements.shaadiResultsContainer.style.display = "block";
+
+  // Download Soulmate Story Card Handler
+  document.getElementById("btnDownloadSoulmateCard")?.addEventListener("click", () => {
+    CosmicCardGenerator.downloadSoulmateCard(state.activeChart, soul);
+  });
 
   // Share to WhatsApp Handler
   document.getElementById("btnShareShaadiWhatsApp")?.addEventListener("click", () => {
