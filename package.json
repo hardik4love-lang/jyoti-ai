@@ -1,0 +1,22 @@
+{
+  "name": "reva-zero",
+  "version": "1.0.0",
+  "description": "Next-Gen 100% Free & Zero-Cost AI Vedic Astrologer",
+  "type": "module",
+  "scripts": {
+    "test": "node test-engine.js",
+    "start": "npx serve ."
+  },
+  "keywords": [
+    "astrology",
+    "vedic",
+    "jyotish",
+    "kundli",
+    "ai",
+    "gemini",
+    "free",
+    "open-source"
+  ],
+  "author": "Antigravity",
+  "license": "MIT"
+}

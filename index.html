@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jyoti AI - 100% Free Personal Vedic Astrologer</title>
+  <meta name="description" content="Next-generation, completely free and private AI Vedic Astrologer. Kundli, Dasha, Ashta Koota Matchmaking, Daily Panchang with zero subscription fees.">
+  <meta name="theme-color" content="#f4c453">
+
+  <link rel="manifest" href="./manifest.json">
+  <link rel="stylesheet" href="./src/styles.css">
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand-wrapper">
+        <div class="brand-icon">ॐ</div>
+        <div>
+          <h1 class="brand-title">Jyoti AI</h1>
+        </div>
+        <span id="brandTag" class="brand-tag">100% Free • $0 Cost</span>
+      </div>
+
+      <div class="header-actions">
+        <!-- Language Switcher -->
+        <button id="langToggleBtn" class="btn-icon" title="Switch Language">
+          🌐 हिन्दी
+        </button>
+
+        <!-- Relaxing 432Hz Sound Synthesizer -->
+        <button id="audioToggleBtn" class="audio-toggle" title="Toggle 432Hz Ambient Resonance">
+          🔇 432Hz Calm: OFF
+        </button>
+
+        <!-- Settings Modal Trigger -->
+        <button id="settingsBtn" class="btn-icon" title="AI Provider & Settings">
+          ⚙️ Settings
+        </button>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs-wrapper">
+      <div class="nav-tabs">
+        <button id="navTabPersonal" class="nav-tab active">🔮 Personal Kundli & AI</button>
+        <button id="navTabMatching" class="nav-tab">💍 Kundli Milan (36 Gunas)</button>
+        <button id="navTabPanchang" class="nav-tab">📅 Daily Panchang & Muhurat</button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Main App Content -->
+  <main class="main-wrapper">
+
+    <!-- VIEW 1: PERSONAL KUNDLI & AI CHAT -->
+    <div id="viewPersonal">
+      <!-- Input Form -->
+      <section id="formSection" class="glass-card">
+        <div style="text-align: center; max-width: 650px; margin: 0 auto 1.5rem;">
+          <h2 id="heroTitle" style="font-size: 1.85rem; font-weight: 800; background: linear-gradient(90deg, #fff, var(--accent-gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            Discover Your Destiny with Sacred Jyotish
+          </h2>
+          <p id="heroDesc" style="color: var(--text-secondary); margin-top: 0.5rem; font-size: 0.95rem;">
+            Enter your exact birth coordinates below. Calculations are computed <strong>locally in your browser</strong> using Swiss Ephemeris mathematics — 100% private, instantaneous, and forever free.
+          </p>
+        </div>
+
+        <form id="kundliForm">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label" id="labelFullName" for="userName">Full Name</label>
+              <input type="text" id="userName" class="form-input" placeholder="e.g. Aarav Sharma" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" id="labelGender" for="userGender">Gender</label>
+              <select id="userGender" class="form-select">
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other / Non-binary</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" id="labelDob" for="userDob">Date of Birth</label>
+              <input type="date" id="userDob" class="form-input" required value="1998-05-15">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" id="labelTob" for="userTob">Time of Birth (Exact)</label>
+              <input type="time" id="userTob" class="form-input" required value="14:30">
+            </div>
+
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label class="form-label" id="labelCity" for="cityInput">Birth City / Location</label>
+              <input type="text" id="cityInput" class="form-input" placeholder="Type city (e.g. Delhi, Mumbai, Bengaluru, London, New York...)" autocomplete="off">
+              <div id="cityDropdown" class="autocomplete-dropdown"></div>
+            </div>
+          </div>
+
+          <input type="hidden" id="latInput" value="28.6139">
+          <input type="hidden" id="lonInput" value="77.2090">
+          <input type="hidden" id="tzInput" value="5.5">
+
+          <div style="text-align: center; margin-top: 2rem;">
+            <button type="submit" id="generateBtn" class="btn-primary">
+              ✨ Generate Sacred Kundli & Consult Jyoti
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Dashboard Grid -->
+      <section id="dashboardSection" style="display: none;">
+        <div class="dashboard-grid">
+
+          <!-- Left Column: Chart & Metrics -->
+          <div class="chart-box">
+            <div class="glass-card" style="padding: 1.25rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem; flex-wrap: wrap; gap: 0.5rem;">
+                <!-- D1 vs D9 Varga Selector -->
+                <div class="chart-tabs">
+                  <button id="tabD1" class="tab-btn active">D-1 Rashi</button>
+                  <button id="tabD9" class="tab-btn">D-9 Navamsha</button>
+                </div>
+                <!-- North vs South Selector -->
+                <div class="chart-tabs">
+                  <button id="tabNorth" class="tab-btn active">North</button>
+                  <button id="tabSouth" class="tab-btn">South</button>
+                </div>
+              </div>
+
+              <!-- SVG Chart -->
+              <div id="chartContainer" class="kundli-container"></div>
+
+              <!-- Metrics Badges -->
+              <div id="metricsBadges" class="badges-grid"></div>
+
+              <div style="margin-top: 1.25rem; display: flex; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap;">
+                <button id="printReportBtn" class="btn-icon" style="font-size: 0.8rem;">
+                  📄 Download PDF / Print
+                </button>
+                <button id="editChartBtn" class="btn-icon" style="font-size: 0.8rem;">
+                  ✏️ Edit Birth Details
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: AI Astrologer ("Jyoti") -->
+          <div class="chat-container">
+            <div class="chat-header">
+              <div class="astrologer-info">
+                <div class="astrologer-avatar">ॐ</div>
+                <div>
+                  <div class="astrologer-name">Jyoti (Personal AI Astrologer)</div>
+                  <div class="status-indicator">
+                    <span class="status-dot"></span> Online • 24/7 Guidance
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Chat Messages -->
+            <div id="chatMessages" class="chat-messages"></div>
+
+            <!-- Quick Topic Chips -->
+            <div id="chipsWrapper" class="chips-wrapper">
+              <button class="topic-chip" data-query="How does my career and job look in the coming months?">💼 Career & Growth</button>
+              <button class="topic-chip" data-query="What does my 7th house say about love, marriage timing, and my future spouse?">💍 Love & Marriage</button>
+              <button class="topic-chip" data-query="Can you analyze my wealth, savings, and financial prospects?">💰 Wealth & Finance</button>
+              <button class="topic-chip" data-query="What are my planetary health indications and daily remedies?">🌿 Health & Upaya</button>
+              <button class="topic-chip" data-query="Tell me about my active Vimshottari Mahadasha and what precautions I should take.">🔮 Dasha Insights</button>
+            </div>
+
+            <!-- Chat Input -->
+            <div class="chat-input-bar">
+              <input type="text" id="chatInput" class="chat-input" placeholder="Ask Jyoti anything about your chart..." autocomplete="off">
+              <button id="sendBtn" class="btn-send" title="Send Question">➔</button>
+            </div>
+          </div>
+
+        </div>
+      </section>
+    </div>
+
+    <!-- VIEW 2: KUNDLI MILAN (ASHTA KOOTA 36 GUNAS) -->
+    <div id="viewMatching" style="display: none;">
+      <section class="glass-card">
+        <div style="text-align: center; max-width: 650px; margin: 0 auto 1.5rem;">
+          <h2 style="font-size: 1.85rem; font-weight: 800; background: linear-gradient(90deg, #fff, var(--accent-gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            Vedic Kundli Milan (36 Gunas)
+          </h2>
+          <p style="color: var(--text-secondary); margin-top: 0.5rem; font-size: 0.95rem;">
+            Authentic Ashta Koota compatibility matching based on classical Parashara principles (Varna, Vashya, Tara, Yoni, Graha Maitri, Gana, Bhakoot, and Nadi).
+          </p>
+        </div>
+
+        <form id="matchingForm">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+            
+            <!-- Boy's Details -->
+            <div style="background: rgba(14, 16, 38, 0.7); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem;">
+              <h3 style="color: #60a5fa; margin-bottom: 1rem;">👦 Boy's Birth Details</h3>
+              <div class="form-group" style="margin-bottom: 0.85rem;">
+                <label class="form-label">Name</label>
+                <input type="text" id="boyName" class="form-input" value="Aarav" required>
+              </div>
+              <div class="form-group" style="margin-bottom: 0.85rem;">
+                <label class="form-label">Date of Birth</label>
+                <input type="date" id="boyDob" class="form-input" value="1996-08-20" required>
+              </div>
+              <div class="form-group" style="margin-bottom: 0.85rem;">
+                <label class="form-label">Time of Birth</label>
+                <input type="time" id="boyTob" class="form-input" value="10:15" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">City</label>
+                <input type="text" id="boyCity" class="form-input" value="New Delhi, India">
+              </div>
+            </div>
+
+            <!-- Girl's Details -->
+            <div style="background: rgba(14, 16, 38, 0.7); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem;">
+              <h3 style="color: #f472b6; margin-bottom: 1rem;">👧 Girl's Birth Details</h3>
+              <div class="form-group" style="margin-bottom: 0.85rem;">
+                <label class="form-label">Name</label>
+                <input type="text" id="girlName" class="form-input" value="Ananya" required>
+              </div>
+              <div class="form-group" style="margin-bottom: 0.85rem;">
+                <label class="form-label">Date of Birth</label>
+                <input type="date" id="girlDob" class="form-input" value="1998-05-15" required>
+              </div>
+              <div class="form-group" style="margin-bottom: 0.85rem;">
+                <label class="form-label">Time of Birth</label>
+                <input type="time" id="girlTob" class="form-input" value="14:30" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">City</label>
+                <input type="text" id="girlCity" class="form-input" value="New Delhi, India">
+              </div>
+            </div>
+
+          </div>
+
+          <div style="text-align: center; margin-top: 1.75rem;">
+            <button type="submit" class="btn-primary">
+              💑 Match Horoscopes (36 Gunas)
+            </button>
+          </div>
+        </form>
+
+        <!-- Match Result Container -->
+        <div id="matchResultBox" style="margin-top: 2rem; display: none;"></div>
+      </section>
+    </div>
+
+    <!-- VIEW 3: DAILY PANCHANG & SHUBH MUHURAT -->
+    <div id="viewPanchang" style="display: none;">
+      <section class="glass-card">
+        <div style="text-align: center; max-width: 650px; margin: 0 auto 1.5rem;">
+          <h2 style="font-size: 1.85rem; font-weight: 800; background: linear-gradient(90deg, #fff, var(--accent-gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            Today's Sacred Vedic Panchang & Shubh Muhurat
+          </h2>
+          <p id="panchangDateDisplay" style="color: var(--accent-gold-light); font-weight: 600; margin-top: 0.4rem;"></p>
+        </div>
+
+        <div id="panchangGrid" class="badges-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+          <!-- Dynamically filled -->
+        </div>
+
+        <div style="margin-top: 2rem; background: rgba(22, 25, 52, 0.7); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem;">
+          <h3 style="color: var(--accent-gold); margin-bottom: 0.75rem;">🌟 Daily Auspicious Muhurat Guidelines</h3>
+          <ul style="color: var(--text-secondary); line-height: 1.8; margin-left: 1.25rem;">
+            <li><strong>Abhijit Muhurat:</strong> Highly auspicious 48-minute celestial window daily for commencing new ventures, signings, or travels.</li>
+            <li><strong>Rahu Kaal:</strong> Period ruled by Rahu where major purchases, investment decisions, or auspicious ceremonies should be avoided.</li>
+            <li><strong>Daily Upaya (Remedy):</strong> Practice mindfulness, offer gratitude to nature, and align work tasks during daylight horas.</li>
+          </ul>
+        </div>
+      </section>
+    </div>
+
+  </main>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="settingsModalTitle" style="color: var(--accent-gold); font-size: 1.25rem;">AI Intelligence Settings</h3>
+        <button id="closeSettingsBtn" class="modal-close">&times;</button>
+      </div>
+
+      <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+        Jyoti AI provides an authentic <strong>Local Offline Astrological Engine</strong> that runs without any API key or subscription. You can also optionally connect your own free-tier API keys.
+      </p>
+
+      <div class="form-group" style="margin-bottom: 1rem;">
+        <label class="form-label" for="providerSelect">Select AI Engine</label>
+        <select id="providerSelect" class="form-select">
+          <option value="local">🌟 Local Jyotish Engine (100% Free, Offline, 0 API Key)</option>
+          <option value="gemini">⚡ Google Gemini Free Tier (Gemini 1.5 Flash)</option>
+          <option value="groq">🚀 Groq Cloud Free Tier (Llama 3.3 70B)</option>
+        </select>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 1rem;">
+        <label class="form-label" for="geminiKeyInput">
+          Google Gemini API Key (Optional)
+          <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color: var(--accent-gold); font-size: 0.75rem; margin-left: 0.5rem; text-decoration: underline;">Get free key</a>
+        </label>
+        <input type="password" id="geminiKeyInput" class="form-input" placeholder="AIzaSy...">
+      </div>
+
+      <div class="form-group" style="margin-bottom: 1.5rem;">
+        <label class="form-label" for="groqKeyInput">
+          Groq API Key (Optional)
+          <a href="https://console.groq.com/keys" target="_blank" style="color: var(--accent-gold); font-size: 0.75rem; margin-left: 0.5rem; text-decoration: underline;">Get free key</a>
+        </label>
+        <input type="password" id="groqKeyInput" class="form-input" placeholder="gsk_...">
+      </div>
+
+      <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(74, 222, 128, 0.3); border-radius: var(--radius-sm); padding: 0.75rem; margin-bottom: 1.5rem; font-size: 0.8rem; color: #86efac;">
+        🛡️ <strong>Zero Cost Guarantee:</strong> We never ask for UPI, credit cards, or phone numbers. All data stays in your browser.
+      </div>
+
+      <button id="saveSettingsBtn" class="btn-primary" style="width: 100%;">
+        Save & Apply
+      </button>
+    </div>
+  </div>
+
+  <script type="module" src="./src/app.js"></script>
+</body>
+</html>
