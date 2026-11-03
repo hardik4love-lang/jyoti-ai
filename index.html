@@ -3,27 +3,37 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jyoti AI - 100% Free Personal Vedic Astrologer</title>
-  <meta name="description" content="Next-generation, completely free and private AI Vedic Astrologer. Kundli, Dasha, Ashta Koota Matchmaking, Daily Panchang with zero subscription fees.">
+  <title>Jyoti AI - Sacred Vedic Astrology & Cosmic Intelligence</title>
+  <meta name="description" content="100% Free & Private AI Vedic Astrologer. Conversational Kundli, Ashta Koota Matchmaking, Cosmic Identity Card for Instagram Stories, and 24/7 personal spiritual guidance.">
   <meta name="theme-color" content="#f4c453">
 
   <link rel="manifest" href="./manifest.json">
   <link rel="stylesheet" href="./src/styles.css">
 </head>
-<body>
+<body class="cosmic-theme">
+
+  <!-- Background Ambient Stardust Canvas -->
+  <canvas id="starCanvas" class="star-canvas"></canvas>
 
   <!-- Top Navigation Header -->
   <header class="app-header">
     <div class="header-container">
       <div class="brand-wrapper">
-        <div class="brand-icon">ॐ</div>
-        <div>
-          <h1 class="brand-title">Jyoti AI</h1>
+        <div class="brand-orb">
+          <span class="orb-om">ॐ</span>
         </div>
-        <span id="brandTag" class="brand-tag">100% Free • $0 Cost</span>
+        <div>
+          <h1 class="brand-title">JYOTI <span class="ai-badge">AI</span></h1>
+        </div>
+        <span id="brandTag" class="brand-tag">100% FREE • NO SUBSCRIPTION SCAMS</span>
       </div>
 
       <div class="header-actions">
+        <!-- Persona Mode Switcher: Gentle Sage vs Cosmic Roast -->
+        <button id="personaToggleBtn" class="persona-pill" title="Toggle AI Persona">
+          <span id="personaIcon">🕊️</span> <span id="personaLabel">Gentle Guru</span>
+        </button>
+
         <!-- Language Switcher -->
         <button id="langToggleBtn" class="btn-icon" title="Switch Language">
           🌐 हिन्दी
@@ -31,12 +41,12 @@
 
         <!-- Relaxing 432Hz Sound Synthesizer -->
         <button id="audioToggleBtn" class="audio-toggle" title="Toggle 432Hz Ambient Resonance">
-          🔇 432Hz Calm: OFF
+          🔇 432Hz: OFF
         </button>
 
         <!-- Settings Modal Trigger -->
-        <button id="settingsBtn" class="btn-icon" title="AI Provider & Settings">
-          ⚙️ Settings
+        <button id="settingsBtn" class="btn-icon" title="Settings">
+          ⚙️
         </button>
       </div>
     </div>
@@ -44,7 +54,7 @@
     <!-- Navigation Tabs -->
     <nav class="nav-tabs-wrapper">
       <div class="nav-tabs">
-        <button id="navTabPersonal" class="nav-tab active">🔮 Personal Kundli & AI</button>
+        <button id="navTabPersonal" class="nav-tab active">✨ Sacred Kundli & AI</button>
         <button id="navTabMatching" class="nav-tab">💍 Kundli Milan (36 Gunas)</button>
         <button id="navTabPanchang" class="nav-tab">📅 Daily Panchang & Muhurat</button>
       </div>
@@ -56,67 +66,107 @@
 
     <!-- VIEW 1: PERSONAL KUNDLI & AI CHAT -->
     <div id="viewPersonal">
-      <!-- Input Form -->
-      <section id="formSection" class="glass-card">
-        <div style="text-align: center; max-width: 650px; margin: 0 auto 1.5rem;">
-          <h2 id="heroTitle" style="font-size: 1.85rem; font-weight: 800; background: linear-gradient(90deg, #fff, var(--accent-gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-            Discover Your Destiny with Sacred Jyotish
-          </h2>
-          <p id="heroDesc" style="color: var(--text-secondary); margin-top: 0.5rem; font-size: 0.95rem;">
-            Enter your exact birth coordinates below. Calculations are computed <strong>locally in your browser</strong> using Swiss Ephemeris mathematics — 100% private, instantaneous, and forever free.
-          </p>
+      
+      <!-- Conversational Step Onboarding (The Viral Makeover) -->
+      <section id="onboardingSection" class="portal-card">
+        <div class="portal-halo">
+          <div class="pulsing-aura"></div>
+          <div class="sacred-symbol">ॐ</div>
         </div>
 
-        <form id="kundliForm">
-          <div class="form-grid">
-            <div class="form-group">
-              <label class="form-label" id="labelFullName" for="userName">Full Name</label>
-              <input type="text" id="userName" class="form-input" placeholder="e.g. Aarav Sharma" required>
-            </div>
+        <div class="dialogue-box">
+          <p id="portalGreeting" class="portal-tagline">CELESTIAL REVELATION</p>
+          <h2 id="stepPromptTitle" class="step-title">What name does the universe call you?</h2>
+          <p id="stepPromptSubtitle" class="step-subtitle">Your sound vibration anchors your planetary consciousness.</p>
+        </div>
 
-            <div class="form-group">
-              <label class="form-label" id="labelGender" for="userGender">Gender</label>
-              <select id="userGender" class="form-select">
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Other">Other / Non-binary</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" id="labelDob" for="userDob">Date of Birth</label>
-              <input type="date" id="userDob" class="form-input" required value="1998-05-15">
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" id="labelTob" for="userTob">Time of Birth (Exact)</label>
-              <input type="time" id="userTob" class="form-input" required value="14:30">
-            </div>
-
-            <div class="form-group" style="grid-column: 1 / -1;">
-              <label class="form-label" id="labelCity" for="cityInput">Birth City / Location</label>
-              <input type="text" id="cityInput" class="form-input" placeholder="Type city (e.g. Delhi, Mumbai, Bengaluru, London, New York...)" autocomplete="off">
-              <div id="cityDropdown" class="autocomplete-dropdown"></div>
-            </div>
+        <!-- Step 1: Name & Gender -->
+        <div id="step1" class="step-pane active">
+          <div class="input-glow-group">
+            <input type="text" id="userName" class="portal-input" placeholder="Enter your first name..." autofocus value="Aarav">
           </div>
+          <div class="gender-pill-selector">
+            <button type="button" class="gender-btn active" data-gender="Male">Male</button>
+            <button type="button" class="gender-btn" data-gender="Female">Female</button>
+            <button type="button" class="gender-btn" data-gender="Other">Non-Binary</button>
+          </div>
+          <div class="step-actions">
+            <button id="btnNext1" class="btn-celestial">Continue to Birth Date ➔</button>
+          </div>
+        </div>
 
+        <!-- Step 2: Date of Birth -->
+        <div id="step2" class="step-pane">
+          <div class="input-glow-group">
+            <input type="date" id="userDob" class="portal-input" value="1998-05-15">
+          </div>
+          <div class="step-actions">
+            <button id="btnBack2" class="btn-subtle">⬅ Back</button>
+            <button id="btnNext2" class="btn-celestial">Continue to Birth Time ➔</button>
+          </div>
+        </div>
+
+        <!-- Step 3: Time of Birth -->
+        <div id="step3" class="step-pane">
+          <div class="input-glow-group">
+            <input type="time" id="userTob" class="portal-input" value="14:30">
+          </div>
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; text-align: center;">
+            Exact time calculates your Ascendant (Lagna) with mathematical precision.
+          </p>
+          <div class="step-actions">
+            <button id="btnBack3" class="btn-subtle">⬅ Back</button>
+            <button id="btnNext3" class="btn-celestial">Continue to Birth City ➔</button>
+          </div>
+        </div>
+
+        <!-- Step 4: City Search & Reveal -->
+        <div id="step4" class="step-pane">
+          <div class="input-glow-group" style="position: relative;">
+            <input type="text" id="cityInput" class="portal-input" placeholder="Type city (e.g. Delhi, Mumbai, Bengaluru, London...)" autocomplete="off" value="New Delhi, Delhi, India">
+            <div id="cityDropdown" class="autocomplete-dropdown"></div>
+          </div>
           <input type="hidden" id="latInput" value="28.6139">
           <input type="hidden" id="lonInput" value="77.2090">
           <input type="hidden" id="tzInput" value="5.5">
 
-          <div style="text-align: center; margin-top: 2rem;">
-            <button type="submit" id="generateBtn" class="btn-primary">
-              ✨ Generate Sacred Kundli & Consult Jyoti
+          <div class="step-actions">
+            <button id="btnBack4" class="btn-subtle">⬅ Back</button>
+            <button id="btnRevealDestiny" class="btn-celestial pulse-gold">
+              ✨ Cast My Sacred Kundli
             </button>
           </div>
-        </form>
+        </div>
+
+        <!-- Step Progress Dots -->
+        <div class="step-dots">
+          <span class="dot active"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+        </div>
       </section>
 
-      <!-- Dashboard Grid -->
+      <!-- Dashboard Grid (Revealed after calculation) -->
       <section id="dashboardSection" style="display: none;">
+        
+        <!-- Viral Top Banner: Cosmic Passport Share -->
+        <div class="viral-banner">
+          <div class="viral-banner-content">
+            <div class="passport-icon">🪪</div>
+            <div>
+              <h3 class="viral-title">Your Cosmic Identity Passport is Ready</h3>
+              <p class="viral-desc">Export your custom 9:16 Instagram Story & WhatsApp card with your Archetype, Rising, Moon & Dasha.</p>
+            </div>
+          </div>
+          <button id="btnDownloadCard" class="btn-share-story">
+            📸 Download Story Card (PNG)
+          </button>
+        </div>
+
         <div class="dashboard-grid">
 
-          <!-- Left Column: Chart & Metrics -->
+          <!-- Left Column: Sacred Chart & Metrics -->
           <div class="chart-box">
             <div class="glass-card" style="padding: 1.25rem;">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem; flex-wrap: wrap; gap: 0.5rem;">
@@ -140,7 +190,7 @@
 
               <div style="margin-top: 1.25rem; display: flex; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap;">
                 <button id="printReportBtn" class="btn-icon" style="font-size: 0.8rem;">
-                  📄 Download PDF / Print
+                  📄 Print / PDF
                 </button>
                 <button id="editChartBtn" class="btn-icon" style="font-size: 0.8rem;">
                   ✏️ Edit Birth Details
@@ -155,12 +205,16 @@
               <div class="astrologer-info">
                 <div class="astrologer-avatar">ॐ</div>
                 <div>
-                  <div class="astrologer-name">Jyoti (Personal AI Astrologer)</div>
+                  <div class="astrologer-name">Jyoti <span id="activePersonaBadge" class="persona-badge-pill">Guru Mode</span></div>
                   <div class="status-indicator">
                     <span class="status-dot"></span> Online • 24/7 Guidance
                   </div>
                 </div>
               </div>
+
+              <button id="btnRoastToggle" class="roast-quick-btn" title="Toggle Cosmic Roast">
+                🔥 Roast Me
+              </button>
             </div>
 
             <!-- Chat Messages -->
@@ -247,12 +301,11 @@
 
           <div style="text-align: center; margin-top: 1.75rem;">
             <button type="submit" class="btn-primary">
-              💑 Match Horoscopes (36 Gunas)
+              💑 Calculate 36 Guna Compatibility
             </button>
           </div>
         </form>
 
-        <!-- Match Result Container -->
         <div id="matchResultBox" style="margin-top: 2rem; display: none;"></div>
       </section>
     </div>
@@ -267,9 +320,7 @@
           <p id="panchangDateDisplay" style="color: var(--accent-gold-light); font-weight: 600; margin-top: 0.4rem;"></p>
         </div>
 
-        <div id="panchangGrid" class="badges-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-          <!-- Dynamically filled -->
-        </div>
+        <div id="panchangGrid" class="badges-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;"></div>
 
         <div style="margin-top: 2rem; background: rgba(22, 25, 52, 0.7); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem;">
           <h3 style="color: var(--accent-gold); margin-bottom: 0.75rem;">🌟 Daily Auspicious Muhurat Guidelines</h3>

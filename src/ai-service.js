@@ -11,10 +11,22 @@ export class AIService {
     this.geminiApiKey = isBrowser ? (localStorage.getItem("jyoti_gemini_key") || "") : "";
     this.groqApiKey = isBrowser ? (localStorage.getItem("jyoti_groq_key") || "") : "";
     this.preferredProvider = isBrowser ? (localStorage.getItem("jyoti_provider") || "local") : "local";
+    this.personaMode = isBrowser ? (localStorage.getItem("jyoti_persona") || "gentle") : "gentle"; // 'gentle' or 'roast'
   }
 
-  setCredentials({ provider, geminiKey, groqKey }) {
+  setPersonaMode(mode) {
+    this.personaMode = mode;
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem("jyoti_persona", mode);
+    }
+  }
+
+  setCredentials({ provider, geminiKey, groqKey, persona }) {
     const isBrowser = typeof localStorage !== "undefined";
+    if (persona) {
+      this.personaMode = persona;
+      if (isBrowser) localStorage.setItem("jyoti_persona", persona);
+    }
     if (provider) {
       this.preferredProvider = provider;
       if (isBrowser) localStorage.setItem("jyoti_provider", provider);
@@ -181,6 +193,55 @@ CORE PRINCIPLES:
     const dasha = chart.dasha.current;
     const name = chart.user.name;
 
+    // IF IN ROAST MODE: Deliver witty, razor-sharp, relatable Co-Star style cosmic truth!
+    if (this.personaMode === "roast") {
+      if (q.includes("career") || q.includes("job") || q.includes("work")) {
+        return `### 🔥 Cosmic Roast: Career Edition for ${name}
+
+Let’s be brutally honest: with **${lagna.english} Lagna**, your primary career obstacle isn't your resume—it's your tendency to overthink decisions for 3 weeks and then make an impulsive choice in 3 seconds.
+
+1. **The Hard Reality:**
+   • Your 10th house is governed by **${chart.houses[10].rashi.lord}**. You want the CEO title and freedom, but you secretly resent meetings before 11 AM.
+   • Under **${dasha.mahadasha} Mahadasha**, blaming bad office politics won’t work. The stars are forcing you to finish the projects you started 6 months ago.
+2. **The Unfiltered Upaya:**
+   • Stop tweaking your LinkedIn bio. Close the 42 open browser tabs and execute one hard task today.`;
+      }
+
+      if (q.includes("love") || q.includes("marriage") || q.includes("relationship") || q.includes("partner")) {
+        return `### 💔 Cosmic Roast: Love & Relationship Edition for ${name}
+
+Let’s unpack your Kalatra Bhava (7th House in **${chart.houses[7].rashi.english}**):
+
+1. **Why You’re Complicated:**
+   • You claim you want peace and stability, but your **${nakshatra.name} Moon** gets bored the second someone actually treats you nicely and communicates like a mature adult.
+   • ${chart.doshas.manglik.intensity !== "None" ? `You have **${chart.doshas.manglik.intensity} Manglik energy**, meaning you view minor disagreements as Shakespearean dramas.` : "You don't have Manglik dosha, so you can't blame Mars when you leave people on read for 48 hours."}
+2. **The Fix:**
+   • Lower your emotional fortress by 10%. They can't read your mind, even if you think the stars told them to.`;
+      }
+
+      if (q.includes("wealth") || q.includes("money") || q.includes("finance")) {
+        return `### 💸 Cosmic Roast: Money Edition for ${name}
+
+Your 2nd house of savings is in **${chart.houses[2].rashi.english}**, and your bank account is judging you:
+
+1. **Financial Truth:**
+   • Retail therapy is not a Vedic remedy. Under **${dasha.mahadasha} Mahadasha**, treating yourself after a mildly stressful Tuesday is why your savings aren't compounding.
+2. **The Fix:**
+   • Put that money into an index fund or gold bond instead of ordering food at midnight. Your future self will thank Saturn.`;
+      }
+
+      return `### ⚡ Unfiltered Cosmic Assessment for ${name}
+
+Welcome to your reality check. You are an **${lagna.english} Lagna** with Moon in **${nakshatra.name}**:
+
+• **The Vibe:** You carry yourself like you have everything figured out, but inside you're operating on pure intuition, caffeine, and celestial spite.
+• **Your Superpower:** Uncanny ability to read a room in 5 seconds and predict catastrophe before it happens.
+• **Your Fatal Flaw:** Forgetting to live in the present because you're already calculating what will happen in your next Dasha.
+
+Ask me about your **Career**, **Love**, or **Finances** if you can handle the unvarnished cosmic truth!`;
+    }
+
+    // GENTLE SAGE MODE (Classical, warm, uplifting Parashari guidance)
     // 1. Career / Job / Profession / Business
     if (q.includes("career") || q.includes("job") || q.includes("profession") || q.includes("business") || q.includes("work") || q.includes("promotion")) {
       const h10 = chart.houses[10];

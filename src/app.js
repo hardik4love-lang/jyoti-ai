@@ -1,8 +1,7 @@
 /**
- * Jyoti AI - Main Application Controller
- * Handles Form Interaction, City Autocomplete, Chart Rendering,
- * Ashta Koota Matchmaking, Daily Panchang, Bilingual I18n,
- * Real-time Conversational Flow, and Settings Management.
+ * Jyoti AI - Main Application Controller (v3 Viral Edition)
+ * Conversational Onboarding • Cosmic Story Card Exporter •
+ * Dual Persona (Guru vs Roast) • Interactive Stardust Canvas
  */
 
 import { generateKundli, calculateAshtaKoota, calculateDailyPanchang } from "./vedic-engine.js";
@@ -11,16 +10,18 @@ import { KundliChartRenderer } from "./chart-renderer.js";
 import { AIService } from "./ai-service.js";
 import { AmbientAudioEngine } from "./audio-ambient.js";
 import { TRANSLATIONS } from "./i18n.js";
+import { CosmicCardGenerator } from "./card-generator.js";
 
-// Global App State
+// Global State
 const state = {
   activeChart: null,
-  activeChartStyle: "north", // 'north' or 'south'
-  activeVarga: "D1",         // 'D1' or 'D9'
-  currentLang: "en",         // 'en' or 'hi'
-  currentTab: "personal",    // 'personal', 'matching', 'panchang'
+  activeChartStyle: "north",
+  activeVarga: "D1",
+  currentLang: "en",
+  currentTab: "personal",
+  currentStep: 1,
+  selectedGender: "Male",
   chatHistory: [],
-  selectedCity: null,
   isGenerating: false
 };
 
@@ -37,16 +38,42 @@ const elements = {
   viewMatching: document.getElementById("viewMatching"),
   viewPanchang: document.getElementById("viewPanchang"),
   langToggleBtn: document.getElementById("langToggleBtn"),
+  personaToggleBtn: document.getElementById("personaToggleBtn"),
+  personaIcon: document.getElementById("personaIcon"),
+  personaLabel: document.getElementById("personaLabel"),
+  activePersonaBadge: document.getElementById("activePersonaBadge"),
+  btnRoastToggle: document.getElementById("btnRoastToggle"),
 
-  // Personal Kundli
-  formSection: document.getElementById("formSection"),
+  // Onboarding Steps
+  onboardingSection: document.getElementById("onboardingSection"),
   dashboardSection: document.getElementById("dashboardSection"),
-  kundliForm: document.getElementById("kundliForm"),
+  stepTitle: document.getElementById("stepPromptTitle"),
+  stepSubtitle: document.getElementById("stepPromptSubtitle"),
+  step1: document.getElementById("step1"),
+  step2: document.getElementById("step2"),
+  step3: document.getElementById("step3"),
+  step4: document.getElementById("step4"),
+  btnNext1: document.getElementById("btnNext1"),
+  btnNext2: document.getElementById("btnNext2"),
+  btnNext3: document.getElementById("btnNext3"),
+  btnBack2: document.getElementById("btnBack2"),
+  btnBack3: document.getElementById("btnBack3"),
+  btnBack4: document.getElementById("btnBack4"),
+  btnRevealDestiny: document.getElementById("btnRevealDestiny"),
+  dots: document.querySelectorAll(".step-dots .dot"),
+  genderBtns: document.querySelectorAll(".gender-btn"),
+
+  // Inputs
+  userName: document.getElementById("userName"),
+  userDob: document.getElementById("userDob"),
+  userTob: document.getElementById("userTob"),
   cityInput: document.getElementById("cityInput"),
   cityDropdown: document.getElementById("cityDropdown"),
   latInput: document.getElementById("latInput"),
   lonInput: document.getElementById("lonInput"),
   tzInput: document.getElementById("tzInput"),
+
+  // Dashboard
   chartContainer: document.getElementById("chartContainer"),
   tabNorth: document.getElementById("tabNorth"),
   tabSouth: document.getElementById("tabSouth"),
@@ -55,6 +82,7 @@ const elements = {
   editChartBtn: document.getElementById("editChartBtn"),
   printReportBtn: document.getElementById("printReportBtn"),
   metricsBadges: document.getElementById("metricsBadges"),
+  btnDownloadCard: document.getElementById("btnDownloadCard"),
 
   // Chat
   chatMessages: document.getElementById("chatMessages"),
@@ -78,12 +106,15 @@ const elements = {
   providerSelect: document.getElementById("providerSelect"),
   geminiKeyInput: document.getElementById("geminiKeyInput"),
   groqKeyInput: document.getElementById("groqKeyInput"),
-  audioToggleBtn: document.getElementById("audioToggleBtn")
+  audioToggleBtn: document.getElementById("audioToggleBtn"),
+  starCanvas: document.getElementById("starCanvas")
 };
 
 // Initialize App
 document.addEventListener("DOMContentLoaded", () => {
   setupEventListeners();
+  setupOnboardingFlow();
+  setupStardustCanvas();
   loadSavedSettings();
   loadSavedChart();
   renderPanchang();
@@ -92,10 +123,121 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function registerServiceWorker() {
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("./sw.js").catch(err => {
-      console.warn("SW note:", err);
+    navigator.serviceWorker.register("./sw.js").catch(() => {});
+  }
+}
+
+// Stardust Ambient Background Particles (Lightweight, 60fps)
+function setupStardustCanvas() {
+  const canvas = elements.starCanvas;
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+
+  let w, h;
+  const resize = () => {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+  };
+  window.addEventListener("resize", resize);
+  resize();
+
+  const stars = Array.from({ length: 90 }, () => ({
+    x: Math.random() * w,
+    y: Math.random() * h,
+    radius: Math.random() * 1.5 + 0.3,
+    alpha: Math.random(),
+    speed: Math.random() * 0.008 + 0.002
+  }));
+
+  function animate() {
+    ctx.clearRect(0, 0, w, h);
+    stars.forEach(s => {
+      s.alpha += s.speed;
+      if (s.alpha > 1) { s.alpha = 0; s.x = Math.random() * w; s.y = Math.random() * h; }
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(244, 196, 83, ${Math.sin(s.alpha * Math.PI) * 0.8})`;
+      ctx.fill();
+    });
+    requestAnimationFrame(animate);
+  }
+  animate();
+}
+
+// Conversational Onboarding Logic
+function setupOnboardingFlow() {
+  const stepTitles = {
+    1: { title: "What name does the universe call you?", sub: "Your sound vibration anchors your planetary consciousness." },
+    2: { title: "When did your soul arrive in this realm?", sub: "Your birth date positions the 9 celestial Grahas across the zodiac." },
+    3: { title: "At what exact moment did you take your first breath?", sub: "Your birth time unlocks your exact Ascendant (Lagna) degree." },
+    4: { title: "Under what skies were you born?", sub: "Your geographic coordinates align local sidereal time with cosmic truth." }
+  };
+
+  function goToStep(step) {
+    state.currentStep = step;
+    elements.step1.classList.toggle("active", step === 1);
+    elements.step2.classList.toggle("active", step === 2);
+    elements.step3.classList.toggle("active", step === 3);
+    elements.step4.classList.toggle("active", step === 4);
+
+    elements.stepTitle.innerText = stepTitles[step].title;
+    elements.stepSubtitle.innerText = stepTitles[step].sub;
+
+    elements.dots.forEach((dot, idx) => {
+      dot.classList.toggle("active", idx === step - 1);
     });
   }
+
+  // Next / Back handlers
+  elements.btnNext1.addEventListener("click", () => {
+    if (!elements.userName.value.trim()) {
+      alert("Please enter your name.");
+      return;
+    }
+    goToStep(2);
+  });
+  elements.btnNext2.addEventListener("click", () => goToStep(3));
+  elements.btnNext3.addEventListener("click", () => goToStep(4));
+
+  elements.btnBack2.addEventListener("click", () => goToStep(1));
+  elements.btnBack3.addEventListener("click", () => goToStep(2));
+  elements.btnBack4.addEventListener("click", () => goToStep(3));
+
+  // Gender selection
+  elements.genderBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      elements.genderBtns.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      state.selectedGender = btn.dataset.gender;
+    });
+  });
+
+  // Reveal Destiny Button
+  elements.btnRevealDestiny.addEventListener("click", executeCalculation);
+}
+
+function executeCalculation() {
+  const name = elements.userName.value.trim() || "Seeker";
+  const gender = state.selectedGender;
+  const dob = elements.userDob.value;
+  const tob = elements.userTob.value;
+  const lat = parseFloat(elements.latInput.value) || 28.6139;
+  const lon = parseFloat(elements.lonInput.value) || 77.2090;
+  const tz = parseFloat(elements.tzInput.value) || 5.5;
+
+  const chart = generateKundli({
+    name,
+    gender,
+    dob,
+    tob,
+    lat,
+    lon,
+    timezone: tz
+  });
+
+  state.activeChart = chart;
+  localStorage.setItem("jyoti_active_chart", JSON.stringify(chart));
+  displayDashboard(chart);
 }
 
 function setupEventListeners() {
@@ -104,8 +246,10 @@ function setupEventListeners() {
   elements.navTabMatching.addEventListener("click", () => switchNavTab("matching"));
   elements.navTabPanchang.addEventListener("click", () => switchNavTab("panchang"));
 
-  // Language Toggle
+  // Language & Persona Toggles
   elements.langToggleBtn.addEventListener("click", toggleLanguage);
+  elements.personaToggleBtn.addEventListener("click", togglePersonaMode);
+  elements.btnRoastToggle.addEventListener("click", togglePersonaMode);
 
   // City Search Autocomplete
   elements.cityInput.addEventListener("input", handleCityInput);
@@ -115,17 +259,25 @@ function setupEventListeners() {
     }
   });
 
-  // Personal Form Submission
-  elements.kundliForm.addEventListener("submit", handleFormSubmit);
-
-  // Edit details
+  // Edit details button
   if (elements.editChartBtn) {
     elements.editChartBtn.addEventListener("click", () => {
       elements.dashboardSection.style.display = "none";
-      elements.formSection.style.display = "block";
-      elements.formSection.scrollIntoView({ behavior: "smooth" });
+      elements.onboardingSection.style.display = "block";
+      elements.onboardingSection.scrollIntoView({ behavior: "smooth" });
     });
   }
+
+  // Download Story Card
+  elements.btnDownloadCard.addEventListener("click", () => {
+    if (!state.activeChart) return;
+    const archetypes = [
+      "The Cosmic Alchemist", "The Rebel Mystic", "The Strategic Visionary",
+      "The Resilient Healer", "The Sovereign Pioneer", "The Ethereal Sage"
+    ];
+    const archetype = archetypes[state.activeChart.moonSign.id % archetypes.length];
+    CosmicCardGenerator.downloadCard(state.activeChart, archetype);
+  });
 
   // Print Report
   if (elements.printReportBtn) {
@@ -169,8 +321,8 @@ function setupEventListeners() {
   elements.audioToggleBtn.addEventListener("click", () => {
     const isPlaying = audioEngine.toggle();
     elements.audioToggleBtn.innerHTML = isPlaying
-      ? "🔊 432Hz Calm: ON"
-      : "🔇 432Hz Calm: OFF";
+      ? "🔊 432Hz: ON"
+      : "🔇 432Hz: OFF";
   });
 }
 
@@ -188,38 +340,56 @@ function switchNavTab(tabName) {
   if (tabName === "panchang") renderPanchang();
 }
 
+// Persona Switcher (Gentle Guru vs Cosmic Roast)
+function togglePersonaMode() {
+  const current = aiService.personaMode;
+  const next = current === "gentle" ? "roast" : "gentle";
+  aiService.setPersonaMode(next);
+
+  updatePersonaUI(next);
+
+  // Send a quick announcement message in chat
+  if (state.activeChart) {
+    if (next === "roast") {
+      appendMessage("bot", `🔥 **Cosmic Roast Mode Activated!** No sugarcoating, no excuses. Ask me about your career, toxic love patterns, or finances if you're brave enough.`);
+    } else {
+      appendMessage("bot", `🕊️ **Gentle Guru Mode Activated.** Namaste. I am here with compassionate, grounding Vedic wisdom and practical remedies.`);
+    }
+  }
+}
+
+function updatePersonaUI(mode) {
+  if (mode === "roast") {
+    elements.personaIcon.innerText = "🔥";
+    elements.personaLabel.innerText = "Cosmic Roast";
+    elements.personaToggleBtn.classList.add("roast-active");
+    elements.activePersonaBadge.innerText = "Roast Mode 🔥";
+    elements.activePersonaBadge.style.background = "rgba(244, 63, 94, 0.2)";
+    elements.activePersonaBadge.style.color = "#fda4af";
+    elements.activePersonaBadge.style.borderColor = "rgba(244, 63, 94, 0.4)";
+    elements.btnRoastToggle.innerText = "🕊️ Calm Mode";
+  } else {
+    elements.personaIcon.innerText = "🕊️";
+    elements.personaLabel.innerText = "Gentle Guru";
+    elements.personaToggleBtn.classList.remove("roast-active");
+    elements.activePersonaBadge.innerText = "Guru Mode";
+    elements.activePersonaBadge.style.background = "rgba(244, 196, 83, 0.15)";
+    elements.activePersonaBadge.style.color = "var(--accent-gold)";
+    elements.activePersonaBadge.style.borderColor = "var(--border-glow)";
+    elements.btnRoastToggle.innerText = "🔥 Roast Me";
+  }
+}
+
 // Language Switcher (English <-> Hindi)
 function toggleLanguage() {
   state.currentLang = state.currentLang === "en" ? "hi" : "en";
   elements.langToggleBtn.innerHTML = state.currentLang === "en" ? "🌐 हिन्दी" : "🌐 English";
-  applyTranslations();
-}
-
-function applyTranslations() {
   const t = TRANSLATIONS[state.currentLang];
   document.getElementById("brandTag").innerText = t.brandTag;
-  document.getElementById("heroTitle").innerText = t.heroTitle;
-  document.getElementById("heroDesc").innerText = t.heroDesc;
-  document.getElementById("labelFullName").innerText = t.fullName;
-  document.getElementById("labelGender").innerText = t.gender;
-  document.getElementById("labelDob").innerText = t.dob;
-  document.getElementById("labelTob").innerText = t.tob;
-  document.getElementById("labelCity").innerText = t.cityLabel;
-  document.getElementById("generateBtn").innerText = t.generateBtn;
   document.getElementById("navTabPersonal").innerText = t.navPersonal;
   document.getElementById("navTabMatching").innerText = t.navMatching;
   document.getElementById("navTabPanchang").innerText = t.navPanchang;
-  document.getElementById("editChartBtn").innerText = t.editDetails;
-  document.getElementById("printReportBtn").innerText = t.printReport;
-  document.getElementById("tabNorth").innerText = t.northChart;
-  document.getElementById("tabSouth").innerText = t.southChart;
-  document.getElementById("tabD1").innerText = t.d1Chart;
-  document.getElementById("tabD9").innerText = t.d9Chart;
   elements.chatInput.placeholder = t.placeholderAsk;
-
-  if (state.activeChart && state.chatHistory.length <= 1) {
-    displayDashboard(state.activeChart);
-  }
 }
 
 // City Search Autocomplete
@@ -238,7 +408,7 @@ function handleCityInput(e) {
 
   elements.cityDropdown.innerHTML = matches.map(c => `
     <div class="autocomplete-item" data-lat="${c.lat}" data-lon="${c.lon}" data-tz="${c.tz}" data-name="${c.name}, ${c.state || c.country}">
-      <strong>${c.name}</strong><span class="city-state">(${c.state ? c.state + ", " : ""}${c.country})</span>
+      <strong>${c.name}</strong> <span style="color: #94a3b8; font-size: 0.8rem;">(${c.state ? c.state + ", " : ""}${c.country})</span>
     </div>
   `).join("");
 
@@ -255,36 +425,9 @@ function handleCityInput(e) {
   });
 }
 
-// Form Submission & Kundli Calculation
-function handleFormSubmit(e) {
-  e.preventDefault();
-
-  const name = document.getElementById("userName").value.trim() || "Seeker";
-  const gender = document.getElementById("userGender").value;
-  const dob = document.getElementById("userDob").value;
-  const tob = document.getElementById("userTob").value;
-  const lat = parseFloat(elements.latInput.value) || 28.6139;
-  const lon = parseFloat(elements.lonInput.value) || 77.2090;
-  const tz = parseFloat(elements.tzInput.value) || 5.5;
-
-  const chart = generateKundli({
-    name,
-    gender,
-    dob,
-    tob,
-    lat,
-    lon,
-    timezone: tz
-  });
-
-  state.activeChart = chart;
-  localStorage.setItem("jyoti_active_chart", JSON.stringify(chart));
-  displayDashboard(chart);
-}
-
 // Display Chart, Badges and Initial AI greeting
 function displayDashboard(chart) {
-  elements.formSection.style.display = "none";
+  elements.onboardingSection.style.display = "none";
   elements.dashboardSection.style.display = "block";
 
   // Badges
@@ -372,7 +515,6 @@ function handleMatchingSubmit(e) {
   const girlChart = generateKundli({ name: girlName, gender: "Female", dob: girlDob, tob: girlTob, lat: 28.6139, lon: 77.2090, timezone: 5.5 });
 
   const result = calculateAshtaKoota(boyChart, girlChart);
-
   const statusColor = result.totalScore >= 28 ? "#4ade80" : result.totalScore >= 18 ? "#facc15" : "#f87171";
 
   const rowsHtml = result.breakdown.map(k => `
@@ -536,6 +678,7 @@ function saveSettings() {
 function loadSavedSettings() {
   const creds = aiService.getCredentials();
   elements.providerSelect.value = creds.provider;
+  updatePersonaUI(aiService.personaMode);
 }
 
 function loadSavedChart() {
@@ -548,10 +691,5 @@ function loadSavedChart() {
     } catch (e) {
       console.warn("Could not parse saved chart:", e);
     }
-  } else {
-    elements.cityInput.value = "New Delhi, Delhi, India";
-    elements.latInput.value = "28.6139";
-    elements.lonInput.value = "77.2090";
-    elements.tzInput.value = "5.5";
   }
 }
