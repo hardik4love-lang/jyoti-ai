@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jyoti AI - Sacred Vedic Astrology & Cosmic Intelligence</title>
-  <meta name="description" content="100% Free & Private AI Vedic Astrologer. Conversational Kundli, Ashta Koota Matchmaking, Cosmic Identity Card for Instagram Stories, and 24/7 personal spiritual guidance.">
+  <title>Jyoti AI - Your Personal AI Vedic Astrologer</title>
+  <meta name="description" content="100% Free & Private AI Vedic Astrologer. Conversational Kundli, Shaadi & Soulmate Predictor, Ashta Koota Matchmaking, and 24/7 personal spiritual guidance.">
   <meta name="theme-color" content="#f4c453">
 
   <link rel="manifest" href="./manifest.json">
@@ -19,19 +19,24 @@
   <header class="app-header">
     <div class="header-container">
       <div class="brand-wrapper">
-        <div class="brand-orb">
-          <span class="orb-om">ॐ</span>
+        <div class="brand-avatar-mini">
+          <img src="./src/avatar.jpg" alt="Jyoti AI Astrologer" class="mini-avatar-img">
         </div>
         <div>
           <h1 class="brand-title">JYOTI <span class="ai-badge">AI</span></h1>
         </div>
-        <span id="brandTag" class="brand-tag">100% FREE • NO SUBSCRIPTION SCAMS</span>
+        <span id="brandTag" class="brand-tag">100% FREE • NO ₹699 SUBSCRIPTION SCAMS</span>
       </div>
 
       <div class="header-actions">
+        <!-- Voice Toggle: Listen to Jyoti -->
+        <button id="voiceToggleBtn" class="persona-pill" title="Toggle Voice of Jyoti">
+          <span id="voiceIcon">🔊</span> <span id="voiceLabel">Voice: ON</span>
+        </button>
+
         <!-- Persona Mode Switcher: Gentle Sage vs Cosmic Roast -->
         <button id="personaToggleBtn" class="persona-pill" title="Toggle AI Persona">
-          <span id="personaIcon">🕊️</span> <span id="personaLabel">Gentle Guru</span>
+          <span id="personaIcon">🕊️</span> <span id="personaLabel">Guru Mode</span>
         </button>
 
         <!-- Language Switcher -->
@@ -39,9 +44,9 @@
           🌐 हिन्दी
         </button>
 
-        <!-- Relaxing 432Hz Sound Synthesizer -->
+        <!-- 432Hz Sound Synthesizer -->
         <button id="audioToggleBtn" class="audio-toggle" title="Toggle 432Hz Ambient Resonance">
-          🔇 432Hz: OFF
+          🔇 432Hz
         </button>
 
         <!-- Settings Modal Trigger -->
@@ -54,8 +59,9 @@
     <!-- Navigation Tabs -->
     <nav class="nav-tabs-wrapper">
       <div class="nav-tabs">
-        <button id="navTabPersonal" class="nav-tab active">✨ Sacred Kundli & AI</button>
-        <button id="navTabMatching" class="nav-tab">💍 Kundli Milan (36 Gunas)</button>
+        <button id="navTabPersonal" class="nav-tab active">✨ Live Consultation with Jyoti</button>
+        <button id="navTabShaadi" class="nav-tab">💍 Shaadi & Soulmate Radar</button>
+        <button id="navTabMatching" class="nav-tab">💑 Kundli Milan (36 Gunas)</button>
         <button id="navTabPanchang" class="nav-tab">📅 Daily Panchang & Muhurat</button>
       </div>
     </nav>
@@ -64,26 +70,29 @@
   <!-- Main App Content -->
   <main class="main-wrapper">
 
-    <!-- VIEW 1: PERSONAL KUNDLI & AI CHAT -->
+    <!-- VIEW 1: PERSONAL KUNDLI & LIVE AVATAR CONSULTATION -->
     <div id="viewPersonal">
       
-      <!-- Conversational Step Onboarding (The Viral Makeover) -->
+      <!-- Conversational Step Onboarding with Jyoti's Avatar Front & Center -->
       <section id="onboardingSection" class="portal-card">
-        <div class="portal-halo">
-          <div class="pulsing-aura"></div>
-          <div class="sacred-symbol">ॐ</div>
+        <div class="avatar-hero-container">
+          <div class="avatar-aura-ring"></div>
+          <img src="./src/avatar.jpg" alt="Jyoti - AI Astrologer" class="avatar-hero-img">
+          <div class="avatar-status-badge">
+            <span class="live-dot"></span> LIVE ASTROLOGER
+          </div>
         </div>
 
         <div class="dialogue-box">
-          <p id="portalGreeting" class="portal-tagline">CELESTIAL REVELATION</p>
-          <h2 id="stepPromptTitle" class="step-title">What name does the universe call you?</h2>
-          <p id="stepPromptSubtitle" class="step-subtitle">Your sound vibration anchors your planetary consciousness.</p>
+          <p id="portalGreeting" class="portal-tagline">1-ON-1 SACRED CONSULTATION</p>
+          <h2 id="stepPromptTitle" class="step-title">"Namaste! What name does the universe call you?"</h2>
+          <p id="stepPromptSubtitle" class="step-subtitle">I'm Jyoti, your personal Vedic astrologer. Let's look into your stars together.</p>
         </div>
 
         <!-- Step 1: Name & Gender -->
         <div id="step1" class="step-pane active">
           <div class="input-glow-group">
-            <input type="text" id="userName" class="portal-input" placeholder="Enter your first name..." autofocus value="Aarav">
+            <input type="text" id="userName" class="portal-input" placeholder="Type your first name..." autofocus value="Aarav">
           </div>
           <div class="gender-pill-selector">
             <button type="button" class="gender-btn active" data-gender="Male">Male</button>
@@ -133,7 +142,7 @@
           <div class="step-actions">
             <button id="btnBack4" class="btn-subtle">⬅ Back</button>
             <button id="btnRevealDestiny" class="btn-celestial pulse-gold">
-              ✨ Cast My Sacred Kundli
+              ✨ Consult Jyoti (100% Free)
             </button>
           </div>
         </div>
@@ -153,10 +162,10 @@
         <!-- Viral Top Banner: Cosmic Passport Share -->
         <div class="viral-banner">
           <div class="viral-banner-content">
-            <div class="passport-icon">🪪</div>
+            <img src="./src/avatar.jpg" alt="Jyoti" class="banner-avatar-thumbnail">
             <div>
               <h3 class="viral-title">Your Cosmic Identity Passport is Ready</h3>
-              <p class="viral-desc">Export your custom 9:16 Instagram Story & WhatsApp card with your Archetype, Rising, Moon & Dasha.</p>
+              <p class="viral-desc">Export your custom 9:16 Instagram Story card with your Archetype, Rising, Moon & Dasha.</p>
             </div>
           </div>
           <button id="btnDownloadCard" class="btn-share-story">
@@ -170,12 +179,10 @@
           <div class="chart-box">
             <div class="glass-card" style="padding: 1.25rem;">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem; flex-wrap: wrap; gap: 0.5rem;">
-                <!-- D1 vs D9 Varga Selector -->
                 <div class="chart-tabs">
                   <button id="tabD1" class="tab-btn active">D-1 Rashi</button>
                   <button id="tabD9" class="tab-btn">D-9 Navamsha</button>
                 </div>
-                <!-- North vs South Selector -->
                 <div class="chart-tabs">
                   <button id="tabNorth" class="tab-btn active">North</button>
                   <button id="tabSouth" class="tab-btn">South</button>
@@ -199,22 +206,32 @@
             </div>
           </div>
 
-          <!-- Right Column: AI Astrologer ("Jyoti") -->
+          <!-- Right Column: Interactive Avatar Video-Consultation Chat -->
           <div class="chat-container">
-            <div class="chat-header">
-              <div class="astrologer-info">
-                <div class="astrologer-avatar">ॐ</div>
-                <div>
-                  <div class="astrologer-name">Jyoti <span id="activePersonaBadge" class="persona-badge-pill">Guru Mode</span></div>
-                  <div class="status-indicator">
-                    <span class="status-dot"></span> Online • 24/7 Guidance
-                  </div>
+            <!-- Stage: Jyoti Virtual Consultation Header -->
+            <div class="consultation-stage">
+              <div class="stage-avatar-wrapper">
+                <div id="speakingHalo" class="speaking-halo"></div>
+                <img src="./src/avatar.jpg" alt="Jyoti AI Astrologer" class="stage-avatar-img">
+              </div>
+              <div class="stage-info">
+                <div class="stage-name-row">
+                  <span class="stage-name">Jyoti</span>
+                  <span id="activePersonaBadge" class="persona-badge-pill">Guru Mode</span>
+                </div>
+                <div id="avatarSpeakingStatus" class="stage-status">
+                  <span class="status-dot"></span> In consultation with you
                 </div>
               </div>
 
-              <button id="btnRoastToggle" class="roast-quick-btn" title="Toggle Cosmic Roast">
-                🔥 Roast Me
-              </button>
+              <div class="stage-controls">
+                <button id="btnSpeakLastMsg" class="stage-btn" title="Replay voice reading">
+                  🔊 Read Aloud
+                </button>
+                <button id="btnRoastToggle" class="roast-quick-btn" title="Toggle Cosmic Roast">
+                  🔥 Roast Me
+                </button>
+              </div>
             </div>
 
             <!-- Chat Messages -->
@@ -223,7 +240,7 @@
             <!-- Quick Topic Chips -->
             <div id="chipsWrapper" class="chips-wrapper">
               <button class="topic-chip" data-query="How does my career and job look in the coming months?">💼 Career & Growth</button>
-              <button class="topic-chip" data-query="What does my 7th house say about love, marriage timing, and my future spouse?">💍 Love & Marriage</button>
+              <button class="topic-chip" data-query="When will I get married and what is my future spouse like?">💍 Shaadi Kab Hogi?</button>
               <button class="topic-chip" data-query="Can you analyze my wealth, savings, and financial prospects?">💰 Wealth & Finance</button>
               <button class="topic-chip" data-query="What are my planetary health indications and daily remedies?">🌿 Health & Upaya</button>
               <button class="topic-chip" data-query="Tell me about my active Vimshottari Mahadasha and what precautions I should take.">🔮 Dasha Insights</button>
@@ -231,7 +248,7 @@
 
             <!-- Chat Input -->
             <div class="chat-input-bar">
-              <input type="text" id="chatInput" class="chat-input" placeholder="Ask Jyoti anything about your chart..." autocomplete="off">
+              <input type="text" id="chatInput" class="chat-input" placeholder="Ask Jyoti anything about your life..." autocomplete="off">
               <button id="sendBtn" class="btn-send" title="Send Question">➔</button>
             </div>
           </div>
@@ -240,7 +257,35 @@
       </section>
     </div>
 
-    <!-- VIEW 2: KUNDLI MILAN (ASHTA KOOTA 36 GUNAS) -->
+    <!-- VIEW 2: SHAADI & SOULMATE RADAR (THE VIRAL ENGINE) -->
+    <div id="viewShaadi" style="display: none;">
+      <section class="glass-card" style="max-width: 860px; margin: 0 auto;">
+        <div style="text-align: center; margin-bottom: 2rem;">
+          <div class="avatar-hero-container" style="width: 80px; height: 80px; margin-bottom: 1rem;">
+            <img src="./src/avatar.jpg" alt="Jyoti" class="avatar-hero-img">
+          </div>
+          <h2 style="font-size: 2rem; font-weight: 800; background: linear-gradient(90deg, #fff, var(--accent-gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            💍 Shaadi & Soulmate Radar
+          </h2>
+          <p style="color: var(--text-secondary); margin-top: 0.5rem; font-size: 0.95rem;">
+            Vedic prediction of your soulmate archetype, marriage timing window, and compatibility destiny based on your 7th house and D-9 Navamsha.
+          </p>
+        </div>
+
+        <div id="shaadiResultsContainer" style="display: none;">
+          <!-- Dynamically populated from activeChart -->
+        </div>
+
+        <div id="shaadiPromptBox" style="text-align: center; padding: 2rem;">
+          <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Please generate your personal Kundli first to calculate your Soulmate Radar.</p>
+          <button id="btnGoToConsultation" class="btn-celestial">
+            ✨ Cast My Kundli First
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <!-- VIEW 3: KUNDLI MILAN (ASHTA KOOTA 36 GUNAS) -->
     <div id="viewMatching" style="display: none;">
       <section class="glass-card">
         <div style="text-align: center; max-width: 650px; margin: 0 auto 1.5rem;">
@@ -310,7 +355,7 @@
       </section>
     </div>
 
-    <!-- VIEW 3: DAILY PANCHANG & SHUBH MUHURAT -->
+    <!-- VIEW 4: DAILY PANCHANG & SHUBH MUHURAT -->
     <div id="viewPanchang" style="display: none;">
       <section class="glass-card">
         <div style="text-align: center; max-width: 650px; margin: 0 auto 1.5rem;">

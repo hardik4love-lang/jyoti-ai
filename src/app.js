@@ -4,13 +4,14 @@
  * Dual Persona (Guru vs Roast) • Interactive Stardust Canvas
  */
 
-import { generateKundli, calculateAshtaKoota, calculateDailyPanchang } from "./vedic-engine.js";
+import { generateKundli, calculateAshtaKoota, calculateDailyPanchang, predictMarriageAndSoulmate } from "./vedic-engine.js";
 import { searchCities, CITIES } from "./cities.js";
 import { KundliChartRenderer } from "./chart-renderer.js";
 import { AIService } from "./ai-service.js";
 import { AmbientAudioEngine } from "./audio-ambient.js";
 import { TRANSLATIONS } from "./i18n.js";
 import { CosmicCardGenerator } from "./card-generator.js";
+import { VoiceEngine } from "./voice-engine.js";
 
 // Global State
 const state = {
@@ -22,19 +23,23 @@ const state = {
   currentStep: 1,
   selectedGender: "Male",
   chatHistory: [],
-  isGenerating: false
+  isGenerating: false,
+  lastBotMessage: ""
 };
 
 const aiService = new AIService();
 const audioEngine = new AmbientAudioEngine();
+const voiceEngine = new VoiceEngine();
 
 // DOM Elements
 const elements = {
   // Navigation
   navTabPersonal: document.getElementById("navTabPersonal"),
+  navTabShaadi: document.getElementById("navTabShaadi"),
   navTabMatching: document.getElementById("navTabMatching"),
   navTabPanchang: document.getElementById("navTabPanchang"),
   viewPersonal: document.getElementById("viewPersonal"),
+  viewShaadi: document.getElementById("viewShaadi"),
   viewMatching: document.getElementById("viewMatching"),
   viewPanchang: document.getElementById("viewPanchang"),
   langToggleBtn: document.getElementById("langToggleBtn"),
@@ -43,6 +48,17 @@ const elements = {
   personaLabel: document.getElementById("personaLabel"),
   activePersonaBadge: document.getElementById("activePersonaBadge"),
   btnRoastToggle: document.getElementById("btnRoastToggle"),
+  voiceToggleBtn: document.getElementById("voiceToggleBtn"),
+  voiceIcon: document.getElementById("voiceIcon"),
+  voiceLabel: document.getElementById("voiceLabel"),
+  speakingHalo: document.getElementById("speakingHalo"),
+  avatarSpeakingStatus: document.getElementById("avatarSpeakingStatus"),
+  btnSpeakLastMsg: document.getElementById("btnSpeakLastMsg"),
+
+  // Shaadi & Soulmate
+  shaadiResultsContainer: document.getElementById("shaadiResultsContainer"),
+  shaadiPromptBox: document.getElementById("shaadiPromptBox"),
+  btnGoToConsultation: document.getElementById("btnGoToConsultation"),
 
   // Onboarding Steps
   onboardingSection: document.getElementById("onboardingSection"),
@@ -243,8 +259,17 @@ function executeCalculation() {
 function setupEventListeners() {
   // Navigation Tabs
   elements.navTabPersonal.addEventListener("click", () => switchNavTab("personal"));
+  if (elements.navTabShaadi) elements.navTabShaadi.addEventListener("click", () => switchNavTab("shaadi"));
   elements.navTabMatching.addEventListener("click", () => switchNavTab("matching"));
   elements.navTabPanchang.addEventListener("click", () => switchNavTab("panchang"));
+
+  if (elements.btnGoToConsultation) {
+    elements.btnGoToConsultation.addEventListener("click", () => switchNavTab("personal"));
+  }
+
+  // Voice Toggle & Speak button
+  if (elements.voiceToggleBtn) elements.voiceToggleBtn.addEventListener("click", toggleVoice);
+  if (elements.btnSpeakLastMsg) elements.btnSpeakLastMsg.addEventListener("click", speakLastBotMessage);
 
   // Language & Persona Toggles
   elements.langToggleBtn.addEventListener("click", toggleLanguage);
@@ -330,14 +355,131 @@ function setupEventListeners() {
 function switchNavTab(tabName) {
   state.currentTab = tabName;
   elements.navTabPersonal.classList.toggle("active", tabName === "personal");
+  if (elements.navTabShaadi) elements.navTabShaadi.classList.toggle("active", tabName === "shaadi");
   elements.navTabMatching.classList.toggle("active", tabName === "matching");
   elements.navTabPanchang.classList.toggle("active", tabName === "panchang");
 
   elements.viewPersonal.style.display = tabName === "personal" ? "block" : "none";
+  if (elements.viewShaadi) elements.viewShaadi.style.display = tabName === "shaadi" ? "block" : "none";
   elements.viewMatching.style.display = tabName === "matching" ? "block" : "none";
   elements.viewPanchang.style.display = tabName === "panchang" ? "block" : "none";
 
   if (tabName === "panchang") renderPanchang();
+  if (tabName === "shaadi") renderShaadiRadar();
+}
+
+// Voice Functions
+function toggleVoice() {
+  const isEnabled = voiceEngine.toggleVoice();
+  elements.voiceIcon.innerText = isEnabled ? "🔊" : "🔇";
+  elements.voiceLabel.innerText = isEnabled ? "Voice: ON" : "Voice: OFF";
+}
+
+function speakLastBotMessage() {
+  if (state.lastBotMessage) {
+    speakWithJyoti(state.lastBotMessage);
+  }
+}
+
+function speakWithJyoti(text) {
+  voiceEngine.speak(
+    text,
+    state.currentLang,
+    () => {
+      // On start speaking: halo glowing
+      if (elements.speakingHalo) elements.speakingHalo.classList.add("active");
+      if (elements.avatarSpeakingStatus) {
+        elements.avatarSpeakingStatus.innerHTML = `<span class="status-dot" style="background:#f43f5e; box-shadow:0 0 8px #f43f5e;"></span> Jyoti is speaking to you...`;
+      }
+    },
+    () => {
+      // On end speaking
+      if (elements.speakingHalo) elements.speakingHalo.classList.remove("active");
+      if (elements.avatarSpeakingStatus) {
+        elements.avatarSpeakingStatus.innerHTML = `<span class="status-dot"></span> In consultation with you`;
+      }
+    }
+  );
+}
+
+// Render Shaadi & Soulmate Radar
+function renderShaadiRadar() {
+  if (!state.activeChart) {
+    elements.shaadiResultsContainer.style.display = "none";
+    elements.shaadiPromptBox.style.display = "block";
+    return;
+  }
+
+  elements.shaadiPromptBox.style.display = "none";
+  const soul = predictMarriageAndSoulmate(state.activeChart);
+
+  elements.shaadiResultsContainer.innerHTML = `
+    <div class="shaadi-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;">
+        <div>
+          <span style="font-size: 0.75rem; font-weight: 800; color: #f43f5e; letter-spacing: 0.15em;">SOULMATE ARCHETYPE</span>
+          <h3 style="font-size: 1.6rem; color: #fff; margin-top: 0.2rem;">"${soul.archetype.title}"</h3>
+        </div>
+        <div style="background: rgba(244, 63, 94, 0.15); border: 1px solid rgba(244, 63, 94, 0.4); padding: 0.5rem 1rem; border-radius: var(--radius-full); font-size: 0.85rem; color: #fda4af; font-weight: 700;">
+          7th House in ${state.activeChart.houses[7].rashi.english} (${state.activeChart.houses[7].rashi.name})
+        </div>
+      </div>
+
+      <p style="color: var(--text-secondary); margin-top: 1rem; font-size: 1.05rem; line-height: 1.6;">
+        ${soul.archetype.traits}
+      </p>
+
+      <div class="shaadi-grid">
+        <div class="shaadi-pill">
+          <div class="metric-label">Marriage Window</div>
+          <div class="shaadi-val-highlight">${soul.favorableAge}</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">Peak Alignment: ${soul.yearWindow}</div>
+        </div>
+
+        <div class="shaadi-pill">
+          <div class="metric-label">Connection Dynamic</div>
+          <div class="shaadi-val-highlight" style="font-size: 1.1rem; color: #60a5fa;">${soul.marriageType}</div>
+          <div class="love-bar-container">
+            <div class="love-bar-fill" style="width: ${soul.lovePercentage}%;"></div>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted);">
+            <span>Love: ${soul.lovePercentage}%</span>
+            <span>Arranged: ${soul.arrangedPercentage}%</span>
+          </div>
+        </div>
+
+        <div class="shaadi-pill">
+          <div class="metric-label">Spouse's Name Vibration</div>
+          <div class="shaadi-val-highlight" style="letter-spacing: 0.15em; color: #a78bfa;">
+            ${soul.probableLetters.join(", ")}
+          </div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">Primary Syllable Initials</div>
+        </div>
+
+        <div class="shaadi-pill">
+          <div class="metric-label">Meeting Direction</div>
+          <div class="shaadi-val-highlight" style="font-size: 1.15rem; color: #34d399;">${soul.meetingDirection}</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">From your birth sanctuary</div>
+        </div>
+      </div>
+
+      <div style="text-align: center; margin-top: 2rem;">
+        <button id="btnShareShaadiWhatsApp" class="btn-celestial" style="background: linear-gradient(135deg, #25D366, #128C7E); color: #fff;">
+          📲 Share Soulmate Prediction to WhatsApp
+        </button>
+      </div>
+    </div>
+  `;
+
+  elements.shaadiResultsContainer.style.display = "block";
+
+  // Share to WhatsApp Handler
+  document.getElementById("btnShareShaadiWhatsApp")?.addEventListener("click", () => {
+    const text = encodeURIComponent(
+      `💍 Jyoti AI just revealed my Vedic Soulmate Archetype:\n\n✨ Partner: "${soul.archetype.title}"\n🎯 Marriage Window: ${soul.favorableAge} (${soul.yearWindow})\n🔮 Name Starting With: ${soul.probableLetters.join(", ")}\n❤️ Type: ${soul.marriageType}\n\nCheck yours 100% free with zero subscriptions: http://localhost:8080`
+    );
+    window.open(`https://api.whatsapp.com/send?text=${text}`, "_blank");
+  });
 }
 
 // Persona Switcher (Gentle Guru vs Cosmic Roast)
@@ -473,6 +615,8 @@ function displayDashboard(chart) {
   );
 
   appendMessage("bot", initialBotMsg);
+  state.lastBotMessage = initialBotMsg;
+  speakWithJyoti(initialBotMsg);
 }
 
 // Chart Style & Varga Toggles
@@ -612,6 +756,8 @@ async function handleSendMessage() {
     typingBubble.remove();
     appendMessage("bot", responseText);
     state.chatHistory.push({ sender: "bot", text: responseText });
+    state.lastBotMessage = responseText;
+    speakWithJyoti(responseText);
   } catch (err) {
     typingBubble.remove();
     appendMessage("bot", `I apologize, there was an issue: ${err.message}.`);

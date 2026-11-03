@@ -671,3 +671,78 @@ export function calculateDailyPanchang(date = new Date(), lat = 28.6139, lon = 7
     abhijit
   };
 }
+
+// =========================================================================
+// VIRAL SHAADI (MARRIAGE) & SOULMATE RADAR ENGINE
+// =========================================================================
+
+export function predictMarriageAndSoulmate(chart) {
+  const h7 = chart.houses[7];
+  const h5 = chart.houses[5];
+  const lagnaLord = chart.lagna.lord;
+  const h7Lord = h7.rashi.lord;
+  const venus = chart.planets.find(p => p.name === "Venus");
+  const jupiter = chart.planets.find(p => p.name === "Jupiter");
+
+  // 1. Archetype of Spouse based on 7th Sign
+  const archetypes = {
+    Aries: { title: "The Dynamic Trailblazer", traits: "Passionate, courageous, direct communicator, fiercely protective." },
+    Taurus: { title: "The Grounded Devotee", traits: "Sensual, highly loyal, aesthetic connoisseur, creates financial stability." },
+    Gemini: { title: "The Witty Intellectual", traits: "Social butterfly, endlessly curious, youthful spirit, loves deep late-night banter." },
+    Cancer: { title: "The Empathetic Nurturer", traits: "Intuitive, family-centric, deeply emotional, builds an impenetrable safe haven." },
+    Leo: { title: "The Magnetic Sovereign", traits: "Generous, proud, warm-hearted, commands respect with charismatic elegance." },
+    Virgo: { title: "The Mindful Anchor", traits: "Practical, observant, service-oriented, notices every detail of your life." },
+    Libra: { title: "The Graceful Peacemaker", traits: "Charming, artistic, romantic, prioritizes balance and mutual respect." },
+    Scorpio: { title: "The Intense Mystic", traits: "Deeply magnetic, fiercely loyal, transformative presence, all-or-nothing love." },
+    Sagittarius: { title: "The Free-Spirited Explorer", traits: "Philosophical, optimistic, loves adventure, inspires you to dream bigger." },
+    Capricorn: { title: "The Ambitious Builder", traits: "Mature, disciplined, long-term planner, shows love through rock-solid loyalty." },
+    Aquarius: { title: "The Visionary Rebel", traits: "Unconventional, humanitarian, intellectual friend first, values authentic freedom." },
+    Pisces: { title: "The Soulful Dreamer", traits: "Spiritual, deeply compassionate, creative genius, connects on a telepathic level." }
+  };
+  const soulmateArchetype = archetypes[h7.rashi.english] || archetypes.Libra;
+
+  // 2. Love vs Arranged Probability
+  let loveScore = 50;
+  if ([h5.rashi.lord, "Venus", "Mars"].includes(h7Lord)) loveScore += 25;
+  if (h7.planets.includes("Venus") || h7.planets.includes("Mars") || h7.planets.includes("Rahu")) loveScore += 20;
+  if (h7.planets.includes("Jupiter") || h7.planets.includes("Sun")) loveScore -= 20;
+  loveScore = Math.max(15, Math.min(92, loveScore));
+  const marriageType = loveScore >= 55 ? "Love Marriage / Self-Chosen Partner" : "Traditional Arranged / Family-Blessed Connection";
+
+  // 3. Favorable Marriage Age Window
+  const birthYear = new Date(chart.user.dob).getFullYear();
+  let baseAge = 25;
+  if (["Saturn", "Rahu", "Ketu"].includes(h7Lord) || h7.planets.includes("Saturn")) baseAge += 3; // Saturn delays for maturity
+  if (["Venus", "Mercury", "Moon"].includes(h7Lord)) baseAge -= 1; // Early/on-time
+  const ageRange = `${baseAge} - ${baseAge + 3} years`;
+  const yearWindow = `${birthYear + baseAge} - ${birthYear + baseAge + 3}`;
+
+  // 4. Soulmate's Name First Letter Vibration (derived from 7th house rashi / nakshatra syllables)
+  const lettersBySign = {
+    Aries: ["A", "L", "I"], Taurus: ["B", "V", "U"], Gemini: ["K", "CH", "GH"],
+    Cancer: ["H", "D"], Leo: ["M", "T"], Virgo: ["P", "T", "N"],
+    Libra: ["R", "T"], Scorpio: ["N", "Y"], Sagittarius: ["BH", "DH", "F"],
+    Capricorn: ["KH", "J"], Aquarius: ["G", "S"], Pisces: ["D", "CH", "Z"]
+  };
+  const probableLetters = lettersBySign[h7.rashi.english] || ["A", "S", "R"];
+
+  // 5. Meeting Direction
+  const directions = {
+    Fire: "East / North-East",
+    Earth: "South / South-West",
+    Air: "West / North-West",
+    Water: "North / North-East"
+  };
+  const meetingDirection = directions[chart.houses[7].rashi.element] || "North";
+
+  return {
+    archetype: soulmateArchetype,
+    marriageType,
+    lovePercentage: loveScore,
+    arrangedPercentage: 100 - loveScore,
+    favorableAge: ageRange,
+    yearWindow,
+    probableLetters,
+    meetingDirection
+  };
+}

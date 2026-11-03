@@ -1,7 +1,7 @@
 /**
  * Verification Test Suite for Jyoti AI Core Modules (v2)
  */
-import { generateKundli, calculateAshtaKoota, calculateDailyPanchang } from "./src/vedic-engine.js";
+import { generateKundli, calculateAshtaKoota, calculateDailyPanchang, predictMarriageAndSoulmate } from "./src/vedic-engine.js";
 import { searchCities } from "./src/cities.js";
 import { KundliChartRenderer } from "./src/chart-renderer.js";
 import { AIService } from "./src/ai-service.js";
@@ -43,6 +43,14 @@ console.log(`- Status: ${milan.statusText}`);
 milan.breakdown.forEach(k => {
   console.log(`  • ${k.name}: ${k.score}/${k.max} pts - ${k.desc}`);
 });
+
+console.log("\n=== Testing Shaadi & Soulmate Radar Engine ===");
+const shaadi = predictMarriageAndSoulmate(boyChart);
+console.log(`✅ Soulmate Archetype: "${shaadi.archetype.title}"`);
+console.log(`- Favorable Age Window: ${shaadi.favorableAge} (${shaadi.yearWindow})`);
+console.log(`- Connection Type: ${shaadi.marriageType} (Love: ${shaadi.lovePercentage}%)`);
+console.log(`- Probable Name Initial: ${shaadi.probableLetters.join(", ")}`);
+console.log(`- Meeting Direction: ${shaadi.meetingDirection}`);
 
 console.log("\n=== Testing Daily Panchang & Muhurat ===");
 const panchang = calculateDailyPanchang(new Date(2026, 10, 4), 28.6139, 77.2090);
