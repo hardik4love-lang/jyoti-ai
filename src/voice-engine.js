@@ -12,6 +12,16 @@ export class VoiceEngine {
     this.voiceEnabled = true;
     this.currentUtterance = null;
     this.recognition = null;
+    this.voices = [];
+
+    if (this.synth) {
+      this.voices = this.synth.getVoices();
+      if (this.synth.onvoiceschanged !== undefined) {
+        this.synth.onvoiceschanged = () => {
+          this.voices = this.synth.getVoices();
+        };
+      }
+    }
 
     if (typeof window !== "undefined") {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -25,15 +35,38 @@ export class VoiceEngine {
 
   getVoice(lang = "en") {
     if (!this.synth) return null;
-    const voices = this.synth.getVoices();
+    const voices = this.voices && this.voices.length > 0 ? this.voices : this.synth.getVoices();
+    if (!voices || voices.length === 0) return null;
+
     if (lang === "hi") {
-      return voices.find(v => v.lang.includes("hi") || v.lang.includes("IN")) || voices[0];
+      return (
+        voices.find(v => v.lang === "hi-IN") ||
+        voices.find(v => v.lang.includes("hi")) ||
+        voices.find(v => v.name.includes("Lekha") || v.name.includes("Swara")) ||
+        voices[0]
+      );
     }
-    return voices.find(v => v.lang === "en-IN" || v.name.includes("India") || v.name.includes("Natural") || v.name.includes("Google") || v.name.includes("Samantha")) || voices[0];
+    return (
+      voices.find(v => v.lang === "en-IN") ||
+      voices.find(v => v.name.includes("Neerja") || v.name.includes("Rishi") || v.name.includes("Aditi") || v.name.includes("India")) ||
+      voices.find(v => v.name.includes("Samantha") || v.name.includes("Natural") || v.name.includes("Google")) ||
+      voices[0]
+    );
   }
 
-  speak(text, lang = "en", onStart, onEnd) {
+  speak(text, langOrEndCb = "en", onStart, onEnd) {
     if (!this.synth || !this.voiceEnabled) return;
+
+    let lang = "en";
+    let startCb = onStart;
+    let endCb = onEnd;
+
+    if (typeof langOrEndCb === "function") {
+      endCb = langOrEndCb;
+      lang = "en";
+    } else if (typeof langOrEndCb === "string") {
+      lang = langOrEndCb;
+    }
 
     this.stop();
 
@@ -54,17 +87,17 @@ export class VoiceEngine {
 
     utterance.onstart = () => {
       this.isSpeaking = true;
-      if (onStart) onStart();
+      if (startCb) startCb();
     };
 
     utterance.onend = () => {
       this.isSpeaking = false;
-      if (onEnd) onEnd();
+      if (endCb) endCb();
     };
 
     utterance.onerror = () => {
       this.isSpeaking = false;
-      if (onEnd) onEnd();
+      if (endCb) endCb();
     };
 
     this.currentUtterance = utterance;
@@ -78,6 +111,10 @@ export class VoiceEngine {
     }
   }
 
+  stopSpeaking() {
+    this.stop();
+  }
+
   toggleVoice() {
     this.voiceEnabled = !this.voiceEnabled;
     if (!this.voiceEnabled) this.stop();
@@ -85,9 +122,23 @@ export class VoiceEngine {
   }
 
   // Speech Recognition (Talk to Jyoti via Microphone)
-  startListening(lang = "en", onResult, onStart, onEnd) {
+  startListening(langOrOnResult = "en", onResult, onStart, onEnd) {
+    let lang = "en";
+    let resultCb = onResult;
+    let startCb = onStart;
+    let endCb = onEnd;
+
+    if (typeof langOrOnResult === "function") {
+      resultCb = langOrOnResult;
+      startCb = onResult;
+      endCb = onStart;
+      lang = "en";
+    } else if (typeof langOrOnResult === "string") {
+      lang = langOrOnResult;
+    }
+
     if (!this.recognition) {
-      alert("Speech recognition is not supported in this browser. Please use Google Chrome or Microsoft Edge.");
+      console.warn("Speech recognition not supported in this browser. Please use text input.");
       return;
     }
 
@@ -96,29 +147,29 @@ export class VoiceEngine {
 
     this.recognition.onstart = () => {
       this.isListening = true;
-      if (onStart) onStart();
+      if (startCb) startCb();
     };
 
     this.recognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript;
-      if (onResult) onResult(transcript);
+      if (resultCb) resultCb(transcript);
     };
 
     this.recognition.onend = () => {
       this.isListening = false;
-      if (onEnd) onEnd();
+      if (endCb) endCb();
     };
 
     this.recognition.onerror = (err) => {
       console.warn("Speech recognition error:", err);
       this.isListening = false;
-      if (onEnd) onEnd();
+      if (endCb) endCb();
     };
 
     try {
       this.recognition.start();
     } catch (e) {
-      console.warn("Recognition already started:", e);
+      console.warn("Recognition already active:", e);
     }
   }
 

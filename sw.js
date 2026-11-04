@@ -48,6 +48,10 @@ self.addEventListener("activate", event => {
 });
 
 self.addEventListener("fetch", event => {
+  // Only handle local GET requests (avoids breaking POST to Gemini / Groq)
+  if (event.request.method !== "GET") return;
+  if (!event.request.url.startsWith(self.location.origin)) return;
+
   event.respondWith(
     caches.match(event.request).then(cached => cached || fetch(event.request).catch(() => cached))
   );

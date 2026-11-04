@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
   <title>Jyoti AI - Your Personal AI Vedic Astrologer</title>
   <meta name="description" content="100% Free & Private AI Vedic Astrologer. Conversational Kundli, 12-Sign Daily Rashifal, Shaadi Radar, Gemstone Prescription, and 24/7 personal spiritual guidance.">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -64,6 +64,14 @@
       </button>
     </div>
   </header>
+
+  <!-- Multi-Profile Family & Partner Vault Bar -->
+  <div id="profileVaultBar" class="profile-vault-bar" style="display: none;">
+    <div id="profilePillsContainer" style="display: flex; gap: 0.5rem; align-items: center;"></div>
+    <button id="btnAddProfile" class="btn-add-profile" title="Save a chart for partner, mom, dad, or friend">
+      ➕ Add Profile
+    </button>
+  </div>
 
   <!-- PWA Install Floating Banner -->
   <div id="pwaBanner" class="pwa-install-banner" style="display: none;">
@@ -204,6 +212,9 @@
 
               <!-- SVG Chart -->
               <div id="chartContainer" class="kundli-container"></div>
+
+              <!-- Gandanta & Boundary Degree Alert Container -->
+              <div id="boundaryAlertContainer" style="margin-top: 1rem;"></div>
 
               <!-- Metrics Badges -->
               <div id="metricsBadges" class="badges-grid"></div>

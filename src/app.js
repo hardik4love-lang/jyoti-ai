@@ -21,6 +21,8 @@ import { calculateGemstones } from "./gemstone-engine.js";
 import { StreakEngine } from "./streak-engine.js";
 import { CallEngine } from "./call-engine.js";
 import { PWAInstaller } from "./pwa-install.js";
+import { TempleBellEngine } from "./temple-bell.js";
+import { ProfileManager } from "./profile-manager.js";
 
 // Global State
 const state = {
@@ -41,9 +43,16 @@ const aiService = new AIService();
 const audioEngine = new AmbientAudioEngine();
 const voiceEngine = new VoiceEngine();
 const callEngine = new CallEngine(voiceEngine, aiService);
+const templeBell = new TempleBellEngine();
 
 // DOM Elements
 const elements = {
+  // Multi-Profile Vault
+  profileVaultBar: document.getElementById("profileVaultBar"),
+  profilePillsContainer: document.getElementById("profilePillsContainer"),
+  btnAddProfile: document.getElementById("btnAddProfile"),
+  boundaryAlertContainer: document.getElementById("boundaryAlertContainer"),
+
   // Navigation
   navTabPersonal: document.getElementById("navTabPersonal"),
   navTabShaadi: document.getElementById("navTabShaadi"),
@@ -198,6 +207,7 @@ const elements = {
 
 // Initialize App
 document.addEventListener("DOMContentLoaded", () => {
+  restoreSpaRedirect();
   setupEventListeners();
   setupOnboardingFlow();
   setupStardustCanvas();
@@ -207,7 +217,9 @@ document.addEventListener("DOMContentLoaded", () => {
   renderPanchang();
   initStreak();
   initPWA();
+  initProfileVault();
   initRashifalUI();
+  primeAudioGesture();
   registerServiceWorker();
 });
 
@@ -340,6 +352,21 @@ function executeCalculation() {
 
   state.activeChart = chart;
   localStorage.setItem("jyoti_active_chart", JSON.stringify(chart));
+
+  // Strike sacred bronze temple bell & save profile
+  templeBell.ring(432);
+  ProfileManager.saveProfile({
+    name,
+    gender,
+    dob,
+    tob,
+    city: elements.cityInput.value,
+    lat,
+    lon,
+    tz
+  });
+  renderProfileVault();
+
   displayDashboard(chart);
 }
 
@@ -1045,12 +1072,14 @@ function speakLastBotMessage() {
 }
 
 function speakWithJyoti(text) {
+  const stageWrapper = document.querySelector(".stage-avatar-wrapper");
   voiceEngine.speak(
     text,
     state.currentLang,
     () => {
-      // On start speaking: halo glowing
+      // On start speaking: halo glowing & lifelike vocal cadence animation
       if (elements.speakingHalo) elements.speakingHalo.classList.add("active");
+      if (stageWrapper) stageWrapper.classList.add("speaking-active");
       if (elements.avatarSpeakingStatus) {
         elements.avatarSpeakingStatus.innerHTML = `<span class="status-dot" style="background:#f43f5e; box-shadow:0 0 8px #f43f5e;"></span> Jyoti is speaking to you...`;
       }
@@ -1058,6 +1087,7 @@ function speakWithJyoti(text) {
     () => {
       // On end speaking
       if (elements.speakingHalo) elements.speakingHalo.classList.remove("active");
+      if (stageWrapper) stageWrapper.classList.remove("speaking-active");
       if (elements.avatarSpeakingStatus) {
         elements.avatarSpeakingStatus.innerHTML = `<span class="status-dot"></span> In consultation with you`;
       }
@@ -1342,6 +1372,24 @@ function displayDashboard(chart) {
   renderChartSvg();
   renderAuraMeter(chart);
 
+  // Render Gandanta & Cusp Sandhi Boundary Alerts
+  if (elements.boundaryAlertContainer) {
+    if (chart.boundaries && chart.boundaries.length > 0) {
+      elements.boundaryAlertContainer.innerHTML = chart.boundaries.map(b => `
+        <div class="boundary-alert-badge">
+          <strong>${b.title}</strong>
+          <div>${b.detail}</div>
+        </div>
+      `).join("");
+      elements.boundaryAlertContainer.style.display = "block";
+    } else {
+      elements.boundaryAlertContainer.innerHTML = "";
+      elements.boundaryAlertContainer.style.display = "none";
+    }
+  }
+
+  renderProfileVault();
+
   elements.chatMessages.innerHTML = "";
   state.chatHistory = [];
 
@@ -1577,6 +1625,101 @@ function loadSavedChart() {
       displayDashboard(parsed);
     } catch (e) {
       console.warn("Could not parse saved chart:", e);
+    }
+  }
+}
+
+// Multi-Profile Family & Partner Vault
+function initProfileVault() {
+  renderProfileVault();
+  if (elements.btnAddProfile) {
+    elements.btnAddProfile.addEventListener("click", () => {
+      elements.userName.value = "";
+      elements.userDob.value = "";
+      elements.userTob.value = "";
+      elements.dashboardSection.style.display = "none";
+      elements.onboardingSection.style.display = "block";
+      elements.onboardingSection.scrollIntoView({ behavior: "smooth" });
+
+      const step1 = document.getElementById("step1");
+      if (step1) {
+        document.querySelectorAll(".form-step").forEach(s => s.classList.remove("active"));
+        step1.classList.add("active");
+      }
+    });
+  }
+}
+
+function renderProfileVault() {
+  const profiles = ProfileManager.getProfiles();
+  if (!elements.profileVaultBar || !elements.profilePillsContainer) return;
+
+  if (profiles.length === 0) {
+    elements.profileVaultBar.style.display = "none";
+    return;
+  }
+
+  elements.profileVaultBar.style.display = "flex";
+  const activeId = ProfileManager.getActiveProfileId();
+
+  elements.profilePillsContainer.innerHTML = profiles.map(p => `
+    <button class="profile-pill ${p.id === activeId ? "active" : ""}" data-id="${p.id}">
+      <span>👤</span>
+      <span>${p.name}</span>
+    </button>
+  `).join("");
+
+  elements.profilePillsContainer.querySelectorAll(".profile-pill").forEach(pill => {
+    pill.addEventListener("click", () => {
+      const pId = pill.dataset.id;
+      const profile = profiles.find(p => p.id === pId);
+      if (profile) {
+        ProfileManager.setActiveProfileId(pId);
+        renderProfileVault();
+        templeBell.ring(432);
+        const chart = generateKundli({
+          name: profile.name,
+          gender: profile.gender || "Male",
+          dob: profile.dob,
+          tob: profile.tob,
+          lat: profile.lat || 22.4707,
+          lon: profile.lon || 70.0577,
+          timezone: profile.tz || 5.5
+        });
+        state.activeChart = chart;
+        localStorage.setItem("jyoti_active_chart", JSON.stringify(chart));
+        displayDashboard(chart);
+      }
+    });
+  });
+}
+
+// Audio Gesture Priming for iOS Safari
+function primeAudioGesture() {
+  const unlock = () => {
+    audioEngine.init();
+    templeBell.initAudioContext();
+    if (typeof window !== "undefined" && window.speechSynthesis) {
+      try {
+        const silent = new SpeechSynthesisUtterance(" ");
+        silent.volume = 0.01;
+        window.speechSynthesis.speak(silent);
+      } catch (e) {}
+    }
+    document.removeEventListener("touchstart", unlock);
+    document.removeEventListener("click", unlock);
+  };
+  document.addEventListener("touchstart", unlock, { once: true });
+  document.addEventListener("click", unlock, { once: true });
+}
+
+// SPA Routing Recovery from 404.html
+function restoreSpaRedirect() {
+  if (typeof sessionStorage !== "undefined" && sessionStorage.redirect) {
+    const redirectUrl = sessionStorage.redirect;
+    delete sessionStorage.redirect;
+    if (redirectUrl !== location.href) {
+      history.replaceState(null, null, redirectUrl);
     }
   }
 }

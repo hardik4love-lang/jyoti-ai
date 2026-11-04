@@ -1,7 +1,7 @@
 /**
  * Verification Test Suite for Jyoti AI Core Modules (v2)
  */
-import { generateKundli, calculateAshtaKoota, calculateDailyPanchang, predictMarriageAndSoulmate } from "./src/vedic-engine.js";
+import { generateKundli, calculateAshtaKoota, calculateDailyPanchang, predictMarriageAndSoulmate, detectBoundaryDegrees, getHistoricalTimezoneOffset } from "./src/vedic-engine.js";
 import { searchCities } from "./src/cities.js";
 import { KundliChartRenderer } from "./src/chart-renderer.js";
 import { AIService } from "./src/ai-service.js";
@@ -134,5 +134,20 @@ gemstonePrescription.prescriptions.forEach(p => {
   console.log(`  • ${p.role}: ${p.data.stone} (${p.data.color}) on ${p.data.finger} | Metal: ${p.data.metal}`);
 });
 console.log(`  • Seed Mantra: "${gemstonePrescription.prescriptions[0].data.mantra}"`);
+
+console.log("\n=== Testing Gandanta Boundary Detection & Historical DST Timezones ===");
+const nyDstSummer = getHistoricalTimezoneOffset("America/New_York", "2024-07-15", "12:00");
+const nyDstWinter = getHistoricalTimezoneOffset("America/New_York", "2024-01-15", "12:00");
+console.log(`✅ America/New_York DST Summer Offset: ${nyDstSummer}h (EDT) | Winter: ${nyDstWinter}h (EST)`);
+if (nyDstSummer !== -4 || nyDstWinter !== -5) {
+  throw new Error("DST Historical Timezone failed!");
+}
+
+const gandantaTest = detectBoundaryDegrees({
+  lagna: { degreeTotal: 1.5, degree: "1.50" }, // In Ashwini Gandanta
+  moonSign: { degreeTotal: 239.5 } // In Jyeshtha-Mula Gandanta
+});
+console.log(`✅ Gandanta & Boundary Degrees detected: ${gandantaTest.length} alerts`);
+gandantaTest.forEach(g => console.log(`  • ${g.title}`));
 
 console.log("\n🎉 ALL ADVANCED TESTS PASSED! Production-ready at 100% free and $0 cost.");

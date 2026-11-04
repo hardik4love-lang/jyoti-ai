@@ -434,12 +434,14 @@ export function generateKundli({ name, gender, dob, tob, lat, lon, timezone }) {
       sign: lagnaRashi.name,
       english: lagnaRashi.english,
       degree: (lagnaDeg % 30).toFixed(2),
+      degreeTotal: lagnaDeg,
       lord: lagnaRashi.lord,
       element: lagnaRashi.element
     },
     moonSign: {
       sign: moonRashi.name,
       english: moonRashi.english,
+      degreeTotal: sidereal.Moon,
       lord: moonRashi.lord,
       id: moonRashi.id
     },
@@ -460,6 +462,10 @@ export function generateKundli({ name, gender, dob, tob, lat, lon, timezone }) {
       manglik,
       sadeSati
     },
+    boundaries: detectBoundaryDegrees({
+      lagna: { degreeTotal: lagnaDeg, degree: (lagnaDeg % 30).toFixed(2) },
+      moonSign: { degreeTotal: sidereal.Moon }
+    }),
     recommendations: {
       luckyColor: luckyColorMap[lagnaRashi.lord] || "Gold",
       luckyNumber: luckyNumberMap[lagnaRashi.lord] || 7,
@@ -745,4 +751,88 @@ export function predictMarriageAndSoulmate(chart) {
     probableLetters,
     meetingDirection
   };
+}
+
+/**
+ * Gandanta & Boundary Degree (Rashi Sandhi) Precision Guard
+ * Classical Parashari detection of karmic junction knots and cusp sensitivity.
+ */
+export function detectBoundaryDegrees(chart) {
+  const warnings = [];
+  const GANDANTA_ZONES = [
+    { start: 356.6667, end: 3.3333, name: "Revati-Ashwini Junction (Meena-Mesha Gandanta)", deity: "Nirriti / Ketu" },
+    { start: 116.6667, end: 123.3333, name: "Ashlesha-Magha Junction (Karka-Simha Gandanta)", deity: "Sarpa / Pitri" },
+    { start: 236.6667, end: 243.3333, name: "Jyeshtha-Mula Junction (Vrishchika-Dhanu Gandanta)", deity: "Indra / Nirriti" }
+  ];
+
+  if (chart.lagna && chart.lagna.degreeTotal !== undefined) {
+    const lDeg = chart.lagna.degreeTotal;
+    GANDANTA_ZONES.forEach(z => {
+      const inZone = (z.start > z.end) ? (lDeg >= z.start || lDeg <= z.end) : (lDeg >= z.start && lDeg <= z.end);
+      if (inZone) {
+        warnings.push({
+          type: "Gandanta",
+          title: `⚡ Sacred Gandanta: ${z.name}`,
+          detail: "Lagna is at the sacred Water-Fire junction knot. Special spiritual focus brings immense transformation."
+        });
+      }
+    });
+
+    const degInSign = parseFloat(chart.lagna.degree);
+    if (degInSign < 1.0 || degInSign > 29.0) {
+      warnings.push({
+        type: "Sandhi",
+        title: `⚠️ Cusp Degree Sensitivity (${degInSign}° in sign)`,
+        detail: "Rising sign is within 1° of the boundary. A ±2 min birth time variance can adjust the Lagna degree."
+      });
+    }
+  }
+
+  if (chart.moonSign && chart.moonSign.degreeTotal !== undefined) {
+    const mDeg = chart.moonSign.degreeTotal;
+    GANDANTA_ZONES.forEach(z => {
+      const inZone = (z.start > z.end) ? (mDeg >= z.start || mDeg <= z.end) : (mDeg >= z.start && mDeg <= z.end);
+      if (inZone) {
+        warnings.push({
+          type: "Gandanta",
+          title: `🌙 Chandra Gandanta: ${z.name}`,
+          detail: "Janma Nakshatra is at a Gandanta boundary. Chanting Maha Mrityunjaya Mantra brings peace."
+        });
+      }
+    });
+  }
+
+  return warnings;
+}
+
+/**
+ * Historical Daylight Saving Time & Timezone Offset Resolver
+ * Uses zero-cost native Intl.DateTimeFormat (0 network, 0 bundle size)
+ */
+export function getHistoricalTimezoneOffset(ianaTimezone, dateStr, timeStr, fallbackTz = 5.5) {
+  if (!ianaTimezone) return fallbackTz;
+  try {
+    const utcTestDate = new Date(`${dateStr}T${timeStr || "12:00"}:00Z`);
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: ianaTimezone,
+      year: "numeric", month: "2-digit", day: "2-digit",
+      hour: "2-digit", minute: "2-digit", second: "2-digit",
+      hour12: false
+    });
+    const parts = formatter.formatToParts(utcTestDate).reduce((acc, p) => {
+      acc[p.type] = p.value;
+      return acc;
+    }, {});
+    const localEquivalent = new Date(Date.UTC(
+      +parts.year,
+      +parts.month - 1,
+      +parts.day,
+      +parts.hour === 24 ? 0 : +parts.hour,
+      +parts.minute,
+      +parts.second
+    ));
+    return (localEquivalent.getTime() - utcTestDate.getTime()) / (3600 * 1000);
+  } catch (err) {
+    return fallbackTz;
+  }
 }

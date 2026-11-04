@@ -59,6 +59,7 @@ body.cosmic-theme {
   -webkit-tap-highlight-color: transparent;
   user-select: none;
   touch-action: manipulation;
+  overscroll-behavior-y: contain;
 }
 
 /* Starfield Background Canvas */
@@ -1892,4 +1893,118 @@ body.cosmic-theme {
   color: var(--accent-gold);
   margin-bottom: 0.5rem;
 }
+
+/* ==========================================================================
+   Jyoti AI - Avatar Realism, Multi-Profile Vault & Boundary Warnings
+   ========================================================================== */
+
+/* Organic Respiration & Postural Micro-Sway */
+.avatar-hero-container, .stage-avatar-wrapper, .call-avatar-container {
+  animation: organicBreathing 4.5s infinite ease-in-out, subtleHeadSway 9.5s infinite ease-in-out;
+  will-change: transform;
+}
+
+@keyframes organicBreathing {
+  0%, 100% { transform: scale(1) translateY(0); }
+  50% { transform: scale(1.018, 1.025) translateY(-2px); }
+}
+
+@keyframes subtleHeadSway {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(0.6deg); }
+  75% { transform: rotate(-0.6deg); }
+}
+
+/* Speaking Vocal Cadence */
+.stage-avatar-wrapper.speaking-active img,
+.call-avatar-container.speaking-active img {
+  animation: vocalCadence 0.22s infinite alternate ease-in-out;
+}
+
+@keyframes vocalCadence {
+  0% {
+    transform: scale(1) translateY(0);
+    filter: drop-shadow(0 0 15px rgba(244, 196, 83, 0.4));
+  }
+  100% {
+    transform: scale(1.03) translateY(-1.5px);
+    filter: drop-shadow(0 0 30px rgba(244, 196, 83, 0.85)) brightness(1.08);
+  }
+}
+
+/* Multi-Profile Family & Partner Chart Vault */
+.profile-vault-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  overflow-x: auto;
+  background: rgba(10, 12, 28, 0.75);
+  border-bottom: 1px solid rgba(255, 215, 120, 0.1);
+  scrollbar-width: none;
+}
+
+.profile-vault-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.profile-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-full);
+  padding: 0.35rem 0.85rem;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: var(--transition-smooth);
+}
+
+.profile-pill.active {
+  background: rgba(244, 196, 83, 0.18);
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+  box-shadow: 0 0 10px rgba(244, 196, 83, 0.25);
+}
+
+.profile-pill:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.btn-add-profile {
+  background: transparent;
+  border: 1px dashed var(--accent-gold);
+  color: var(--accent-gold);
+  border-radius: var(--radius-full);
+  padding: 0.35rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: var(--transition-smooth);
+}
+
+.btn-add-profile:hover {
+  background: rgba(244, 196, 83, 0.15);
+}
+
+/* Boundary & Gandanta Alert Badge */
+.boundary-alert-badge {
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.25rem;
+  color: #fef08a;
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
 
