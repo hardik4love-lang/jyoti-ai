@@ -6,6 +6,8 @@ import { searchCities } from "./src/cities.js";
 import { KundliChartRenderer } from "./src/chart-renderer.js";
 import { AIService } from "./src/ai-service.js";
 import { TRANSLATIONS } from "./src/i18n.js";
+import { CELEBRITIES } from "./src/celebrities.js";
+import { calculateDailyAura } from "./src/aura-meter.js";
 
 console.log("=== Testing Vedic Astronomical Calculation Engine ===");
 const boyBirth = {
@@ -75,5 +77,24 @@ console.log(`✅ D-9 South SVG: ${d9South.length} bytes`);
 console.log("\n=== Testing Bilingual Localization ===");
 console.log(`✅ English Hero: ${TRANSLATIONS.en.heroTitle}`);
 console.log(`✅ Hindi Hero: ${TRANSLATIONS.hi.heroTitle}`);
+
+console.log("\n=== Testing Celebrity Synastry & Daily Aura Meter ===");
+console.log(`✅ Loaded ${CELEBRITIES.length} verified celebrity charts: ${CELEBRITIES.map(c => c.name).join(", ")}`);
+const virat = CELEBRITIES.find(c => c.id === "virat");
+const viratChart = generateKundli({
+  name: virat.name,
+  gender: virat.gender,
+  dob: virat.dob,
+  tob: virat.tob,
+  lat: virat.lat,
+  lon: virat.lon,
+  timezone: virat.tz
+});
+const celebMatch = calculateAshtaKoota(boyChart, viratChart);
+console.log(`✅ Match with Virat Kohli: ${celebMatch.totalScore}/36 Gunas (${celebMatch.percentage}%)`);
+
+const aura = calculateDailyAura(boyChart);
+console.log(`✅ Daily Aura Meter -> Love: ${aura.love}%, Career: ${aura.career}%, Intuition: ${aura.intuition}%`);
+console.log(`- Daily Cosmic Advice: "${aura.advice}"`);
 
 console.log("\n🎉 ALL ADVANCED TESTS PASSED! Production-ready at 100% free and $0 cost.");

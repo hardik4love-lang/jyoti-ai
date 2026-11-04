@@ -1027,6 +1027,102 @@ body.cosmic-theme {
   box-shadow: 0 0 0 3px rgba(244, 196, 83, 0.15);
 }
 
+/* Daily Aura & Cosmic Alignment Meter */
+.aura-meter-box {
+  background: rgba(15, 17, 36, 0.7);
+  border: 1px solid var(--border-glow);
+  border-radius: var(--radius-md);
+  padding: 1.15rem;
+}
+
+.aura-meter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.85rem;
+}
+
+.aura-meter-title {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--accent-gold);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.aura-bars-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.aura-bar-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.aura-bar-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.aura-track {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.aura-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width 1s ease-in-out;
+}
+
+/* Celebrity Quick Match Banner */
+.celeb-banner {
+  background: linear-gradient(135deg, rgba(30, 20, 60, 0.6), rgba(15, 17, 36, 0.8));
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1.15rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.celeb-chips-wrapper {
+  display: flex;
+  gap: 0.6rem;
+  overflow-x: auto;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding-top: 0.35rem;
+}
+
+.celeb-chip {
+  background: var(--bg-glass);
+  border: 1px solid var(--border-glow);
+  color: #ffdf7e;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 0.45rem 0.9rem;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: var(--transition-smooth);
+}
+
+.celeb-chip:hover {
+  background: rgba(244, 196, 83, 0.25);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(244, 196, 83, 0.3);
+}
+
 .btn-mic {
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid var(--border-glow);

@@ -12,6 +12,8 @@ import { AmbientAudioEngine } from "./audio-ambient.js";
 import { TRANSLATIONS } from "./i18n.js";
 import { CosmicCardGenerator } from "./card-generator.js";
 import { VoiceEngine } from "./voice-engine.js";
+import { CELEBRITIES } from "./celebrities.js";
+import { calculateDailyAura } from "./aura-meter.js";
 
 // Global State
 const state = {
@@ -110,6 +112,10 @@ const elements = {
   // Matching
   matchingForm: document.getElementById("matchingForm"),
   matchResultBox: document.getElementById("matchResultBox"),
+  celebChipsContainer: document.getElementById("celebChipsContainer"),
+
+  // Aura Meter
+  auraMeterCard: document.getElementById("auraMeterCard"),
 
   // Panchang
   panchangDateDisplay: document.getElementById("panchangDateDisplay"),
@@ -132,6 +138,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupEventListeners();
   setupOnboardingFlow();
   setupStardustCanvas();
+  renderCelebrityChips();
   loadSavedSettings();
   loadSavedChart();
   renderPanchang();
@@ -357,7 +364,143 @@ function setupEventListeners() {
   });
 }
 
-// Navigation Tab Switcher
+// Render Celebrity Quick Match Chips
+function renderCelebrityChips() {
+  if (!elements.celebChipsContainer) return;
+
+  elements.celebChipsContainer.innerHTML = CELEBRITIES.map(c => `
+    <button type="button" class="celeb-chip" data-id="${c.id}">
+      <span>${c.emoji}</span> <span>${c.name}</span>
+    </button>
+  `).join("");
+
+  elements.celebChipsContainer.querySelectorAll(".celeb-chip").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const celebId = btn.dataset.id;
+      const celeb = CELEBRITIES.find(c => c.id === celebId);
+      if (!celeb) return;
+
+      // If user's chart exists, match directly with user
+      if (state.activeChart) {
+        const celebChart = generateKundli({
+          name: celeb.name,
+          gender: celeb.gender,
+          dob: celeb.dob,
+          tob: celeb.tob,
+          lat: celeb.lat,
+          lon: celeb.lon,
+          timezone: celeb.tz
+        });
+
+        // Determine who is Boy / Girl based on gender
+        const isUserMale = state.activeChart.user.gender === "Male";
+        const boy = isUserMale ? state.activeChart : celebChart;
+        const girl = isUserMale ? celebChart : state.activeChart;
+
+        const result = calculateAshtaKoota(boy, girl);
+        const statusColor = result.totalScore >= 28 ? "#4ade80" : result.totalScore >= 18 ? "#facc15" : "#f87171";
+
+        elements.matchResultBox.innerHTML = `
+          <div style="background: rgba(15, 17, 36, 0.9); border: 2px solid var(--accent-gold); border-radius: var(--radius-lg); padding: 1.75rem; text-align: center; box-shadow: 0 10px 40px rgba(244, 196, 83, 0.25);">
+            <span style="font-size: 0.8rem; font-weight: 800; color: #ffdf7e; letter-spacing: 0.15em;">🌟 CELEBRITY SYNASTRY RESULT</span>
+            <h3 style="font-size: 1.75rem; color: #fff; margin: 0.5rem 0;">
+              ${state.activeChart.user.name} & ${celeb.name} ${celeb.emoji}
+            </h3>
+            <div style="font-size: 3.5rem; font-weight: 800; color: ${statusColor}; margin: 0.25rem 0;">
+              ${result.totalScore} <span style="font-size: 1.5rem; color: var(--text-muted);">/ 36 Gunas</span>
+            </div>
+            <div style="font-size: 1.2rem; font-weight: 700; color: ${statusColor}; margin-bottom: 1.25rem;">
+              ${result.statusText} (${result.percentage}% Match)
+            </div>
+
+            <p style="color: var(--text-secondary); max-width: 500px; margin: 0 auto 1.5rem; line-height: 1.6;">
+              ${result.totalScore >= 24
+                ? `Incredible cosmic synergy! Your Moon Nakshatra (${state.activeChart.nakshatra.name}) resonates profoundly with ${celeb.name}'s aura (${celebChart.nakshatra.name}).`
+                : `A dynamic, high-spark connection! While temperaments differ, mutual fascination and growth are immense.`}
+            </p>
+
+            <button id="btnShareCelebWhatsApp" class="btn-celestial" style="background: linear-gradient(135deg, #25D366, #128C7E); color: #fff;">
+              📲 Share Celebrity Match on WhatsApp
+            </button>
+          </div>
+        `;
+
+        elements.matchResultBox.style.display = "block";
+        elements.matchResultBox.scrollIntoView({ behavior: "smooth" });
+
+        document.getElementById("btnShareCelebWhatsApp")?.addEventListener("click", () => {
+          const text = encodeURIComponent(
+            `🌟 I just tested my Vedic compatibility with ${celeb.name} on Jyoti AI and we got ${result.totalScore}/36 Gunas (${result.percentage}% match)! 😱💍\n\nTest your celebrity crush 100% free: http://localhost:8080`
+          );
+          window.open(`https://api.whatsapp.com/send?text=${text}`, "_blank");
+        });
+      } else {
+        // Auto-fill girl or boy field in the form
+        if (celeb.gender === "Female") {
+          document.getElementById("girlName").value = celeb.name;
+          document.getElementById("girlDob").value = celeb.dob;
+          document.getElementById("girlTob").value = celeb.tob;
+          document.getElementById("girlCity").value = celeb.city;
+        } else {
+          document.getElementById("boyName").value = celeb.name;
+          document.getElementById("boyDob").value = celeb.dob;
+          document.getElementById("boyTob").value = celeb.tob;
+          document.getElementById("boyCity").value = celeb.city;
+        }
+        elements.matchingForm.scrollIntoView({ behavior: "smooth" });
+      }
+    });
+  });
+}
+
+// Render Daily Cosmic Energy & Aura Meter
+function renderAuraMeter(chart) {
+  if (!elements.auraMeterCard) return;
+  const aura = calculateDailyAura(chart);
+
+  elements.auraMeterCard.innerHTML = `
+    <div class="aura-meter-header">
+      <div class="aura-meter-title">✨ Today's Cosmic Alignment</div>
+      <div style="font-size: 0.75rem; color: #ffdf7e; font-weight: 700;">${aura.dayLord}'s Day</div>
+    </div>
+
+    <div class="aura-bars-grid">
+      <div class="aura-bar-row">
+        <div class="aura-bar-label">
+          <span>💖 Love & Harmony</span>
+          <span style="font-weight: bold; color: #f472b6;">${aura.love}%</span>
+        </div>
+        <div class="aura-track">
+          <div class="aura-fill" style="width: ${aura.love}%; background: linear-gradient(90deg, #ec4899, #f43f5e);"></div>
+        </div>
+      </div>
+
+      <div class="aura-bar-row">
+        <div class="aura-bar-label">
+          <span>💼 Career & Momentum</span>
+          <span style="font-weight: bold; color: #60a5fa;">${aura.career}%</span>
+        </div>
+        <div class="aura-track">
+          <div class="aura-fill" style="width: ${aura.career}%; background: linear-gradient(90deg, #3b82f6, #06b6d4);"></div>
+        </div>
+      </div>
+
+      <div class="aura-bar-row">
+        <div class="aura-bar-label">
+          <span>🔮 Intuition & Spirit</span>
+          <span style="font-weight: bold; color: #c084fc;">${aura.intuition}%</span>
+        </div>
+        <div class="aura-track">
+          <div class="aura-fill" style="width: ${aura.intuition}%; background: linear-gradient(90deg, #a855f7, #eab308);"></div>
+        </div>
+      </div>
+    </div>
+
+    <p style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.75rem; line-height: 1.5; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 0.5rem;">
+      <strong>Guidance:</strong> ${aura.advice}
+    </p>
+  `;
+}
 function switchNavTab(tabName) {
   state.currentTab = tabName;
   elements.navTabPersonal.classList.toggle("active", tabName === "personal");
@@ -644,6 +787,7 @@ function displayDashboard(chart) {
   `;
 
   renderChartSvg();
+  renderAuraMeter(chart);
 
   elements.chatMessages.innerHTML = "";
   state.chatHistory = [];
