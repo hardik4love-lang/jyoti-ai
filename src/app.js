@@ -311,8 +311,21 @@ function executeCalculation() {
   const gender = state.selectedGender;
   const dob = elements.userDob.value;
   const tob = elements.userTob.value;
-  const lat = parseFloat(elements.latInput.value) || 28.6139;
-  const lon = parseFloat(elements.lonInput.value) || 77.2090;
+
+  // Auto-resolve city coordinates from input if not yet explicitly selected from dropdown
+  const typedCity = elements.cityInput.value.trim();
+  if (typedCity) {
+    const matched = searchCities(typedCity)[0];
+    if (matched && (!elements.latInput.value || elements.latInput.value === "28.6139")) {
+      elements.latInput.value = matched.lat;
+      elements.lonInput.value = matched.lon;
+      elements.tzInput.value = matched.tz;
+      elements.cityInput.value = `${matched.name}, ${matched.state ? matched.state + ", " : ""}${matched.country}`;
+    }
+  }
+
+  const lat = parseFloat(elements.latInput.value) || 22.4707;
+  const lon = parseFloat(elements.lonInput.value) || 70.0577;
   const tz = parseFloat(elements.tzInput.value) || 5.5;
 
   const chart = generateKundli({
@@ -1192,7 +1205,9 @@ function toggleLanguage() {
   elements.chatInput.placeholder = t.placeholderAsk;
 }
 
-// City Search Autocomplete
+// City Search Autocomplete with Offline Ranking & Global Atlas Fallback
+let citySearchDebounceTimer = null;
+
 function handleCityInput(e) {
   const query = e.target.value.trim();
   if (query.length < 1) {
@@ -1201,19 +1216,30 @@ function handleCityInput(e) {
   }
 
   const matches = searchCities(query);
-  if (matches.length === 0) {
-    elements.cityDropdown.classList.remove("active");
-    return;
+
+  if (matches.length > 0) {
+    elements.cityDropdown.innerHTML = matches.map(c => `
+      <div class="autocomplete-item" data-lat="${c.lat}" data-lon="${c.lon}" data-tz="${c.tz}" data-name="${c.name}, ${c.state ? c.state + ", " : ""}${c.country}">
+        <strong>${c.name}</strong> <span style="color: #94a3b8; font-size: 0.8rem;">(${c.state ? c.state + ", " : ""}${c.country})</span>
+      </div>
+    `).join("");
+
+    elements.cityDropdown.classList.add("active");
+    bindCityItemClicks();
   }
 
-  elements.cityDropdown.innerHTML = matches.map(c => `
-    <div class="autocomplete-item" data-lat="${c.lat}" data-lon="${c.lon}" data-tz="${c.tz}" data-name="${c.name}, ${c.state || c.country}">
-      <strong>${c.name}</strong> <span style="color: #94a3b8; font-size: 0.8rem;">(${c.state ? c.state + ", " : ""}${c.country})</span>
-    </div>
-  `).join("");
+  // If query is at least 3 chars and matches are few, fetch from global OpenStreetMap atlas
+  if (query.length >= 3) {
+    clearTimeout(citySearchDebounceTimer);
+    citySearchDebounceTimer = setTimeout(() => {
+      fetchGlobalCityFallback(query, matches);
+    }, 450);
+  } else if (matches.length === 0) {
+    elements.cityDropdown.classList.remove("active");
+  }
+}
 
-  elements.cityDropdown.classList.add("active");
-
+function bindCityItemClicks() {
   elements.cityDropdown.querySelectorAll(".autocomplete-item").forEach(item => {
     item.addEventListener("click", () => {
       elements.cityInput.value = item.dataset.name;
@@ -1223,6 +1249,61 @@ function handleCityInput(e) {
       elements.cityDropdown.classList.remove("active");
     });
   });
+}
+
+async function fetchGlobalCityFallback(query, existingMatches) {
+  try {
+    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`);
+    if (!res.ok) return;
+    const data = await res.json();
+    if (!Array.isArray(data) || data.length === 0) return;
+
+    const existingNames = new Set(existingMatches.map(m => m.name.toLowerCase()));
+    const remoteItems = data
+      .filter(d => {
+        const place = (d.address?.city || d.address?.town || d.address?.village || d.name || "").toLowerCase();
+        return !existingNames.has(place);
+      })
+      .slice(0, 4)
+      .map(d => {
+        const placeName = d.address?.city || d.address?.town || d.address?.village || d.name || query;
+        const stateName = d.address?.state || "";
+        const countryName = d.address?.country || "";
+        const lat = parseFloat(d.lat);
+        const lon = parseFloat(d.lon);
+        const isIndia = countryName.toLowerCase().includes("india") || d.display_name.toLowerCase().includes("india");
+        const tz = isIndia ? 5.5 : Math.round((lon / 15) * 2) / 2;
+        return {
+          name: placeName,
+          fullName: `${placeName}${stateName ? ", " + stateName : ""}, ${countryName}`,
+          lat,
+          lon,
+          tz
+        };
+      });
+
+    if (remoteItems.length === 0) return;
+
+    const remoteHtml = remoteItems.map(c => `
+      <div class="autocomplete-item" data-lat="${c.lat}" data-lon="${c.lon}" data-tz="${c.tz}" data-name="${c.fullName}">
+        🌐 <strong>${c.name}</strong> <span style="color: #94a3b8; font-size: 0.8rem;">(${c.fullName})</span>
+      </div>
+    `).join("");
+
+    if (existingMatches.length > 0) {
+      elements.cityDropdown.innerHTML += `
+        <div style="padding: 0.35rem 0.75rem; font-size: 0.7rem; color: var(--accent-gold); border-top: 1px solid rgba(255,255,255,0.08); text-transform: uppercase; letter-spacing: 0.05em;">Global Atlas</div>
+        ${remoteHtml}
+      `;
+    } else {
+      elements.cityDropdown.innerHTML = remoteHtml;
+      elements.cityDropdown.classList.add("active");
+    }
+
+    bindCityItemClicks();
+  } catch (err) {
+    // Graceful offline fallback
+  }
 }
 
 // Display Chart, Badges and Initial AI greeting

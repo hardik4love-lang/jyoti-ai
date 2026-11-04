@@ -14,6 +14,14 @@ import { getDailyRashifal, getAllRashifalList } from "./src/rashifal-engine.js";
 import { calculateGemstones } from "./src/gemstone-engine.js";
 
 console.log("=== Testing Vedic Astronomical Calculation Engine ===");
+console.log("\n=== Testing City Geocoding & Prefix Ranking ===");
+const jamResults = searchCities("jam");
+console.log(`✅ searchCities("jam") -> First match: ${jamResults[0].name} (${jamResults[0].state}, ${jamResults[0].country})`);
+console.log(`- Total matches for "jam": ${jamResults.length} (${jamResults.map(c => c.name).join(", ")})`);
+if (jamResults[0].name !== "Jamnagar") {
+  throw new Error("Jamnagar should be ranked #1 when searching 'jam'!");
+}
+console.log("✅ Verified: Jamnagar, Gujarat is prioritized #1 for 'jam'!");
 const boyBirth = {
   name: "Arjun Verma",
   gender: "Male",
