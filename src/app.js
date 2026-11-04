@@ -16,6 +16,11 @@ import { CELEBRITIES } from "./celebrities.js";
 import { calculateDailyAura } from "./aura-meter.js";
 import { drawPrashnaCards } from "./tarot-engine.js";
 import { HOUSE_DEFINITIONS } from "./house-details.js";
+import { getDailyRashifal, getAllRashifalList, ZODIAC_SIGNS } from "./rashifal-engine.js";
+import { calculateGemstones } from "./gemstone-engine.js";
+import { StreakEngine } from "./streak-engine.js";
+import { CallEngine } from "./call-engine.js";
+import { PWAInstaller } from "./pwa-install.js";
 
 // Global State
 const state = {
@@ -26,6 +31,7 @@ const state = {
   currentTab: "personal",
   currentStep: 1,
   selectedGender: "Male",
+  selectedRashifalSign: 1,
   chatHistory: [],
   isGenerating: false,
   lastBotMessage: ""
@@ -34,6 +40,7 @@ const state = {
 const aiService = new AIService();
 const audioEngine = new AmbientAudioEngine();
 const voiceEngine = new VoiceEngine();
+const callEngine = new CallEngine(voiceEngine, aiService);
 
 // DOM Elements
 const elements = {
@@ -146,7 +153,47 @@ const elements = {
   geminiKeyInput: document.getElementById("geminiKeyInput"),
   groqKeyInput: document.getElementById("groqKeyInput"),
   audioToggleBtn: document.getElementById("audioToggleBtn"),
-  starCanvas: document.getElementById("starCanvas")
+  starCanvas: document.getElementById("starCanvas"),
+
+  // Bottom Dock Navigation
+  dockHome: document.getElementById("dockHome"),
+  dockRashifal: document.getElementById("dockRashifal"),
+  dockCall: document.getElementById("dockCall"),
+  dockUpaya: document.getElementById("dockUpaya"),
+  dockMilan: document.getElementById("dockMilan"),
+  dockTarot: document.getElementById("dockTarot"),
+
+  // 12-Sign Rashifal
+  viewRashifal: document.getElementById("viewRashifal"),
+  rashifalDateDisplay: document.getElementById("rashifalDateDisplay"),
+  rashifalChipsWrapper: document.getElementById("rashifalChipsWrapper"),
+  rashifalContentArea: document.getElementById("rashifalContentArea"),
+
+  // Gemstones & Upaya
+  viewUpaya: document.getElementById("viewUpaya"),
+  gemstoneCardsContainer: document.getElementById("gemstoneCardsContainer"),
+  gemstoneWarningBox: document.getElementById("gemstoneWarningBox"),
+
+  // Streak
+  streakBadge: document.getElementById("streakBadge"),
+  streakCount: document.getElementById("streakCount"),
+
+  // PWA Banner & iOS Guide
+  pwaBanner: document.getElementById("pwaBanner"),
+  btnPwaInstall: document.getElementById("btnPwaInstall"),
+  btnPwaClose: document.getElementById("btnPwaClose"),
+  iosInstallModal: document.getElementById("iosInstallModal"),
+  closeIosInstallBtn: document.getElementById("closeIosInstallBtn"),
+  btnAcknowledgeIosInstall: document.getElementById("btnAcknowledgeIosInstall"),
+
+  // Simulated Live Audio Call
+  callOverlay: document.getElementById("callOverlay"),
+  callStatus: document.getElementById("callStatus"),
+  callTimer: document.getElementById("callTimer"),
+  callSubtitles: document.getElementById("callSubtitles"),
+  btnCallMute: document.getElementById("btnCallMute"),
+  btnCallEnd: document.getElementById("btnCallEnd"),
+  btnCallSpeaker: document.getElementById("btnCallSpeaker")
 };
 
 // Initialize App
@@ -158,6 +205,9 @@ document.addEventListener("DOMContentLoaded", () => {
   loadSavedSettings();
   loadSavedChart();
   renderPanchang();
+  initStreak();
+  initPWA();
+  initRashifalUI();
   registerServiceWorker();
 });
 
@@ -281,12 +331,54 @@ function executeCalculation() {
 }
 
 function setupEventListeners() {
-  // Navigation Tabs
-  elements.navTabPersonal.addEventListener("click", () => switchNavTab("personal"));
+  // Navigation Tabs (Desktop & Legacy)
+  if (elements.navTabPersonal) elements.navTabPersonal.addEventListener("click", () => switchNavTab("personal"));
   if (elements.navTabShaadi) elements.navTabShaadi.addEventListener("click", () => switchNavTab("shaadi"));
-  elements.navTabMatching.addEventListener("click", () => switchNavTab("matching"));
-  elements.navTabPanchang.addEventListener("click", () => switchNavTab("panchang"));
+  if (elements.navTabMatching) elements.navTabMatching.addEventListener("click", () => switchNavTab("matching"));
+  if (elements.navTabPanchang) elements.navTabPanchang.addEventListener("click", () => switchNavTab("panchang"));
   if (elements.navTabTarot) elements.navTabTarot.addEventListener("click", () => switchNavTab("tarot"));
+
+  // Bottom Navigation Dock (Native Mobile Thumb-Zone)
+  if (elements.dockHome) elements.dockHome.addEventListener("click", () => switchNavTab("personal"));
+  if (elements.dockRashifal) elements.dockRashifal.addEventListener("click", () => switchNavTab("rashifal"));
+  if (elements.dockCall) elements.dockCall.addEventListener("click", () => startLiveCall());
+  if (elements.dockUpaya) elements.dockUpaya.addEventListener("click", () => switchNavTab("upaya"));
+  if (elements.dockMilan) elements.dockMilan.addEventListener("click", () => switchNavTab("matching"));
+  if (elements.dockTarot) elements.dockTarot.addEventListener("click", () => switchNavTab("tarot"));
+
+  // Live Audio Call Controls
+  if (elements.btnCallEnd) elements.btnCallEnd.addEventListener("click", () => endLiveCall());
+  if (elements.btnCallMute) {
+    elements.btnCallMute.addEventListener("click", () => {
+      const isMuted = callEngine.toggleMute();
+      elements.btnCallMute.classList.toggle("active", isMuted);
+      elements.btnCallMute.innerText = isMuted ? "🔇" : "🎤";
+    });
+  }
+  if (elements.btnCallSpeaker) {
+    elements.btnCallSpeaker.addEventListener("click", () => {
+      callEngine.isSpeakerOn = !callEngine.isSpeakerOn;
+      elements.btnCallSpeaker.classList.toggle("active", callEngine.isSpeakerOn);
+    });
+  }
+
+  // iOS PWA Guide Modal
+  if (elements.closeIosInstallBtn) elements.closeIosInstallBtn.addEventListener("click", () => elements.iosInstallModal.classList.remove("active"));
+  if (elements.btnAcknowledgeIosInstall) elements.btnAcknowledgeIosInstall.addEventListener("click", () => elements.iosInstallModal.classList.remove("active"));
+  if (elements.iosInstallModal) {
+    elements.iosInstallModal.addEventListener("click", (e) => {
+      if (e.target === elements.iosInstallModal) elements.iosInstallModal.classList.remove("active");
+    });
+  }
+
+  // Cosmic Streak Devotion Badge Click
+  if (elements.streakBadge) {
+    elements.streakBadge.addEventListener("click", () => {
+      const { count } = StreakEngine.getStreak();
+      StreakEngine.triggerHapticCelebration();
+      alert(`🔥 You have a ${count}-Day Cosmic Devotion Streak!\nReturn daily to maintain planetary alignment and deepen your karmic insight.`);
+    });
+  }
 
   // Tarot handlers
   if (elements.btnShuffleTarot) elements.btnShuffleTarot.addEventListener("click", renderTarotCards);
@@ -539,21 +631,277 @@ function renderAuraMeter(chart) {
 }
 function switchNavTab(tabName) {
   state.currentTab = tabName;
-  elements.navTabPersonal.classList.toggle("active", tabName === "personal");
+
+  // Bottom dock buttons (Thumb Zone)
+  if (elements.dockHome) elements.dockHome.classList.toggle("active", tabName === "personal");
+  if (elements.dockRashifal) elements.dockRashifal.classList.toggle("active", tabName === "rashifal");
+  if (elements.dockUpaya) elements.dockUpaya.classList.toggle("active", tabName === "upaya");
+  if (elements.dockMilan) elements.dockMilan.classList.toggle("active", tabName === "matching" || tabName === "shaadi");
+  if (elements.dockTarot) elements.dockTarot.classList.toggle("active", tabName === "tarot");
+
+  // Legacy header tabs
+  if (elements.navTabPersonal) elements.navTabPersonal.classList.toggle("active", tabName === "personal");
   if (elements.navTabShaadi) elements.navTabShaadi.classList.toggle("active", tabName === "shaadi");
-  elements.navTabMatching.classList.toggle("active", tabName === "matching");
-  elements.navTabPanchang.classList.toggle("active", tabName === "panchang");
+  if (elements.navTabMatching) elements.navTabMatching.classList.toggle("active", tabName === "matching");
+  if (elements.navTabPanchang) elements.navTabPanchang.classList.toggle("active", tabName === "panchang");
   if (elements.navTabTarot) elements.navTabTarot.classList.toggle("active", tabName === "tarot");
 
-  elements.viewPersonal.style.display = tabName === "personal" ? "block" : "none";
+  // View visibility
+  if (elements.viewPersonal) elements.viewPersonal.style.display = tabName === "personal" ? "block" : "none";
   if (elements.viewShaadi) elements.viewShaadi.style.display = tabName === "shaadi" ? "block" : "none";
-  elements.viewMatching.style.display = tabName === "matching" ? "block" : "none";
-  elements.viewPanchang.style.display = tabName === "panchang" ? "block" : "none";
+  if (elements.viewMatching) elements.viewMatching.style.display = tabName === "matching" ? "block" : "none";
+  if (elements.viewPanchang) elements.viewPanchang.style.display = tabName === "panchang" ? "block" : "none";
   if (elements.viewTarot) elements.viewTarot.style.display = tabName === "tarot" ? "block" : "none";
+  if (elements.viewRashifal) elements.viewRashifal.style.display = tabName === "rashifal" ? "block" : "none";
+  if (elements.viewUpaya) elements.viewUpaya.style.display = tabName === "upaya" ? "block" : "none";
 
   if (tabName === "panchang") renderPanchang();
   if (tabName === "shaadi") renderShaadiRadar();
   if (tabName === "tarot") renderTarotCards();
+  if (tabName === "rashifal") renderRashifal(state.selectedRashifalSign || 1);
+  if (tabName === "upaya") renderGemstones();
+}
+
+// 12-Sign Daily Transit Rashifal
+function initRashifalUI() {
+  if (!elements.rashifalChipsWrapper) return;
+  elements.rashifalChipsWrapper.innerHTML = ZODIAC_SIGNS.map(sign => `
+    <button class="sign-chip ${sign.id === state.selectedRashifalSign ? "active" : ""}" data-sign="${sign.id}">
+      <span>${sign.symbol}</span>
+      <span>${sign.english} (${sign.name})</span>
+    </button>
+  `).join("");
+
+  elements.rashifalChipsWrapper.querySelectorAll(".sign-chip").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const sId = parseInt(btn.dataset.sign, 10);
+      renderRashifal(sId);
+    });
+  });
+
+  renderRashifal(state.selectedRashifalSign || 1);
+}
+
+function renderRashifal(signId) {
+  state.selectedRashifalSign = signId;
+  const data = getDailyRashifal(signId);
+
+  if (elements.rashifalChipsWrapper) {
+    elements.rashifalChipsWrapper.querySelectorAll(".sign-chip").forEach(b => {
+      b.classList.toggle("active", parseInt(b.dataset.sign, 10) === signId);
+    });
+  }
+
+  if (elements.rashifalDateDisplay) {
+    elements.rashifalDateDisplay.innerText = data.dateString;
+  }
+
+  if (!elements.rashifalContentArea) return;
+  elements.rashifalContentArea.innerHTML = `
+    <div class="rashifal-hero-card">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+        <div>
+          <span style="font-size: 2.2rem; margin-right: 0.5rem;">${data.symbol}</span>
+          <span style="font-size: 1.45rem; font-weight: 800; color: #fff;">${data.english} • ${data.name}</span>
+          <div style="color: var(--accent-gold); font-size: 0.85rem; margin-top: 0.2rem;">
+            Ruler: <strong>${data.lord}</strong> • Element: <strong>${data.element}</strong> • Deity: <strong>${data.deity}</strong>
+          </div>
+        </div>
+        <div style="background: rgba(244, 196, 83, 0.15); border: 1px solid var(--border-glow); padding: 0.4rem 0.85rem; border-radius: var(--radius-full); color: var(--accent-gold); font-weight: 800; font-size: 0.95rem;">
+          Cosmic Index: ${data.overallScore}%
+        </div>
+      </div>
+
+      <h3 style="font-size: 1.15rem; color: #fff; margin-bottom: 0.5rem;">${data.headline}</h3>
+      <p style="color: var(--text-secondary); line-height: 1.7; font-size: 0.95rem; margin-bottom: 1.5rem;">
+        ${data.forecast}
+      </p>
+
+      <!-- Rating Meters -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+        <div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.8rem;">
+            <span>❤️ Romance & Harmony</span>
+            <span style="font-weight: bold; color: #f43f5e;">${data.loveScore}%</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" style="width: ${data.loveScore}%; background: linear-gradient(90deg, #ec4899, #f43f5e);"></div>
+          </div>
+        </div>
+        <div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.8rem;">
+            <span>💼 Career & Wealth</span>
+            <span style="font-weight: bold; color: #4ade80;">${data.careerScore}%</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" style="width: ${data.careerScore}%; background: linear-gradient(90deg, #10b981, #4ade80);"></div>
+          </div>
+        </div>
+        <div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.8rem;">
+            <span>⚡ Vital Prana (Health)</span>
+            <span style="font-weight: bold; color: #38bdf8;">${data.healthScore}%</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" style="width: ${data.healthScore}%; background: linear-gradient(90deg, #0ea5e9, #38bdf8);"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lucky Attributes -->
+      <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.5rem;">
+        <div style="background: rgba(255,255,255,0.06); border: 1px solid var(--border-color); padding: 0.45rem 0.85rem; border-radius: var(--radius-sm); font-size: 0.82rem;">
+          🎨 Lucky Color: <strong>${data.luckyColor}</strong>
+        </div>
+        <div style="background: rgba(255,255,255,0.06); border: 1px solid var(--border-color); padding: 0.45rem 0.85rem; border-radius: var(--radius-sm); font-size: 0.82rem;">
+          🔢 Lucky Number: <strong>${data.luckyNumber}</strong>
+        </div>
+        <div style="background: rgba(255,255,255,0.06); border: 1px solid var(--border-color); padding: 0.45rem 0.85rem; border-radius: var(--radius-sm); font-size: 0.82rem;">
+          ⏰ Shubha Muhurat: <strong>${data.luckyMuhurat}</strong>
+        </div>
+      </div>
+
+      <!-- Upaya -->
+      <div style="background: rgba(244, 196, 83, 0.08); border-left: 3px solid var(--accent-gold); padding: 0.75rem 1rem; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; font-size: 0.88rem; color: #fef08a; line-height: 1.6;">
+        <strong>🕊️ Daily Vedic Upaya:</strong> ${data.upaya}
+      </div>
+    </div>
+  `;
+}
+
+// Classical Parashara Gemstones & Vedic Upaya
+function renderGemstones() {
+  if (!elements.gemstoneCardsContainer) return;
+
+  if (!state.activeChart) {
+    elements.gemstoneCardsContainer.innerHTML = `
+      <div style="text-align: center; padding: 2.5rem 1rem; background: rgba(255,255,255,0.02); border: 1px dashed var(--border-color); border-radius: var(--radius-md);">
+        <p style="color: var(--text-secondary); margin-bottom: 1.25rem; font-size: 0.95rem;">
+          Personalized gemstones require your exact Ascendant (Lagna) and 9th House fortune lord.
+        </p>
+        <button id="btnGoKundliForGems" class="btn-primary" style="margin: 0 auto;">
+          ✨ Calculate My Kundli First
+        </button>
+      </div>
+    `;
+    const btn = document.getElementById("btnGoKundliForGems");
+    if (btn) btn.onclick = () => switchNavTab("personal");
+    if (elements.gemstoneWarningBox) elements.gemstoneWarningBox.style.display = "none";
+    return;
+  }
+
+  const gems = calculateGemstones(state.activeChart);
+  if (!gems) return;
+
+  elements.gemstoneCardsContainer.innerHTML = gems.prescriptions.map(p => `
+    <div class="gemstone-card">
+      <div class="gemstone-role-tag">${p.role} • ${p.planet}</div>
+      <h3 style="color: #fff; font-size: 1.25rem; margin-bottom: 0.35rem;">${p.data.stone}</h3>
+      <p style="color: var(--accent-gold-light); font-size: 0.82rem; margin-bottom: 0.75rem;">
+        Alternative: ${p.data.altStone} • Color: ${p.data.color}
+      </p>
+      <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.6; margin-bottom: 0.85rem;">
+        ${p.purpose} ${p.data.benefits}
+      </p>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.5rem; font-size: 0.78rem; background: rgba(0,0,0,0.3); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.05); margin-bottom: 0.75rem;">
+        <div>💍 Metal: <strong>${p.data.metal}</strong></div>
+        <div>👆 Finger: <strong>${p.data.finger}</strong></div>
+        <div>🗓️ Day/Time: <strong>${p.data.day}</strong></div>
+        <div>📿 Rudraksha: <strong>${p.data.rudraksha}</strong></div>
+      </div>
+
+      <div style="font-size: 0.78rem; color: #86efac; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 0.5rem;">
+        <strong>Chant:</strong> "${p.data.mantra}" (108 times)
+      </div>
+    </div>
+  `).join("");
+
+  if (gems.maleficWarnings.length > 0 && elements.gemstoneWarningBox) {
+    elements.gemstoneWarningBox.style.display = "block";
+    elements.gemstoneWarningBox.innerHTML = `
+      <strong>⚠️ Astrological Dusthana Cautions:</strong>
+      <ul style="margin-left: 1.25rem; margin-top: 0.35rem;">
+        ${gems.maleficWarnings.map(w => `<li>${w}</li>`).join("")}
+      </ul>
+    `;
+  } else if (elements.gemstoneWarningBox) {
+    elements.gemstoneWarningBox.style.display = "none";
+  }
+}
+
+// Live Simulated Audio Call with Jyoti
+function startLiveCall() {
+  if (!elements.callOverlay) return;
+  elements.callOverlay.style.display = "flex";
+  elements.callStatus.innerText = "Dialing Jyoti in the Celestial Realm...";
+  elements.callTimer.style.display = "none";
+  elements.callSubtitles.innerText = '"Connecting your soul vibration to the stars..."';
+
+  callEngine.startRinging(() => {
+    elements.callStatus.innerText = "Connected • Live Jyotish Consultation";
+    elements.callTimer.style.display = "block";
+    callEngine.startCallTimer(elements.callTimer);
+
+    const greeting = state.activeChart
+      ? `Namaste ${state.activeChart.user.name}! I am Jyoti. Your stars show your Lagna is ${state.activeChart.lagna.english}. What cosmic guidance do you seek today?`
+      : "Namaste! I am Jyoti, your AI Vedic Astrologer. I am listening to your stars. Speak freely about your destiny or question.";
+
+    elements.callSubtitles.innerText = `"${greeting}"`;
+    voiceEngine.speak(greeting, () => {
+      if (callEngine.isCallActive && !callEngine.isMuted) {
+        voiceEngine.startListening(
+          transcript => handleCallTranscript(transcript),
+          () => {}
+        );
+      }
+    });
+  });
+}
+
+async function handleCallTranscript(query) {
+  if (!query || !callEngine.isCallActive) return;
+  elements.callSubtitles.innerText = `You: "${query}"`;
+  voiceEngine.stopListening();
+  try {
+    const reply = await aiService.askQuestion(query, state.activeChart, state.chatHistory);
+    elements.callSubtitles.innerText = `Jyoti: "${reply}"`;
+    voiceEngine.speak(reply, () => {
+      if (callEngine.isCallActive && !callEngine.isMuted) {
+        voiceEngine.startListening(
+          transcript => handleCallTranscript(transcript),
+          () => {}
+        );
+      }
+    });
+  } catch (e) {
+    elements.callSubtitles.innerText = "Jyoti: I felt a cosmic disturbance. Could you repeat that?";
+  }
+}
+
+function endLiveCall() {
+  callEngine.endCall();
+  if (elements.callOverlay) {
+    elements.callOverlay.style.display = "none";
+  }
+}
+
+// Cosmic Streak Devotion
+function initStreak() {
+  const result = StreakEngine.updateStreak();
+  if (elements.streakCount) {
+    elements.streakCount.innerText = result.count;
+  }
+}
+
+// Smart PWA Installation
+function initPWA() {
+  new PWAInstaller(
+    elements.pwaBanner,
+    elements.btnPwaInstall,
+    elements.btnPwaClose,
+    elements.iosInstallModal
+  );
 }
 
 // Render Daily Vedic Tarot & Prashna

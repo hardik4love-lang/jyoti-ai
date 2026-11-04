@@ -10,6 +10,8 @@ import { CELEBRITIES } from "./src/celebrities.js";
 import { calculateDailyAura } from "./src/aura-meter.js";
 import { drawPrashnaCards, VEDIC_TAROT_DECK } from "./src/tarot-engine.js";
 import { HOUSE_DEFINITIONS } from "./src/house-details.js";
+import { getDailyRashifal, getAllRashifalList } from "./src/rashifal-engine.js";
+import { calculateGemstones } from "./src/gemstone-engine.js";
 
 console.log("=== Testing Vedic Astronomical Calculation Engine ===");
 const boyBirth = {
@@ -109,5 +111,20 @@ console.log(`✅ 3-Card Prashna Drawn:
 
 console.log(`✅ Verified ${Object.keys(HOUSE_DEFINITIONS).length} Classical House Definitions (1st Tanu Bhava to 12th Vyaya Bhava)`);
 console.log(`- 7th House (Kalatra Bhava): ${HOUSE_DEFINITIONS[7].title} | Remedy: ${HOUSE_DEFINITIONS[7].guidance.slice(0, 50)}...`);
+
+console.log("\n=== Testing 12-Sign Daily Transit Rashifal & Gemstones ===");
+const allRashifal = getAllRashifalList();
+console.log(`✅ Successfully generated forecasts for all ${allRashifal.length} Zodiac Rashis (Mesha to Meena)`);
+const ariesForecast = getDailyRashifal(1);
+console.log(`- Mesha (Aries): "${ariesForecast.headline}"`);
+console.log(`  Ratings -> Love: ${ariesForecast.loveScore}%, Career: ${ariesForecast.careerScore}%, Health: ${ariesForecast.healthScore}%`);
+console.log(`  Lucky Attributes -> Color: ${ariesForecast.luckyColor} | Number: ${ariesForecast.luckyNumber}`);
+
+const gemstonePrescription = calculateGemstones(boyChart);
+console.log(`✅ Parashara Gemstone Prescriptions for Lagna ${boyChart.lagna.english}:`);
+gemstonePrescription.prescriptions.forEach(p => {
+  console.log(`  • ${p.role}: ${p.data.stone} (${p.data.color}) on ${p.data.finger} | Metal: ${p.data.metal}`);
+});
+console.log(`  • Seed Mantra: "${gemstonePrescription.prescriptions[0].data.mantra}"`);
 
 console.log("\n🎉 ALL ADVANCED TESTS PASSED! Production-ready at 100% free and $0 cost.");

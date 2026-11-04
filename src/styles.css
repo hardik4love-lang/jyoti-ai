@@ -33,6 +33,11 @@
   --font-main: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --transition-smooth: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   --shadow-halo: 0 0 50px -10px rgba(244, 196, 83, 0.25);
+
+  /* Native Mobile App Ergonomics & Safe Areas */
+  --dock-height: 64px;
+  --safe-bottom: max(12px, env(safe-area-inset-bottom));
+  --safe-top: max(8px, env(safe-area-inset-top));
 }
 
 *, *::before, *::after {
@@ -49,6 +54,11 @@ body.cosmic-theme {
   line-height: 1.5;
   overflow-x: hidden;
   position: relative;
+  padding-top: var(--safe-top);
+  padding-bottom: calc(var(--dock-height) + var(--safe-bottom) + 20px);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  touch-action: manipulation;
 }
 
 /* Starfield Background Canvas */
@@ -1304,19 +1314,21 @@ body.cosmic-theme {
   color: var(--accent-gold-light);
 }
 
-/* Modal */
+/* Native Mobile Bottom Sheet Modal */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(8px);
-  display: grid;
-  place-items: center;
-  z-index: 100;
-  padding: 1rem;
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 2000;
+  padding: 0;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.25s ease;
 }
 
 .modal-overlay.active {
@@ -1325,14 +1337,31 @@ body.cosmic-theme {
 }
 
 .modal-box {
-  background: #0f1124;
+  background: #0d0f22;
   border: 1px solid var(--border-glow);
-  border-radius: var(--radius-lg);
+  border-bottom: none;
+  border-radius: 26px 26px 0 0;
   width: 100%;
-  max-width: 520px;
-  padding: 1.75rem;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
+  max-width: 620px;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 0.75rem 1.5rem calc(var(--safe-bottom) + 1.5rem);
+  box-shadow: 0 -10px 45px rgba(0, 0, 0, 0.9);
   position: relative;
+  transform: translateY(100%);
+  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-overlay.active .modal-box {
+  transform: translateY(0);
+}
+
+.sheet-drag-handle {
+  width: 44px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: var(--radius-full);
+  margin: 0.25rem auto 1.15rem;
 }
 
 .modal-header {
@@ -1434,3 +1463,433 @@ body.cosmic-theme {
     color: #000 !important;
   }
 }
+
+/* ==========================================================================
+   Jyoti AI - Native Mobile App Overhaul & Bottom Dock Navigation
+   ========================================================================== */
+
+/* Streamlined 56px Mobile Header */
+.mobile-app-header {
+  position: sticky;
+  top: 0;
+  z-index: 900;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  background: rgba(8, 9, 20, 0.92);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+}
+
+.header-brand-group {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  text-decoration: none;
+}
+
+.streak-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(245, 158, 11, 0.2));
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #fbbf24;
+  letter-spacing: 0.02em;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.25);
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.streak-pill:active {
+  transform: scale(0.94);
+}
+
+.header-action-group {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.header-icon-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  border-radius: var(--radius-full);
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: var(--transition-smooth);
+}
+
+.header-icon-btn:hover {
+  background: rgba(244, 196, 83, 0.15);
+  border-color: var(--accent-gold);
+  color: #fff;
+}
+
+/* Fixed Bottom Navigation Dock */
+.bottom-dock {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc(var(--dock-height) + var(--safe-bottom));
+  padding-bottom: var(--safe-bottom);
+  background: rgba(8, 9, 20, 0.96);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 1000;
+  box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.7);
+}
+
+.dock-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  padding: 6px 0;
+}
+
+.dock-item .dock-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+  transition: transform 0.2s ease;
+}
+
+.dock-item.active {
+  color: var(--accent-gold);
+}
+
+.dock-item.active .dock-icon {
+  transform: translateY(-2px);
+  filter: drop-shadow(0 0 8px rgba(244, 196, 83, 0.6));
+}
+
+.dock-item:active {
+  transform: scale(0.92);
+}
+
+.dock-call-highlight {
+  position: relative;
+}
+
+.dock-call-highlight .dock-icon {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 1.2rem;
+  box-shadow: 0 0 18px rgba(34, 197, 94, 0.6);
+  margin-top: -14px;
+  transition: var(--transition-smooth);
+}
+
+.dock-call-highlight:hover .dock-icon {
+  transform: scale(1.1);
+  box-shadow: 0 0 28px rgba(34, 197, 94, 0.9);
+}
+
+/* Fullscreen Live Voice Call Overlay */
+.call-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at center, #1b1c3e 0%, #060713 100%);
+  z-index: 3000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: calc(var(--safe-top) + 2rem) 1.5rem calc(var(--safe-bottom) + 2.5rem);
+}
+
+.call-header-meta {
+  text-align: center;
+}
+
+.call-astrologer-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 0.02em;
+}
+
+.call-status-label {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  margin-top: 0.25rem;
+}
+
+.call-timer {
+  font-size: 1.15rem;
+  color: #4ade80;
+  font-family: monospace;
+  margin-top: 0.35rem;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+}
+
+.call-avatar-container {
+  position: relative;
+  width: 170px;
+  height: 170px;
+  margin: 1.5rem auto;
+}
+
+.call-avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-full);
+  border: 4px solid var(--accent-gold);
+  object-fit: cover;
+  box-shadow: 0 0 50px rgba(244, 196, 83, 0.6);
+  position: relative;
+  z-index: 2;
+}
+
+.call-ripple-ring {
+  position: absolute;
+  inset: -18px;
+  border-radius: var(--radius-full);
+  border: 2px solid rgba(244, 196, 83, 0.5);
+  animation: callRipple 2s infinite cubic-bezier(0.2, 0.8, 0.2, 1);
+  z-index: 1;
+}
+
+@keyframes callRipple {
+  0% { transform: scale(0.9); opacity: 1; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+.call-wave-visualizer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 50px;
+  margin: 1rem 0;
+}
+
+.wave-bar {
+  width: 4px;
+  background: linear-gradient(180deg, var(--accent-gold), #ec4899);
+  border-radius: var(--radius-full);
+  animation: wavePulse 1.2s infinite ease-in-out;
+}
+
+.wave-bar:nth-child(2) { animation-delay: 0.15s; }
+.wave-bar:nth-child(3) { animation-delay: 0.3s; }
+.wave-bar:nth-child(4) { animation-delay: 0.45s; }
+.wave-bar:nth-child(5) { animation-delay: 0.6s; }
+.wave-bar:nth-child(6) { animation-delay: 0.45s; }
+.wave-bar:nth-child(7) { animation-delay: 0.3s; }
+.wave-bar:nth-child(8) { animation-delay: 0.15s; }
+.wave-bar:nth-child(9) { animation-delay: 0s; }
+
+@keyframes wavePulse {
+  0%, 100% { height: 8px; opacity: 0.4; }
+  50% { height: 44px; opacity: 1; }
+}
+
+.call-subtitles {
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1.25rem;
+  max-width: 90%;
+  text-align: center;
+  color: #f8fafc;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  min-height: 54px;
+}
+
+.call-controls-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  width: 100%;
+}
+
+.btn-call-circle {
+  width: 58px;
+  height: 58px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 1.35rem;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.btn-call-circle:active {
+  transform: scale(0.9);
+}
+
+.btn-call-circle.active {
+  background: #f4c453;
+  color: #000;
+}
+
+.btn-call-end {
+  width: 68px;
+  height: 68px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  box-shadow: 0 0 25px rgba(239, 68, 68, 0.6);
+}
+
+.btn-call-end:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 35px rgba(239, 68, 68, 0.9);
+}
+
+/* PWA Install Floating Banner */
+.pwa-install-banner {
+  position: fixed;
+  top: calc(var(--safe-top) + 64px);
+  left: 1rem;
+  right: 1rem;
+  max-width: 480px;
+  margin: 0 auto;
+  background: linear-gradient(135deg, rgba(20, 24, 55, 0.96), rgba(10, 12, 28, 0.98));
+  border: 1px solid var(--border-glow);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+  z-index: 999;
+  animation: slideDownBanner 0.4s ease;
+}
+
+@keyframes slideDownBanner {
+  from { transform: translateY(-30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.pwa-btn-install {
+  background: linear-gradient(135deg, var(--accent-gold), var(--accent-amber));
+  color: #000;
+  font-weight: 700;
+  border: none;
+  border-radius: var(--radius-full);
+  padding: 0.4rem 0.85rem;
+  font-size: 0.78rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* 12-Sign Rashifal Grid */
+.rashifal-chips-wrapper {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding: 0.5rem 0.25rem 1rem;
+  scrollbar-width: none;
+}
+
+.rashifal-chips-wrapper::-webkit-scrollbar {
+  display: none;
+}
+
+.sign-chip {
+  flex: 0 0 auto;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-full);
+  padding: 0.5rem 1rem;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: var(--transition-smooth);
+}
+
+.sign-chip.active {
+  background: rgba(244, 196, 83, 0.2);
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+  box-shadow: 0 0 12px rgba(244, 196, 83, 0.3);
+}
+
+.rashifal-hero-card {
+  background: radial-gradient(circle at top right, rgba(157, 78, 221, 0.15), rgba(12, 14, 32, 0.95));
+  border: 1px solid var(--border-glow);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  margin-top: 1rem;
+}
+
+.progress-bar-bg {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin-top: 0.35rem;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Gemstone & Upaya Cards */
+.gemstone-card {
+  background: linear-gradient(135deg, rgba(22, 26, 60, 0.75), rgba(10, 12, 28, 0.95));
+  border: 1px solid var(--border-glow);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.gemstone-role-tag {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 0.2rem 0.65rem;
+  border-radius: var(--radius-full);
+  background: rgba(244, 196, 83, 0.15);
+  color: var(--accent-gold);
+  margin-bottom: 0.5rem;
+}
+
