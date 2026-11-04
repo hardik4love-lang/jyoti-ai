@@ -63,6 +63,7 @@
         <button id="navTabShaadi" class="nav-tab">💍 Shaadi & Soulmate Radar</button>
         <button id="navTabMatching" class="nav-tab">💑 Kundli Milan (36 Gunas)</button>
         <button id="navTabPanchang" class="nav-tab">📅 Daily Panchang & Muhurat</button>
+        <button id="navTabTarot" class="nav-tab">🔮 Daily Tarot & Prashna</button>
       </div>
     </nav>
   </header>
@@ -393,7 +394,45 @@
       </section>
     </div>
 
+    <!-- VIEW 5: DAILY VEDIC TAROT & PRASHNA ("PICK-A-CARD") -->
+    <div id="viewTarot" style="display: none;">
+      <section class="glass-card" style="max-width: 920px; margin: 0 auto;">
+        <div style="text-align: center; margin-bottom: 2rem;">
+          <h2 style="font-size: 1.85rem; font-weight: 800; background: linear-gradient(90deg, #fff, var(--accent-gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            🔮 Daily Vedic Prashna & Tarot Oracle
+          </h2>
+          <p style="color: var(--text-secondary); margin-top: 0.5rem; font-size: 0.95rem;">
+            Hold your question in your heart and draw 3 sacred celestial cards for Past Root, Present Energy, and Future Outcome.
+          </p>
+          <button id="btnShuffleTarot" class="btn-celestial" style="margin-top: 1.25rem;">
+            🔀 Draw 3 Sacred Cards
+          </button>
+        </div>
+
+        <div id="tarotCardsContainer" class="tarot-cards-grid">
+          <!-- 3 Interactive 3D Flip Cards -->
+        </div>
+
+        <div id="tarotShareBar" style="text-align: center; margin-top: 2rem; display: none;">
+          <button id="btnShareTarotWhatsApp" class="btn-share-story" style="background: linear-gradient(135deg, #25D366, #128C7E); margin: 0 auto;">
+            📲 Share Tarot Reading to WhatsApp
+          </button>
+        </div>
+      </section>
+    </div>
+
   </main>
+
+  <!-- Interactive House Details Modal -->
+  <div id="houseModal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="houseModalTitle" style="color: var(--accent-gold); font-size: 1.3rem;">House Details</h3>
+        <button id="closeHouseModalBtn" class="modal-close">&times;</button>
+      </div>
+      <div id="houseModalBody" style="line-height: 1.7; color: var(--text-secondary);"></div>
+    </div>
+  </div>
 
   <!-- Settings Modal -->
   <div id="settingsModal" class="modal-overlay">

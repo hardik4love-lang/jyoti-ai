@@ -4,7 +4,7 @@
  * Dual Persona (Guru vs Roast) • Interactive Stardust Canvas
  */
 
-import { generateKundli, calculateAshtaKoota, calculateDailyPanchang, predictMarriageAndSoulmate } from "./vedic-engine.js";
+import { generateKundli, calculateAshtaKoota, calculateDailyPanchang, predictMarriageAndSoulmate, RASHIS } from "./vedic-engine.js";
 import { searchCities, CITIES } from "./cities.js";
 import { KundliChartRenderer } from "./chart-renderer.js";
 import { AIService } from "./ai-service.js";
@@ -14,6 +14,8 @@ import { CosmicCardGenerator } from "./card-generator.js";
 import { VoiceEngine } from "./voice-engine.js";
 import { CELEBRITIES } from "./celebrities.js";
 import { calculateDailyAura } from "./aura-meter.js";
+import { drawPrashnaCards } from "./tarot-engine.js";
+import { HOUSE_DEFINITIONS } from "./house-details.js";
 
 // Global State
 const state = {
@@ -40,10 +42,12 @@ const elements = {
   navTabShaadi: document.getElementById("navTabShaadi"),
   navTabMatching: document.getElementById("navTabMatching"),
   navTabPanchang: document.getElementById("navTabPanchang"),
+  navTabTarot: document.getElementById("navTabTarot"),
   viewPersonal: document.getElementById("viewPersonal"),
   viewShaadi: document.getElementById("viewShaadi"),
   viewMatching: document.getElementById("viewMatching"),
   viewPanchang: document.getElementById("viewPanchang"),
+  viewTarot: document.getElementById("viewTarot"),
   langToggleBtn: document.getElementById("langToggleBtn"),
   personaToggleBtn: document.getElementById("personaToggleBtn"),
   personaIcon: document.getElementById("personaIcon"),
@@ -120,6 +124,18 @@ const elements = {
   // Panchang
   panchangDateDisplay: document.getElementById("panchangDateDisplay"),
   panchangGrid: document.getElementById("panchangGrid"),
+
+  // Tarot
+  tarotCardsContainer: document.getElementById("tarotCardsContainer"),
+  btnShuffleTarot: document.getElementById("btnShuffleTarot"),
+  tarotShareBar: document.getElementById("tarotShareBar"),
+  btnShareTarotWhatsApp: document.getElementById("btnShareTarotWhatsApp"),
+
+  // House Modal
+  houseModal: document.getElementById("houseModal"),
+  closeHouseModalBtn: document.getElementById("closeHouseModalBtn"),
+  houseModalTitle: document.getElementById("houseModalTitle"),
+  houseModalBody: document.getElementById("houseModalBody"),
 
   // Settings & Audio
   settingsBtn: document.getElementById("settingsBtn"),
@@ -270,6 +286,26 @@ function setupEventListeners() {
   if (elements.navTabShaadi) elements.navTabShaadi.addEventListener("click", () => switchNavTab("shaadi"));
   elements.navTabMatching.addEventListener("click", () => switchNavTab("matching"));
   elements.navTabPanchang.addEventListener("click", () => switchNavTab("panchang"));
+  if (elements.navTabTarot) elements.navTabTarot.addEventListener("click", () => switchNavTab("tarot"));
+
+  // Tarot handlers
+  if (elements.btnShuffleTarot) elements.btnShuffleTarot.addEventListener("click", renderTarotCards);
+
+  // House Modal close
+  if (elements.closeHouseModalBtn) {
+    elements.closeHouseModalBtn.addEventListener("click", () => elements.houseModal.classList.remove("active"));
+  }
+  if (elements.houseModal) {
+    elements.houseModal.addEventListener("click", (e) => {
+      if (e.target === elements.houseModal) elements.houseModal.classList.remove("active");
+    });
+  }
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      if (elements.houseModal) elements.houseModal.classList.remove("active");
+      if (elements.settingsModal) elements.settingsModal.classList.remove("active");
+    }
+  });
 
   if (elements.btnGoToConsultation) {
     elements.btnGoToConsultation.addEventListener("click", () => switchNavTab("personal"));
@@ -507,14 +543,102 @@ function switchNavTab(tabName) {
   if (elements.navTabShaadi) elements.navTabShaadi.classList.toggle("active", tabName === "shaadi");
   elements.navTabMatching.classList.toggle("active", tabName === "matching");
   elements.navTabPanchang.classList.toggle("active", tabName === "panchang");
+  if (elements.navTabTarot) elements.navTabTarot.classList.toggle("active", tabName === "tarot");
 
   elements.viewPersonal.style.display = tabName === "personal" ? "block" : "none";
   if (elements.viewShaadi) elements.viewShaadi.style.display = tabName === "shaadi" ? "block" : "none";
   elements.viewMatching.style.display = tabName === "matching" ? "block" : "none";
   elements.viewPanchang.style.display = tabName === "panchang" ? "block" : "none";
+  if (elements.viewTarot) elements.viewTarot.style.display = tabName === "tarot" ? "block" : "none";
 
   if (tabName === "panchang") renderPanchang();
   if (tabName === "shaadi") renderShaadiRadar();
+  if (tabName === "tarot") renderTarotCards();
+}
+
+// Render Daily Vedic Tarot & Prashna
+function renderTarotCards() {
+  if (!elements.tarotCardsContainer) return;
+  const cards = drawPrashnaCards(3);
+  const cardList = [cards.past, cards.present, cards.future];
+
+  elements.tarotCardsContainer.innerHTML = cardList.map(c => `
+    <div class="tarot-card-item">
+      <span class="card-role-badge">${c.role}</span>
+      <div class="card-symbol-hero">${c.symbol}</div>
+      <h3 class="card-name-title">${c.name}</h3>
+      <div class="card-keywords">${c.keywords}</div>
+      <p class="card-advice-body">
+        <strong>Oracle Advice:</strong> ${c.advice}
+      </p>
+    </div>
+  `).join("");
+
+  if (elements.tarotShareBar) elements.tarotShareBar.style.display = "block";
+
+  if (elements.btnShareTarotWhatsApp) {
+    elements.btnShareTarotWhatsApp.onclick = () => {
+      const text = encodeURIComponent(
+        `🔮 Daily Vedic Prashna Oracle on Jyoti AI:\n\n📜 Past Root: ${cards.past.name} (${cards.past.keywords})\n⚡ Present Energy: ${cards.present.name} (${cards.present.keywords})\n✨ Future Outcome: ${cards.future.name}\n\n"${cards.future.advice}"\n\nDraw your free 3-card reading: http://localhost:8080`
+      );
+      window.open(`https://api.whatsapp.com/send?text=${text}`, "_blank");
+    };
+  }
+}
+
+// Interactive House Modal Handler
+function attachHouseClickListeners() {
+  if (!elements.chartContainer) return;
+  elements.chartContainer.querySelectorAll(".house-group").forEach(group => {
+    group.addEventListener("click", () => {
+      const houseNum = parseInt(group.dataset.house);
+      openHouseModal(houseNum);
+    });
+  });
+}
+
+function openHouseModal(houseNum) {
+  if (!state.activeChart) return;
+  const def = HOUSE_DEFINITIONS[houseNum];
+  const isNavamsha = state.activeVarga === "D9";
+
+  let rashiInfo;
+  let planetsInHouse = "";
+
+  if (isNavamsha) {
+    const navLagnaId = state.activeChart.navamsha.lagna.id;
+    const navRashiId = ((navLagnaId + houseNum - 2) % 12) + 1;
+    rashiInfo = RASHIS[navRashiId - 1];
+    planetsInHouse = state.activeChart.navamsha.planets
+      .filter(p => p.rashiId === navRashiId)
+      .map(p => p.name)
+      .join(", ") || "None";
+  } else {
+    const houseData = state.activeChart.houses[houseNum];
+    rashiInfo = houseData.rashi;
+    planetsInHouse = houseData.planets.join(", ") || "None";
+  }
+
+  elements.houseModalTitle.innerHTML = `House ${houseNum}: ${def.sanskrit} <span style="font-size:0.85rem; color:#fff;">(${def.title}) [${isNavamsha ? "D-9 Navamsha" : "D-1 Rashi"}]</span>`;
+  elements.houseModalBody.innerHTML = `
+    <div style="background: rgba(244, 196, 83, 0.1); border: 1px solid var(--border-glow); padding: 0.75rem 1rem; border-radius: var(--radius-sm); margin-bottom: 1rem;">
+      <strong>Sign Placed:</strong> ${rashiInfo.english} (${rashiInfo.name}) • <strong>Sign Lord:</strong> ${rashiInfo.lord}
+    </div>
+    <div style="margin-bottom: 0.75rem;">
+      <strong>Planets Residing:</strong> <span style="color:#ffdf7e; font-weight:bold;">${planetsInHouse}</span>
+    </div>
+    <div style="margin-bottom: 0.75rem;">
+      <strong>Significations (Karakas):</strong> ${def.significance}
+    </div>
+    <div style="margin-bottom: 0.75rem;">
+      <strong>Governed Anatomy:</strong> ${def.bodyParts}
+    </div>
+    <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 0.75rem; margin-top: 0.75rem; color: #86efac;">
+      <strong>Vedic Upaya (Remedy):</strong> ${def.guidance}
+    </div>
+  `;
+
+  elements.houseModal.classList.add("active");
 }
 
 // Microphone input handler
@@ -828,6 +952,7 @@ function renderChartSvg() {
   } else {
     elements.chartContainer.innerHTML = KundliChartRenderer.renderSouthIndian(state.activeChart, state.activeVarga);
   }
+  attachHouseClickListeners();
 }
 
 // Matchmaking Handler (Ashta Koota 36 Gunas)

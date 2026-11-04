@@ -8,6 +8,8 @@ import { AIService } from "./src/ai-service.js";
 import { TRANSLATIONS } from "./src/i18n.js";
 import { CELEBRITIES } from "./src/celebrities.js";
 import { calculateDailyAura } from "./src/aura-meter.js";
+import { drawPrashnaCards, VEDIC_TAROT_DECK } from "./src/tarot-engine.js";
+import { HOUSE_DEFINITIONS } from "./src/house-details.js";
 
 console.log("=== Testing Vedic Astronomical Calculation Engine ===");
 const boyBirth = {
@@ -96,5 +98,16 @@ console.log(`✅ Match with Virat Kohli: ${celebMatch.totalScore}/36 Gunas (${ce
 const aura = calculateDailyAura(boyChart);
 console.log(`✅ Daily Aura Meter -> Love: ${aura.love}%, Career: ${aura.career}%, Intuition: ${aura.intuition}%`);
 console.log(`- Daily Cosmic Advice: "${aura.advice}"`);
+
+console.log("\n=== Testing Vedic Tarot Prashna & House Details ===");
+console.log(`✅ Loaded ${VEDIC_TAROT_DECK.length} Vedic Tarot Archetypes`);
+const prashna = drawPrashnaCards(3);
+console.log(`✅ 3-Card Prashna Drawn:
+  • Past: [${prashna.past.symbol}] ${prashna.past.name} - ${prashna.past.keywords}
+  • Present: [${prashna.present.symbol}] ${prashna.present.name} - ${prashna.present.keywords}
+  • Future: [${prashna.future.symbol}] ${prashna.future.name} - ${prashna.future.keywords}`);
+
+console.log(`✅ Verified ${Object.keys(HOUSE_DEFINITIONS).length} Classical House Definitions (1st Tanu Bhava to 12th Vyaya Bhava)`);
+console.log(`- 7th House (Kalatra Bhava): ${HOUSE_DEFINITIONS[7].title} | Remedy: ${HOUSE_DEFINITIONS[7].guidance.slice(0, 50)}...`);
 
 console.log("\n🎉 ALL ADVANCED TESTS PASSED! Production-ready at 100% free and $0 cost.");

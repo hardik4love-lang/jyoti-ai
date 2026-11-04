@@ -111,27 +111,25 @@ export class KundliChartRenderer {
 
       let isLagna = false;
       let planetStr = "";
+      let houseNum = 0;
 
       if (isNavamsha) {
-        isLagna = chart.navamsha.lagna.id === cell.rashiId;
+        const navLagnaId = chart.navamsha.lagna.id;
+        houseNum = ((cell.rashiId - navLagnaId + 12) % 12) + 1;
+        isLagna = cell.rashiId === navLagnaId;
         planetStr = chart.navamsha.planets
           .filter(p => p.rashiId === cell.rashiId)
           .map(p => p.name.slice(0, 2).toUpperCase())
           .join(" ");
       } else {
-        let houseNum = 0;
-        for (let h = 1; h <= 12; h++) {
-          if (chart.houses[h].rashi.id === cell.rashiId) {
-            houseNum = h;
-            planetStr = chart.houses[h].planets.map(p => p.slice(0, 2).toUpperCase()).join(" ");
-            break;
-          }
-        }
+        const lagnaId = chart.houses[1].rashi.id;
+        houseNum = ((cell.rashiId - lagnaId + 12) % 12) + 1;
         isLagna = houseNum === 1;
+        planetStr = chart.houses[houseNum].planets.map(p => p.slice(0, 2).toUpperCase()).join(" ");
       }
 
       boxesHtml += `
-        <g class="south-box">
+        <g class="south-box house-group" data-house="${houseNum}" tabindex="0">
           <rect x="${x}" y="${y}" width="${boxSize}" height="${boxSize}" class="south-cell" />
           <text x="${x + 6}" y="${y + 14}" class="south-sign-label">${cell.rashiId}</text>
           ${isLagna ? `<text x="${x + boxSize - 18}" y="${y + 14}" class="lagna-mark">ASC</text>` : ""}
