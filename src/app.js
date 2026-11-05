@@ -539,36 +539,78 @@ function setupEventListeners() {
     setInterval(updateDeviceClock, 15000);
   }
 
-  // WhatsApp-Style Audio Voice Note Player
+  // WhatsApp-Style Audio Voice Note Player with Live Playhead & Timer
   let isVnPlaying = false;
+  let vnTimerInterval = null;
+  let vnSeconds = 0;
+
   if (elements.btnPlayVoiceNote) {
+    const resetVnUI = () => {
+      isVnPlaying = false;
+      clearInterval(vnTimerInterval);
+      if (elements.vnPlayIcon) elements.vnPlayIcon.textContent = "▶";
+      if (elements.vnWaveform) {
+        elements.vnWaveform.classList.remove("playing");
+        elements.vnWaveform.querySelectorAll(".vn-bar").forEach(b => b.style.backgroundColor = "");
+      }
+      if (elements.vnTimer) elements.vnTimer.textContent = "0:30";
+    };
+
     elements.btnPlayVoiceNote.addEventListener("click", () => {
       if (isVnPlaying) {
         voiceEngine.stop();
-        isVnPlaying = false;
-        if (elements.vnPlayIcon) elements.vnPlayIcon.textContent = "▶";
-        if (elements.vnWaveform) elements.vnWaveform.classList.remove("playing");
+        resetVnUI();
         return;
       }
 
       const greeting = state.activeChart
-        ? `Namaste ${state.activeChart.user.name}. Today, cosmic energies illuminate your ${state.activeChart.lagna.english} Ascendant and ${state.activeChart.moonSign.english} Moon. Practice steadfast mindfulness, perform your daily upaya, and trust your inner spiritual compass.`
-        : `Namaste seeker. Welcome to Jyoti AI, your 100% free sacred haven for Vedic astrology. Enter your birth details or tap 1-tap demo to reveal your cosmic blueprint with zero subscriptions.`;
+        ? `Radhe Radhe ${state.activeChart.user.name} ji. Pranaam! Today, cosmic currents activate your ${state.activeChart.lagna.english} Lagna and ${state.activeChart.moonSign.english} Moon. Practice steadfast mindfulness, perform your daily upaya, and trust your inner spiritual compass.`
+        : `Radhe Radhe seeker. Pranaam! Welcome to Jyoti AI, your 100% free sanctuary for ancient Vedic wisdom. Enter your birth details or tap 1-tap demo to reveal your cosmic blueprint with zero subscriptions.`;
 
       isVnPlaying = true;
       if (elements.vnPlayIcon) elements.vnPlayIcon.textContent = "⏸";
       if (elements.vnWaveform) elements.vnWaveform.classList.add("playing");
+
+      vnSeconds = 0;
+      clearInterval(vnTimerInterval);
+      const totalEstimatedSecs = 18;
+      const bars = elements.vnWaveform?.querySelectorAll(".vn-bar") || [];
+
+      vnTimerInterval = setInterval(() => {
+        vnSeconds++;
+        const mm = Math.floor(vnSeconds / 60);
+        const ss = (vnSeconds % 60).toString().padStart(2, "0");
+        if (elements.vnTimer) elements.vnTimer.textContent = `${mm}:${ss}`;
+
+        const progress = Math.min(vnSeconds / totalEstimatedSecs, 1);
+        const activeBarCount = Math.floor(progress * bars.length);
+        bars.forEach((b, idx) => {
+          b.style.backgroundColor = idx <= activeBarCount ? "#f4c453" : "rgba(255, 255, 255, 0.3)";
+        });
+
+        if (vnSeconds >= totalEstimatedSecs) clearInterval(vnTimerInterval);
+      }, 1000);
 
       voiceEngine.speak(
         greeting,
         state.currentLang,
         () => {},
         () => {
-          isVnPlaying = false;
-          if (elements.vnPlayIcon) elements.vnPlayIcon.textContent = "▶";
-          if (elements.vnWaveform) elements.vnWaveform.classList.remove("playing");
+          resetVnUI();
         }
       );
+    });
+  }
+
+  // Mobile Virtual Keyboard Auto-Collapse for Bottom Dock
+  if (elements.chatInput) {
+    elements.chatInput.addEventListener("focus", () => {
+      const dock = document.querySelector(".bottom-dock");
+      if (dock) dock.classList.add("dock-keyboard-hidden");
+    });
+    elements.chatInput.addEventListener("blur", () => {
+      const dock = document.querySelector(".bottom-dock");
+      if (dock) dock.classList.remove("dock-keyboard-hidden");
     });
   }
 
@@ -1180,26 +1222,51 @@ function speakLastBotMessage() {
   }
 }
 
-function speakWithJyoti(text) {
+function setAvatarState(mode) {
   const stageWrapper = document.querySelector(".stage-avatar-wrapper");
+  const heroWrapper = document.querySelector(".avatar-hero-container");
+
+  [stageWrapper, heroWrapper].forEach(w => {
+    if (!w) return;
+    w.classList.remove("state-thinking", "state-listening", "state-speaking", "speaking-active");
+    if (mode === "thinking") w.classList.add("state-thinking");
+    else if (mode === "listening") w.classList.add("state-listening");
+    else if (mode === "speaking") {
+      w.classList.add("state-speaking", "speaking-active");
+    }
+  });
+
+  if (elements.speakingHalo) {
+    if (mode === "speaking" || mode === "thinking" || mode === "listening") {
+      elements.speakingHalo.classList.add("active");
+    } else {
+      elements.speakingHalo.classList.remove("active");
+    }
+  }
+
+  if (elements.avatarSpeakingStatus) {
+    if (mode === "thinking") {
+      elements.avatarSpeakingStatus.innerHTML = `<span class="status-dot" style="background:#c084fc; box-shadow:0 0 8px #c084fc;"></span> Jyoti is contemplating your planetary houses...`;
+    } else if (mode === "speaking") {
+      elements.avatarSpeakingStatus.innerHTML = `<span class="status-dot" style="background:#f43f5e; box-shadow:0 0 8px #f43f5e;"></span> Jyoti is speaking to you...`;
+    } else if (mode === "listening") {
+      elements.avatarSpeakingStatus.innerHTML = `<span class="status-dot" style="background:#38bdf8; box-shadow:0 0 8px #38bdf8;"></span> Jyoti is listening attentively...`;
+    } else {
+      elements.avatarSpeakingStatus.innerHTML = `<span class="status-dot"></span> In consultation with you`;
+    }
+  }
+}
+
+function speakWithJyoti(text) {
+  setAvatarState("speaking");
   voiceEngine.speak(
     text,
     state.currentLang,
     () => {
-      // On start speaking: halo glowing & lifelike vocal cadence animation
-      if (elements.speakingHalo) elements.speakingHalo.classList.add("active");
-      if (stageWrapper) stageWrapper.classList.add("speaking-active");
-      if (elements.avatarSpeakingStatus) {
-        elements.avatarSpeakingStatus.innerHTML = `<span class="status-dot" style="background:#f43f5e; box-shadow:0 0 8px #f43f5e;"></span> Jyoti is speaking to you...`;
-      }
+      setAvatarState("speaking");
     },
     () => {
-      // On end speaking
-      if (elements.speakingHalo) elements.speakingHalo.classList.remove("active");
-      if (stageWrapper) stageWrapper.classList.remove("speaking-active");
-      if (elements.avatarSpeakingStatus) {
-        elements.avatarSpeakingStatus.innerHTML = `<span class="status-dot"></span> In consultation with you`;
-      }
+      setAvatarState("idle");
     }
   );
 }
@@ -1391,8 +1458,12 @@ function bindCityItemClicks() {
 }
 
 async function fetchGlobalCityFallback(query, existingMatches) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 4500);
+
   try {
-    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`);
+    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`, { signal: controller.signal });
+    clearTimeout(timeoutId);
     if (!res.ok) return;
     const data = await res.json();
     if (!Array.isArray(data) || data.length === 0) return;
@@ -1596,6 +1667,12 @@ function handleMatchingSubmit(e) {
           ${rowsHtml}
         </tbody>
       </table>
+
+      <div style="text-align: center; margin-top: 1.25rem;">
+        <a href="https://api.whatsapp.com/send?text=${encodeURIComponent(`💑 Kundli Milan Score for ${boyName} & ${girlName}: ${result.totalScore}/36 Gunas (${result.statusText})!\n\nCalculate yours 100% free with zero subscriptions on Jyoti AI: https://hardik4love-lang.github.io/jyoti-ai/`)}" target="_blank" class="btn-whatsapp-share">
+          💬 Share Match Score on WhatsApp
+        </a>
+      </div>
     </div>
   `;
 
@@ -1647,9 +1724,13 @@ async function handleSendMessage() {
 
   state.isGenerating = true;
   elements.sendBtn.disabled = true;
+  setAvatarState("thinking");
   const typingBubble = appendTypingIndicator();
 
   try {
+    // Natural humanized spiritual contemplation pause (850ms)
+    await new Promise(r => setTimeout(r, 850));
+
     const responseText = await aiService.askQuestion(query, state.activeChart, state.chatHistory);
     typingBubble.remove();
     appendMessage("bot", responseText);
@@ -1658,6 +1739,7 @@ async function handleSendMessage() {
     speakWithJyoti(responseText);
   } catch (err) {
     typingBubble.remove();
+    setAvatarState("idle");
     appendMessage("bot", `I apologize, there was an issue: ${err.message}.`);
   } finally {
     state.isGenerating = false;

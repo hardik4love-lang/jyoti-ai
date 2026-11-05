@@ -40,16 +40,28 @@ export class VoiceEngine {
 
     if (lang === "hi") {
       return (
-        voices.find(v => v.lang === "hi-IN") ||
+        voices.find(v => (v.lang === "hi-IN" || v.lang.includes("hi")) && (v.name.includes("Swara") || v.name.includes("Kavya") || v.name.includes("Lekha") || v.name.includes("Female") || !v.name.includes("Madhur"))) ||
         voices.find(v => v.lang.includes("hi")) ||
-        voices.find(v => v.name.includes("Lekha") || v.name.includes("Swara")) ||
         voices[0]
       );
     }
+
+    // English (India) - Strictly Female Prioritization (Eliminating male 'Rishi'/'Hemant')
+    const femaleIndianVoice = voices.find(v => 
+      (v.lang === "en-IN" || v.lang === "en_IN") && 
+      (v.name.includes("Neerja") || v.name.includes("Aditi") || v.name.includes("Heera") || v.name.includes("Female") || v.name.includes("Zira"))
+    );
+    if (femaleIndianVoice) return femaleIndianVoice;
+
+    const anyIndianNonMale = voices.find(v => 
+      (v.lang === "en-IN" || v.lang === "en_IN") && 
+      !v.name.includes("Rishi") && !v.name.includes("Hemant") && !v.name.includes("Pradeep") && !v.name.includes("Male")
+    );
+    if (anyIndianNonMale) return anyIndianNonMale;
+
+    // High quality natural female fallbacks
     return (
-      voices.find(v => v.lang === "en-IN") ||
-      voices.find(v => v.name.includes("Neerja") || v.name.includes("Rishi") || v.name.includes("Aditi") || v.name.includes("India")) ||
-      voices.find(v => v.name.includes("Samantha") || v.name.includes("Natural") || v.name.includes("Google")) ||
+      voices.find(v => v.name.includes("Samantha") || v.name.includes("Google UK English Female") || v.name.includes("Victoria") || v.name.includes("Natural")) ||
       voices[0]
     );
   }

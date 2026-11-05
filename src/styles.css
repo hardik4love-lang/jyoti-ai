@@ -2480,6 +2480,15 @@ body.cosmic-theme {
     box-shadow: none !important;
     background: transparent;
   }
+
+  .phone-device-chassis .bottom-dock {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    max-width: 480px !important;
+    width: 100% !important;
+  }
   
   .phone-top-speaker,
   .phone-status-bar,
@@ -2654,6 +2663,100 @@ body.cosmic-theme {
   background: rgba(244, 196, 83, 0.25);
   box-shadow: 0 0 15px rgba(244, 196, 83, 0.3);
 }
+
+/* ==========================================================================
+   Mobile Keyboard Auto-Collapse & Living Avatar Reactive Aura System
+   ========================================================================== */
+
+/* Bottom Dock Hidden on Virtual Keyboard Open */
+.bottom-dock.dock-keyboard-hidden {
+  transform: translate(-50%, 130%) !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: transform 0.25s ease-out, opacity 0.2s ease-out;
+}
+
+/* Avatar Reactive Aura State System */
+.stage-avatar-wrapper.state-thinking .speaking-halo,
+.avatar-hero-container.state-thinking .avatar-aura-ring {
+  opacity: 1;
+  border-color: rgba(168, 85, 247, 0.7);
+  box-shadow: 0 0 35px rgba(168, 85, 247, 0.6), inset 0 0 20px rgba(168, 85, 247, 0.4);
+  animation: thinkingSpin 4s linear infinite;
+}
+
+.stage-avatar-wrapper.state-listening .speaking-halo,
+.avatar-hero-container.state-listening .avatar-aura-ring {
+  opacity: 1;
+  border-color: rgba(56, 189, 248, 0.85);
+  box-shadow: 0 0 30px rgba(56, 189, 248, 0.65);
+  animation: listeningPulse 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes thinkingSpin {
+  0% { transform: scale(1.02) rotate(0deg); }
+  100% { transform: scale(1.02) rotate(360deg); }
+}
+
+@keyframes listeningPulse {
+  0% { transform: scale(1); filter: brightness(1); }
+  100% { transform: scale(1.05); filter: brightness(1.25); }
+}
+
+/* Milan Celebrity Synastry Quick Chips */
+.celeb-chips-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding: 0.4rem 0 0.85rem;
+  margin-bottom: 0.75rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.celeb-chip {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-glow);
+  color: var(--accent-gold-light);
+  border-radius: var(--radius-full);
+  padding: 0.35rem 0.85rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: var(--transition-smooth);
+}
+
+.celeb-chip:hover {
+  background: rgba(244, 196, 83, 0.2);
+  transform: translateY(-1px);
+}
+
+/* WhatsApp Share Match Button */
+.btn-whatsapp-share {
+  background: #25d366;
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-full);
+  padding: 0.75rem 1.5rem;
+  font-size: 0.88rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+  transition: var(--transition-smooth);
+  text-decoration: none;
+  margin-top: 1.25rem;
+}
+
+.btn-whatsapp-share:hover {
+  background: #20ba59;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6);
+}
+
 
 
 
