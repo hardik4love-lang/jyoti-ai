@@ -167,7 +167,16 @@ export function calculateGemstones(chart) {
 
   return {
     prescriptions: [jeevan, bhagya, vidya],
+    lifeStone: { gem: jeevan.data.stone, planet: jeevan.planet, finger: jeevan.data.finger, benefits: jeevan.purpose },
+    fortuneStone: { gem: bhagya.data.stone, planet: bhagya.planet, finger: bhagya.data.finger, benefits: bhagya.purpose },
+    wisdomStone: { gem: vidya.data.stone, planet: vidya.planet, finger: vidya.data.finger, benefits: vidya.purpose },
     maleficWarnings,
     generalRemedy: "Always energize any sacred gemstone with 108 chants of its planetary Beej Mantra before wearing for the first time."
   };
 }
+
+export const GemstoneEngine = {
+  getGemstonePrescriptions: calculateGemstones,
+  calculateGemstones
+};
+

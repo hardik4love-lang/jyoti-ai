@@ -55,11 +55,17 @@ body.cosmic-theme {
   overflow-x: hidden;
   position: relative;
   padding-top: var(--safe-top);
-  padding-bottom: calc(var(--dock-height) + var(--safe-bottom) + 20px);
+  padding-bottom: 0;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
   touch-action: manipulation;
   overscroll-behavior-y: contain;
+}
+
+@media (max-width: 991px) {
+  body.cosmic-theme {
+    padding-bottom: calc(var(--dock-height) + var(--safe-bottom) + 20px);
+  }
 }
 
 /* Starfield Background Canvas */
@@ -1734,6 +1740,37 @@ body.cosmic-theme {
   font-size: 0.92rem;
   line-height: 1.5;
   min-height: 54px;
+}
+
+.call-quick-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  width: 100%;
+  max-width: 380px;
+  margin: 0.5rem 0 1.25rem 0;
+}
+
+.call-chip-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(244, 196, 83, 0.25);
+  color: #e2e8f0;
+  border-radius: 999px;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+}
+
+.call-chip-btn:hover,
+.call-chip-btn:active {
+  background: rgba(244, 196, 83, 0.2);
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+  transform: translateY(-1px);
 }
 
 .call-controls-row {

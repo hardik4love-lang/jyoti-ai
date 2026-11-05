@@ -22,6 +22,18 @@ if (jamResults[0].name !== "Jamnagar") {
   throw new Error("Jamnagar should be ranked #1 when searching 'jam'!");
 }
 console.log("✅ Verified: Jamnagar, Gujarat is prioritized #1 for 'jam'!");
+
+const multiTokenResults = searchCities("jamnagar gujarat");
+if (!multiTokenResults.length || multiTokenResults[0].name !== "Jamnagar") {
+  throw new Error("Multi-token search 'jamnagar gujarat' must return Jamnagar!");
+}
+console.log(`✅ Verified: Multi-token 'jamnagar gujarat' -> ${multiTokenResults[0].name} (${multiTokenResults[0].state})!`);
+
+const commaResults = searchCities("jamnagar, gujarat");
+if (!commaResults.length || commaResults[0].name !== "Jamnagar") {
+  throw new Error("Comma search 'jamnagar, gujarat' must return Jamnagar!");
+}
+console.log(`✅ Verified: Comma-separated 'jamnagar, gujarat' -> ${commaResults[0].name} (${commaResults[0].state})!`);
 const boyBirth = {
   name: "Arjun Verma",
   gender: "Male",

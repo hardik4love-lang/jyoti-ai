@@ -124,6 +124,7 @@
       </div>
       <div>
         <h1 class="brand-title" style="font-size: 1.1rem; margin: 0;">JYOTI <span class="ai-badge">AI</span></h1>
+        <span id="brandTag" style="display:none;">AI Vedic Guide</span>
       </div>
     </div>
 
@@ -136,7 +137,10 @@
       <!-- Persona Mode Switcher: Gentle Sage vs Cosmic Roast -->
       <button id="personaToggleBtn" class="header-icon-btn" title="Toggle AI Persona Mode">
         <span id="personaIcon">🕊️</span>
+        <span id="personaLabel" style="display:none;">Gentle Guru</span>
       </button>
+      <span id="voiceIcon" style="display:none;"></span>
+      <span id="voiceLabel" style="display:none;"></span>
 
       <!-- Language Switcher -->
       <button id="langToggleBtn" class="header-icon-btn" title="Switch Language">
@@ -649,6 +653,14 @@
 
     <div id="callSubtitles" class="call-subtitles">
       "Connecting your planetary consciousness to the celestial realm..."
+    </div>
+
+    <!-- 1-Tap Quick Consultation Prompts (iOS & No-Mic Resilience) -->
+    <div class="call-quick-chips" id="callQuickChips">
+      <button class="call-chip-btn" data-query="How is my career, promotion, and financial outlook right now?">💼 Career & Wealth</button>
+      <button class="call-chip-btn" data-query="What does my 7th house reveal about my soulmate and marriage timing?">💍 Marriage & Love</button>
+      <button class="call-chip-btn" data-query="What daily remedies and gemstone should I follow?">🌿 Upaya & Gemstones</button>
+      <button class="call-chip-btn" data-query="How is my Sade Sati and planetary dosha balance?">✨ Doshas & Peace</button>
     </div>
 
     <div class="call-controls-row">

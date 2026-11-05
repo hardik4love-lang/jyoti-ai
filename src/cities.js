@@ -243,44 +243,55 @@ export const CITIES = [
 ];
 
 /**
- * Intelligent City Search with Prioritized Prefix & Exact Matching
- * 1. Matches where City Name STARTS with query (e.g., "Jam" -> Jamnagar, Jammu, Jamshedpur)
- * 2. Matches where City Name CONTAINS query
- * 3. Matches where State/Country STARTS with query
- * 4. Matches where State/Country CONTAINS query (e.g., Srinagar for "Jammu and Kashmir")
+ * Intelligent City Search with Prioritized Prefix, Tokenized Multi-Word & Exact Matching
+ * Supports queries like:
+ * - "Jam" -> Jamnagar (#1), Jammu, Jamshedpur
+ * - "Jamnagar" -> Jamnagar (exact)
+ * - "Jamnagar Gujarat" / "Jamnagar, Gujarat" -> Jamnagar (multi-token exact match)
+ * - "London UK", "Pune Maharashtra", etc.
  */
 export function searchCities(query) {
   if (!query || query.trim().length === 0) return [];
-  const q = query.toLowerCase().trim();
+  const cleanQ = query.trim().toLowerCase().replace(/[,.-]/g, " ").replace(/\s+/g, " ").trim();
+  const tokens = cleanQ.split(" ").filter(Boolean);
 
-  const exactStartCity = [];
-  const containsCity = [];
-  const exactStartState = [];
-  const containsState = [];
+  const scored = [];
 
-  for (const c of CITIES) {
-    const cityName = c.name.toLowerCase();
-    const stateName = c.state.toLowerCase();
-    const countryName = c.country.toLowerCase();
+  for (let i = 0; i < CITIES.length; i++) {
+    const c = CITIES[i];
+    const cName = c.name.toLowerCase();
+    const sName = (c.state || "").toLowerCase();
+    const cntry = (c.country || "").toLowerCase();
+    const fullName = `${cName} ${sName} ${cntry}`.replace(/[,.-]/g, " ").replace(/\s+/g, " ");
 
-    if (cityName.startsWith(q)) {
-      exactStartCity.push(c);
-    } else if (cityName.includes(q)) {
-      containsCity.push(c);
-    } else if (stateName.startsWith(q)) {
-      exactStartState.push(c);
-    } else if (stateName.includes(q) || countryName.includes(q)) {
-      containsState.push(c);
+    let score = 0;
+
+    if (cName === cleanQ) {
+      score = 100;
+    } else if (cName.startsWith(cleanQ)) {
+      score = 90;
+    } else if (tokens.length > 1 && tokens.every(t => fullName.includes(t))) {
+      score = cName.startsWith(tokens[0]) ? 88 : 84;
+    } else if (cName.includes(cleanQ)) {
+      score = 80;
+    } else if (fullName.startsWith(cleanQ)) {
+      score = 75;
+    } else if (sName.startsWith(cleanQ)) {
+      score = 60;
+    } else if (sName.includes(cleanQ) || cntry.includes(cleanQ)) {
+      score = 50;
+    }
+
+    if (score > 0) {
+      scored.push({ city: c, score, index: i });
     }
   }
 
-  // Combine in order of relevance, deduplicating
-  const results = [
-    ...exactStartCity,
-    ...containsCity,
-    ...exactStartState,
-    ...containsState
-  ];
+  // Sort descending by score; on tie, preserve curated list priority
+  scored.sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    return a.index - b.index;
+  });
 
-  return results.slice(0, 10);
+  return scored.slice(0, 10).map(s => s.city);
 }

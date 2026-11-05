@@ -2,7 +2,7 @@
  * Jyoti AI - Service Worker for 100% Offline Resilience
  * Zero external network dependency for core calculation & local reading.
  */
-const CACHE_NAME = "jyoti-ai-v3";
+const CACHE_NAME = "jyoti-ai-v4";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
@@ -56,7 +56,18 @@ self.addEventListener("fetch", event => {
   if (event.request.method !== "GET") return;
   if (!event.request.url.startsWith(self.location.origin)) return;
 
+  // Network-First with Cache Fallback for instant updates & offline resilience
   event.respondWith(
-    caches.match(event.request).then(cached => cached || fetch(event.request).catch(() => cached))
+    fetch(event.request)
+      .then(networkResponse => {
+        if (networkResponse && networkResponse.status === 200) {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, responseToCache);
+          });
+        }
+        return networkResponse;
+      })
+      .catch(() => caches.match(event.request))
   );
 });

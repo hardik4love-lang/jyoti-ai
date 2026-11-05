@@ -319,6 +319,20 @@ function setupOnboardingFlow() {
   elements.btnBack3.addEventListener("click", () => goToStep(2));
   elements.btnBack4.addEventListener("click", () => goToStep(3));
 
+  // Native Mobile Keyboard "Enter" / "Next" Key Support
+  elements.userName?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && elements.userName.value.trim()) goToStep(2);
+  });
+  elements.userDob?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && elements.userDob.value) goToStep(3);
+  });
+  elements.userTob?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && elements.userTob.value) goToStep(4);
+  });
+  elements.cityInput?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") executeCalculation();
+  });
+
   // Gender selection
   elements.genderBtns.forEach(btn => {
     btn.addEventListener("click", () => {
@@ -333,16 +347,16 @@ function setupOnboardingFlow() {
 }
 
 function executeCalculation() {
-  const name = elements.userName.value.trim() || "Seeker";
-  const gender = state.selectedGender;
-  const dob = elements.userDob.value;
-  const tob = elements.userTob.value;
+  const name = elements.userName?.value.trim() || "Seeker";
+  const gender = state.selectedGender || "Male";
+  const dob = elements.userDob?.value || "1998-05-15";
+  const tob = elements.userTob?.value || "14:30";
 
-  // Auto-resolve city coordinates from input if not yet explicitly selected from dropdown
-  const typedCity = elements.cityInput.value.trim();
+  // Auto-resolve city coordinates from input
+  const typedCity = elements.cityInput?.value.trim();
   if (typedCity) {
     const matched = searchCities(typedCity)[0];
-    if (matched && (!elements.latInput.value || elements.latInput.value === "28.6139")) {
+    if (matched) {
       elements.latInput.value = matched.lat;
       elements.lonInput.value = matched.lon;
       elements.tzInput.value = matched.tz;
@@ -350,19 +364,33 @@ function executeCalculation() {
     }
   }
 
-  const lat = parseFloat(elements.latInput.value) || 22.4707;
-  const lon = parseFloat(elements.lonInput.value) || 70.0577;
-  const tz = parseFloat(elements.tzInput.value) || 5.5;
+  const lat = parseFloat(elements.latInput?.value) || 22.4707;
+  const lon = parseFloat(elements.lonInput?.value) || 70.0577;
+  const tz = parseFloat(elements.tzInput?.value) || 5.5;
 
-  const chart = generateKundli({
-    name,
-    gender,
-    dob,
-    tob,
-    lat,
-    lon,
-    timezone: tz
-  });
+  let chart;
+  try {
+    chart = generateKundli({
+      name,
+      gender,
+      dob,
+      tob,
+      lat,
+      lon,
+      timezone: tz
+    });
+  } catch (err) {
+    console.error("Kundli generation error, using fallback default:", err);
+    chart = generateKundli({
+      name,
+      gender,
+      dob: "1998-05-15",
+      tob: "14:30",
+      lat: 22.4707,
+      lon: 70.0577,
+      timezone: 5.5
+    });
+  }
 
   state.activeChart = chart;
   localStorage.setItem("jyoti_active_chart", JSON.stringify(chart));
@@ -415,6 +443,16 @@ function setupEventListeners() {
       elements.btnCallSpeaker.classList.toggle("active", callEngine.isSpeakerOn);
     });
   }
+
+  // Live Call Quick Question Chips (iOS & No-Mic Resilience)
+  document.querySelectorAll(".call-chip-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const q = btn.dataset.query;
+      if (q && callEngine.isCallActive) {
+        handleCallTranscript(q);
+      }
+    });
+  });
 
   // iOS PWA Guide Modal
   if (elements.closeIosInstallBtn) elements.closeIosInstallBtn.addEventListener("click", () => elements.iosInstallModal.classList.remove("active"));
@@ -1212,8 +1250,8 @@ function handleMicClick() {
 }
 function toggleVoice() {
   const isEnabled = voiceEngine.toggleVoice();
-  elements.voiceIcon.innerText = isEnabled ? "🔊" : "🔇";
-  elements.voiceLabel.innerText = isEnabled ? "Voice: ON" : "Voice: OFF";
+  if (elements.voiceIcon) elements.voiceIcon.innerText = isEnabled ? "🔊" : "🔇";
+  if (elements.voiceLabel) elements.voiceLabel.innerText = isEnabled ? "Voice: ON" : "Voice: OFF";
 }
 
 function speakLastBotMessage() {
@@ -1379,36 +1417,44 @@ function togglePersonaMode() {
 
 function updatePersonaUI(mode) {
   if (mode === "roast") {
-    elements.personaIcon.innerText = "🔥";
-    elements.personaLabel.innerText = "Cosmic Roast";
-    elements.personaToggleBtn.classList.add("roast-active");
-    elements.activePersonaBadge.innerText = "Roast Mode 🔥";
-    elements.activePersonaBadge.style.background = "rgba(244, 63, 94, 0.2)";
-    elements.activePersonaBadge.style.color = "#fda4af";
-    elements.activePersonaBadge.style.borderColor = "rgba(244, 63, 94, 0.4)";
-    elements.btnRoastToggle.innerText = "🕊️ Calm Mode";
+    if (elements.personaIcon) elements.personaIcon.innerText = "🔥";
+    if (elements.personaLabel) elements.personaLabel.innerText = "Cosmic Roast";
+    if (elements.personaToggleBtn) elements.personaToggleBtn.classList.add("roast-active");
+    if (elements.activePersonaBadge) {
+      elements.activePersonaBadge.innerText = "Roast Mode 🔥";
+      elements.activePersonaBadge.style.background = "rgba(244, 63, 94, 0.2)";
+      elements.activePersonaBadge.style.color = "#fda4af";
+      elements.activePersonaBadge.style.borderColor = "rgba(244, 63, 94, 0.4)";
+    }
+    if (elements.btnRoastToggle) elements.btnRoastToggle.innerText = "🕊️ Calm Mode";
   } else {
-    elements.personaIcon.innerText = "🕊️";
-    elements.personaLabel.innerText = "Gentle Guru";
-    elements.personaToggleBtn.classList.remove("roast-active");
-    elements.activePersonaBadge.innerText = "Guru Mode";
-    elements.activePersonaBadge.style.background = "rgba(244, 196, 83, 0.15)";
-    elements.activePersonaBadge.style.color = "var(--accent-gold)";
-    elements.activePersonaBadge.style.borderColor = "var(--border-glow)";
-    elements.btnRoastToggle.innerText = "🔥 Roast Me";
+    if (elements.personaIcon) elements.personaIcon.innerText = "🕊️";
+    if (elements.personaLabel) elements.personaLabel.innerText = "Gentle Guru";
+    if (elements.personaToggleBtn) elements.personaToggleBtn.classList.remove("roast-active");
+    if (elements.activePersonaBadge) {
+      elements.activePersonaBadge.innerText = "Guru Mode";
+      elements.activePersonaBadge.style.background = "rgba(244, 196, 83, 0.15)";
+      elements.activePersonaBadge.style.color = "var(--accent-gold)";
+      elements.activePersonaBadge.style.borderColor = "var(--border-glow)";
+    }
+    if (elements.btnRoastToggle) elements.btnRoastToggle.innerText = "🔥 Roast Me";
   }
 }
 
 // Language Switcher (English <-> Hindi)
 function toggleLanguage() {
   state.currentLang = state.currentLang === "en" ? "hi" : "en";
-  elements.langToggleBtn.innerHTML = state.currentLang === "en" ? "🌐 हिन्दी" : "🌐 English";
+  if (elements.langToggleBtn) elements.langToggleBtn.innerHTML = state.currentLang === "en" ? "🌐 हिन्दी" : "🌐 English";
   const t = TRANSLATIONS[state.currentLang];
-  document.getElementById("brandTag").innerText = t.brandTag;
-  document.getElementById("navTabPersonal").innerText = t.navPersonal;
-  document.getElementById("navTabMatching").innerText = t.navMatching;
-  document.getElementById("navTabPanchang").innerText = t.navPanchang;
-  elements.chatInput.placeholder = t.placeholderAsk;
+  const brandTag = document.getElementById("brandTag");
+  if (brandTag) brandTag.innerText = t.brandTag;
+  const navTabPersonal = document.getElementById("navTabPersonal");
+  if (navTabPersonal) navTabPersonal.innerText = t.navPersonal;
+  const navTabMatching = document.getElementById("navTabMatching");
+  if (navTabMatching) navTabMatching.innerText = t.navMatching;
+  const navTabPanchang = document.getElementById("navTabPanchang");
+  if (navTabPanchang) navTabPanchang.innerText = t.navPanchang;
+  if (elements.chatInput) elements.chatInput.placeholder = t.placeholderAsk;
 }
 
 // City Search Autocomplete with Offline Ranking & Global Atlas Fallback
@@ -1432,14 +1478,22 @@ function handleCityInput(e) {
 
     elements.cityDropdown.classList.add("active");
     bindCityItemClicks();
+  } else if (query.length >= 2) {
+    elements.cityDropdown.innerHTML = `
+      <div style="padding: 0.75rem 1rem; font-size: 0.85rem; color: #94a3b8; display: flex; align-items: center; gap: 0.5rem;">
+        <span style="display:inline-block; animation: spin 1.5s infinite linear;">🪐</span>
+        <span>Searching global atlas for "${query}"...</span>
+      </div>
+    `;
+    elements.cityDropdown.classList.add("active");
   }
 
-  // If query is at least 3 chars and matches are few, fetch from global OpenStreetMap atlas
-  if (query.length >= 3) {
+  // If query is at least 2 chars, fetch from global OpenStreetMap atlas
+  if (query.length >= 2) {
     clearTimeout(citySearchDebounceTimer);
     citySearchDebounceTimer = setTimeout(() => {
       fetchGlobalCityFallback(query, matches);
-    }, 450);
+    }, 350);
   } else if (matches.length === 0) {
     elements.cityDropdown.classList.remove("active");
   }
@@ -1447,13 +1501,19 @@ function handleCityInput(e) {
 
 function bindCityItemClicks() {
   elements.cityDropdown.querySelectorAll(".autocomplete-item").forEach(item => {
-    item.addEventListener("click", () => {
+    const selectItem = (e) => {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
       elements.cityInput.value = item.dataset.name;
       elements.latInput.value = item.dataset.lat;
       elements.lonInput.value = item.dataset.lon;
       elements.tzInput.value = item.dataset.tz;
       elements.cityDropdown.classList.remove("active");
-    });
+    };
+    item.addEventListener("pointerdown", selectItem);
+    item.addEventListener("click", selectItem);
   });
 }
 

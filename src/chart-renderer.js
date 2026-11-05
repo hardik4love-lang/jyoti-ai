@@ -151,3 +151,12 @@ export class KundliChartRenderer {
     `;
   }
 }
+
+export function generateNorthIndianSvg(chart, varga = "D1") {
+  return KundliChartRenderer.renderNorthIndian(chart, varga);
+}
+
+export function generateSouthIndianSvg(chart, varga = "D1") {
+  return KundliChartRenderer.renderSouthIndian(chart, varga);
+}
+
