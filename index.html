@@ -26,8 +26,94 @@
   <!-- Background Ambient Stardust Canvas -->
   <canvas id="starCanvas" class="star-canvas"></canvas>
 
-  <!-- Streamlined Native Mobile App Header (56px) -->
-  <header class="mobile-app-header">
+  <!-- DESKTOP APP STAGE WRAPPER -->
+  <div class="app-stage-wrapper" id="appStage">
+
+    <!-- DESKTOP COMPANION SIDEBAR (Shown on desktop >= 992px) -->
+    <aside class="desktop-sidebar-companion">
+      <div class="sidebar-brand-card">
+        <img src="./src/avatar.jpg" alt="Jyoti" class="sidebar-avatar">
+        <div>
+          <h2 class="sidebar-title">JYOTI AI</h2>
+          <p class="sidebar-tagline">100% Free Vedic AI Astrologer</p>
+        </div>
+      </div>
+
+      <!-- Simulator Mode Switcher -->
+      <div class="simulator-toggle-card">
+        <span class="sim-toggle-label">Device Frame</span>
+        <div class="sim-toggle-pill">
+          <button id="btnViewPhone" class="sim-toggle-btn active" title="Smartphone Screen Preview">📱 Phone</button>
+          <button id="btnViewFull" class="sim-toggle-btn" title="Expanded Desktop View">🖥️ Fullscreen</button>
+        </div>
+      </div>
+
+      <!-- Anti-Scam Mission Card -->
+      <div class="anti-scam-notice-card">
+        <div class="scam-badge-row">
+          <span class="scam-badge-icon">🛡️</span>
+          <span class="scam-badge-title">Zero Autopay Guarantee</span>
+        </div>
+        <p class="scam-badge-desc">
+          Commercial astrology apps trick users with ₹1 trials and unauthorized <strong>₹699/month recurring UPI debits</strong>.
+        </p>
+        <div class="guarantee-points">
+          <div>✅ ₹0 Forever • No Payment Gateways</div>
+          <div>✅ No Credit Card / UPI Autopay</div>
+          <div>✅ Private • Ephemeris Stored in Browser</div>
+        </div>
+      </div>
+
+      <!-- Live QR Code Card: Scan to Launch on Mobile -->
+      <div class="qr-share-card">
+        <div class="qr-title-row">
+          <span>📲</span>
+          <span>Open on Your Mobile</span>
+        </div>
+        <div class="qr-code-svg-box" id="qrCodeContainer">
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https://hardik4love-lang.github.io/jyoti-ai/&color=f4c453&bgcolor=080914" alt="Scan QR" class="qr-image">
+        </div>
+        <p class="qr-caption">Point your phone camera to open native PWA</p>
+      </div>
+
+      <!-- Features Pill List -->
+      <div class="sidebar-features-list">
+        <div class="feature-tag">✨ Lahiri Vedic Ephemeris</div>
+        <div class="feature-tag">💍 36 Gunas Ashta Koota</div>
+        <div class="feature-tag">🎧 Daily Audio Notes</div>
+        <div class="feature-tag">📄 1-Click Kundli PDF</div>
+        <div class="feature-tag">🔔 432Hz Bronze Temple Bell</div>
+      </div>
+
+      <!-- Star on GitHub Button -->
+      <a href="https://github.com/hardik4love-lang/jyoti-ai" target="_blank" class="github-repo-link">
+        ⭐ View Open-Source on GitHub
+      </a>
+    </aside>
+
+    <!-- SMARTPHONE DEVICE FRAME CONTAINER (iPhone 16 Pro Style) -->
+    <div class="phone-device-chassis" id="phoneChassis">
+      <div class="phone-top-speaker"></div>
+      
+      <!-- Simulated Mobile Status Bar -->
+      <div class="phone-status-bar">
+        <span class="phone-time" id="deviceClock">10:08</span>
+        <div class="phone-notch-island">
+          <span class="island-camera-lens"></span>
+          <span class="island-audio-indicator"></span>
+        </div>
+        <div class="phone-indicators">
+          <span class="net-pill">5G</span>
+          <span class="wifi-pill">📶</span>
+          <span class="battery-pill">100% 🔋</span>
+        </div>
+      </div>
+
+      <!-- Phone Screen Viewport (Scrolls naturally) -->
+      <div class="phone-viewport" id="phoneViewport">
+
+        <!-- Streamlined Native Mobile App Header (56px) -->
+        <header class="mobile-app-header">
     <div class="header-brand-group">
       <div class="brand-avatar-mini" style="width: 36px; height: 36px;">
         <img src="./src/avatar.jpg" alt="Jyoti AI Astrologer" class="mini-avatar-img">
@@ -94,6 +180,44 @@
     <!-- VIEW 1: PERSONAL KUNDLI & LIVE AVATAR CONSULTATION -->
     <div id="viewPersonal">
       
+      <!-- WhatsApp-Style Celestial Audio Voice Note from Jyoti -->
+      <div class="voice-note-pill-card" id="voiceNoteCard">
+        <div class="vn-avatar-wrap">
+          <img src="./src/avatar.jpg" alt="Jyoti" class="vn-avatar-img">
+          <span class="vn-mic-badge">🎙️</span>
+        </div>
+        <div class="vn-content">
+          <div class="vn-header-row">
+            <span class="vn-sender-name">Jyoti's Daily Audio Note</span>
+            <span class="vn-timestamp">Live</span>
+          </div>
+          <div class="vn-player-row">
+            <button id="btnPlayVoiceNote" class="vn-play-btn" title="Listen to Jyoti">
+              <span id="vnPlayIcon">▶</span>
+            </button>
+            <div class="vn-waveform" id="vnWaveform">
+              <span class="vn-bar" style="height: 35%"></span>
+              <span class="vn-bar" style="height: 60%"></span>
+              <span class="vn-bar" style="height: 90%"></span>
+              <span class="vn-bar" style="height: 45%"></span>
+              <span class="vn-bar" style="height: 100%"></span>
+              <span class="vn-bar" style="height: 75%"></span>
+              <span class="vn-bar" style="height: 50%"></span>
+              <span class="vn-bar" style="height: 85%"></span>
+              <span class="vn-bar" style="height: 65%"></span>
+              <span class="vn-bar" style="height: 40%"></span>
+              <span class="vn-bar" style="height: 80%"></span>
+              <span class="vn-bar" style="height: 95%"></span>
+              <span class="vn-bar" style="height: 55%"></span>
+              <span class="vn-bar" style="height: 70%"></span>
+              <span class="vn-bar" style="height: 45%"></span>
+              <span class="vn-bar" style="height: 30%"></span>
+            </div>
+            <span class="vn-timer" id="vnTimer">0:30</span>
+          </div>
+        </div>
+      </div>
+
       <!-- Conversational Step Onboarding with Jyoti's Avatar Front & Center -->
       <section id="onboardingSection" class="portal-card">
         <div class="avatar-hero-container">
@@ -122,6 +246,11 @@
           </div>
           <div class="step-actions">
             <button id="btnNext1" class="btn-celestial">Continue to Birth Date ➔</button>
+          </div>
+          <div style="text-align: center; margin-top: 1rem;">
+            <button type="button" id="btnInstantDemo" class="btn-instant-demo">
+              ⚡ Try 1-Tap Demo Chart (Aarav)
+            </button>
           </div>
         </div>
 
@@ -552,6 +681,13 @@
       <span class="dock-label">Tarot</span>
     </button>
   </nav>
+
+        <!-- Phone Home Indicator Bar -->
+        <div class="phone-home-indicator"></div>
+
+      </div><!-- /phone-viewport -->
+    </div><!-- /phone-device-chassis -->
+  </div><!-- /app-stage-wrapper -->
 
   <!-- Interactive House Details Modal -->
   <div id="houseModal" class="modal-overlay">

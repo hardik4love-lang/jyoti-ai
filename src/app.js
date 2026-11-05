@@ -23,6 +23,8 @@ import { CallEngine } from "./call-engine.js";
 import { PWAInstaller } from "./pwa-install.js";
 import { TempleBellEngine } from "./temple-bell.js";
 import { ProfileManager } from "./profile-manager.js";
+import { ReportGenerator } from "./report-generator.js";
+import { QrGenerator } from "./qr-generator.js";
 
 // Global State
 const state = {
@@ -47,6 +49,18 @@ const templeBell = new TempleBellEngine();
 
 // DOM Elements
 const elements = {
+  // Desktop Frame & Simulator View
+  btnViewPhone: document.getElementById("btnViewPhone"),
+  btnViewFull: document.getElementById("btnViewFull"),
+  appStage: document.getElementById("appStage"),
+  deviceClock: document.getElementById("deviceClock"),
+  btnPlayVoiceNote: document.getElementById("btnPlayVoiceNote"),
+  vnPlayIcon: document.getElementById("vnPlayIcon"),
+  vnWaveform: document.getElementById("vnWaveform"),
+  vnTimer: document.getElementById("vnTimer"),
+  btnInstantDemo: document.getElementById("btnInstantDemo"),
+  qrCodeContainer: document.getElementById("qrCodeContainer"),
+
   // Multi-Profile Vault
   profileVaultBar: document.getElementById("profileVaultBar"),
   profilePillsContainer: document.getElementById("profilePillsContainer"),
@@ -480,9 +494,104 @@ function setupEventListeners() {
     CosmicCardGenerator.downloadCard(state.activeChart, archetype);
   });
 
-  // Print Report
+  // Print Comprehensive Kundli PDF Report
   if (elements.printReportBtn) {
-    elements.printReportBtn.addEventListener("click", () => window.print());
+    elements.printReportBtn.addEventListener("click", () => {
+      ReportGenerator.printKundli(state.activeChart);
+    });
+  }
+
+  // Desktop Simulator Display Mode (Phone vs Fullscreen)
+  if (elements.btnViewPhone && elements.btnViewFull && elements.appStage) {
+    elements.btnViewPhone.addEventListener("click", () => {
+      elements.appStage.classList.remove("fullscreen-mode");
+      elements.btnViewPhone.classList.add("active");
+      elements.btnViewFull.classList.remove("active");
+      try { localStorage.setItem("jyoti_display_mode", "phone"); } catch (e) {}
+    });
+
+    elements.btnViewFull.addEventListener("click", () => {
+      elements.appStage.classList.add("fullscreen-mode");
+      elements.btnViewFull.classList.add("active");
+      elements.btnViewPhone.classList.remove("active");
+      try { localStorage.setItem("jyoti_display_mode", "fullscreen"); } catch (e) {}
+    });
+
+    try {
+      const savedMode = localStorage.getItem("jyoti_display_mode");
+      if (savedMode === "fullscreen") {
+        elements.appStage.classList.add("fullscreen-mode");
+        elements.btnViewFull.classList.add("active");
+        elements.btnViewPhone.classList.remove("active");
+      }
+    } catch (e) {}
+  }
+
+  // Simulated Mobile Status Bar Clock
+  if (elements.deviceClock) {
+    const updateDeviceClock = () => {
+      const now = new Date();
+      const hh = now.getHours().toString().padStart(2, "0");
+      const mm = now.getMinutes().toString().padStart(2, "0");
+      elements.deviceClock.textContent = `${hh}:${mm}`;
+    };
+    updateDeviceClock();
+    setInterval(updateDeviceClock, 15000);
+  }
+
+  // WhatsApp-Style Audio Voice Note Player
+  let isVnPlaying = false;
+  if (elements.btnPlayVoiceNote) {
+    elements.btnPlayVoiceNote.addEventListener("click", () => {
+      if (isVnPlaying) {
+        voiceEngine.stop();
+        isVnPlaying = false;
+        if (elements.vnPlayIcon) elements.vnPlayIcon.textContent = "▶";
+        if (elements.vnWaveform) elements.vnWaveform.classList.remove("playing");
+        return;
+      }
+
+      const greeting = state.activeChart
+        ? `Namaste ${state.activeChart.user.name}. Today, cosmic energies illuminate your ${state.activeChart.lagna.english} Ascendant and ${state.activeChart.moonSign.english} Moon. Practice steadfast mindfulness, perform your daily upaya, and trust your inner spiritual compass.`
+        : `Namaste seeker. Welcome to Jyoti AI, your 100% free sacred haven for Vedic astrology. Enter your birth details or tap 1-tap demo to reveal your cosmic blueprint with zero subscriptions.`;
+
+      isVnPlaying = true;
+      if (elements.vnPlayIcon) elements.vnPlayIcon.textContent = "⏸";
+      if (elements.vnWaveform) elements.vnWaveform.classList.add("playing");
+
+      voiceEngine.speak(
+        greeting,
+        state.currentLang,
+        () => {},
+        () => {
+          isVnPlaying = false;
+          if (elements.vnPlayIcon) elements.vnPlayIcon.textContent = "▶";
+          if (elements.vnWaveform) elements.vnWaveform.classList.remove("playing");
+        }
+      );
+    });
+  }
+
+  // 1-Tap Instant Demo Chart (Aarav)
+  if (elements.btnInstantDemo) {
+    elements.btnInstantDemo.addEventListener("click", () => {
+      elements.userName.value = "Aarav";
+      elements.userDob.value = "1998-05-15";
+      elements.userTob.value = "14:30";
+      elements.cityInput.value = "Jamnagar, Gujarat, India";
+      elements.latInput.value = "22.4707";
+      elements.lonInput.value = "70.0577";
+      elements.tzInput.value = "5.5";
+      executeCalculation();
+    });
+  }
+
+  // Dynamic QR Code for Live Mobile App
+  if (elements.qrCodeContainer) {
+    const liveTargetUrl = (typeof window !== "undefined" && (window.location.origin.includes("localhost") || window.location.origin.includes("127.0.0.1")))
+      ? "https://hardik4love-lang.github.io/jyoti-ai/"
+      : window.location.href;
+    QrGenerator.renderToElement(elements.qrCodeContainer, liveTargetUrl);
   }
 
   // Chart Style Toggles
