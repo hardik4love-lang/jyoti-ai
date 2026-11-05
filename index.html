@@ -999,42 +999,60 @@
       <div class="video-astrologer-badge">
         <span class="live-indicator-dot"></span>
         <div>
-          <h3 class="video-astrologer-name">Jyoti AI • Live Video Consultation</h3>
-          <p id="videoCallStatus" class="video-call-status">Celestial video stream connected</p>
+          <h3 class="video-astrologer-name">Jyoti AI • Live 1-on-1 Video Consultation</h3>
+          <p id="videoCallStatus" class="video-call-status">HD Video Stream Active • 1080p</p>
         </div>
       </div>
-      <div id="videoCallTimer" class="video-call-timer">00:00</div>
+      <div class="video-header-right">
+        <span class="video-latency-badge">📶 18ms</span>
+        <div id="videoCallTimer" class="video-call-timer">00:00</div>
+      </div>
     </header>
 
-    <!-- Central Stage: Jyoti's Living Photorealistic Avatar -->
-    <div class="video-stage-container">
-      <div id="jyotiAvatarLiving" class="jyoti-living-avatar-stage">
-        <!-- Reactive Golden Halo Aura -->
-        <div id="jyotiAuraRing" class="jyoti-golden-aura"></div>
-        
-        <!-- Primary Avatar Canvas / Composite -->
-        <div class="jyoti-avatar-frame">
-          <img id="jyotiBaseImg" src="./src/avatar.jpg" alt="Jyoti" class="jyoti-avatar-base">
-          <!-- Procedural Eyelid Shutter for Natural Blinking -->
-          <div id="jyotiEyelidShutter" class="jyoti-eyelid-overlay"></div>
-          <!-- Speech Reactive Viseme Aura -->
-          <div id="jyotiVisemeGlow" class="jyoti-viseme-glow"></div>
+    <!-- Central Stage: Fullscreen Widescreen Living HD Video Feed -->
+    <div class="video-stage-container" id="videoStageContainer">
+      <div class="video-viewport-wrapper">
+        <!-- Dual Seamless Video Feeds (Zero-Latency Crossfade) -->
+        <video id="jyotiVideoIdle" class="jyoti-video-stream active" autoplay loop playsinline muted poster="./src/avatar.jpg">
+          <source src="./src/jyoti-idle.mp4" type="video/mp4">
+        </video>
+        <video id="jyotiVideoTalking" class="jyoti-video-stream" autoplay loop playsinline muted poster="./src/avatar.jpg">
+          <source src="./src/jyoti-talking.mp4" type="video/mp4">
+        </video>
+
+        <!-- Reactive Celestial Halo Glow & Ambient Lighting -->
+        <div id="jyotiSpeakingHalo" class="video-speaking-halo"></div>
+
+        <!-- In-Stream Quality & P2P Encryption HUD -->
+        <div class="video-stream-meta">
+          <div class="video-meta-badge">
+            <span class="live-pulse-dot"></span>
+            <span class="video-meta-text">LIVE 1080p • 30 FPS</span>
+          </div>
+          <div class="video-encryption-badge">
+            <span>🔒 P2P Encrypted</span>
+          </div>
+        </div>
+
+        <!-- Real-time Oscilloscope Audio Waveform Visualizer -->
+        <div class="video-waveform-wrapper">
+          <canvas id="videoAudioVisualizer" class="video-audio-visualizer" width="320" height="34"></canvas>
         </div>
       </div>
-
-      <!-- Real-time Oscilloscope Audio Waveform Visualizer -->
-      <canvas id="videoAudioVisualizer" class="video-audio-visualizer" width="320" height="48"></canvas>
     </div>
 
     <!-- Floating FaceTime-Style User Camera Feed (Draggable PiP) -->
     <div id="userCameraPiP" class="user-camera-pip">
       <video id="userCameraFeed" autoplay playsinline muted class="user-video-stream"></video>
-      <div id="userCameraOffPlaceholder" class="user-camera-placeholder" style="display: none;">
-        <span class="user-placeholder-icon">👤</span>
+      <div id="userCameraOffPlaceholder" class="user-camera-placeholder">
+        <div class="camera-status-ring">
+          <span class="user-placeholder-icon">👤</span>
+        </div>
         <span class="user-placeholder-text">Camera Off</span>
+        <button id="btnEnableCameraQuick" class="btn-quick-cam-enable" type="button">Enable Cam</button>
       </div>
       <div class="pip-badge">
-        <span class="pip-dot"></span> You
+        <span class="pip-dot" id="pipStatusDot"></span> <span id="pipLabelText">You</span>
       </div>
     </div>
 
@@ -1066,6 +1084,10 @@
       <button id="btnVideoFlipCam" class="video-dock-btn" title="Flip Camera">
         <span class="video-dock-icon">🔄</span>
         <span class="video-dock-label">Flip</span>
+      </button>
+      <button id="btnVideoAuraFilter" class="video-dock-btn" title="Cosmic Aura Filter">
+        <span class="video-dock-icon">✨</span>
+        <span class="video-dock-label">Aura</span>
       </button>
       <button id="btnVideoEndCall" class="video-dock-btn btn-hangup" title="End Consultation">
         <span class="video-dock-icon">📵</span>

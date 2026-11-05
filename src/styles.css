@@ -3463,16 +3463,17 @@ body.cosmic-theme {
 /* Header */
 .video-call-header {
   width: 100%;
-  max-width: 600px;
+  max-width: 960px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.5rem 0.75rem;
-  background: rgba(15, 23, 42, 0.6);
+  padding: 0.5rem 1rem;
+  background: rgba(15, 23, 42, 0.7);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--radius-full);
+  z-index: 20;
 }
 
 .video-astrologer-badge {
@@ -3485,8 +3486,8 @@ body.cosmic-theme {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #f43f5e;
-  box-shadow: 0 0 10px #f43f5e;
+  background: #22c55e;
+  box-shadow: 0 0 10px #22c55e;
   animation: pulseLiveDot 1.4s infinite;
 }
 
@@ -3495,6 +3496,7 @@ body.cosmic-theme {
   font-weight: 700;
   color: #ffffff;
   margin: 0;
+  letter-spacing: 0.02em;
 }
 
 .video-call-status {
@@ -3503,160 +3505,203 @@ body.cosmic-theme {
   margin: 0;
 }
 
+.video-header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.video-latency-badge {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-full);
+}
+
 .video-call-timer {
   font-size: 0.88rem;
   font-weight: 700;
   color: #f4c453;
-  background: rgba(244, 196, 83, 0.12);
-  border: 1px solid rgba(244, 196, 83, 0.3);
+  background: rgba(244, 196, 83, 0.15);
+  border: 1px solid rgba(244, 196, 83, 0.35);
   padding: 0.25rem 0.75rem;
   border-radius: var(--radius-full);
   letter-spacing: 0.05em;
 }
 
-/* Central Stage: Jyoti's Living Photorealistic Avatar */
+/* Central Stage: Fullscreen Widescreen Living HD Video Feed */
 .video-stage-container {
+  position: relative;
+  width: 100%;
+  max-width: 960px;
+  height: calc(100vh - 210px);
+  max-height: 640px;
+  min-height: 420px;
+  margin: 0.5rem auto;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin: auto 0;
+  border-radius: 24px;
+  overflow: hidden;
+  background: #03040b;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 50px rgba(244, 196, 83, 0.15);
+  border: 1.5px solid rgba(244, 196, 83, 0.35);
+}
+
+@media (max-width: 768px) {
+  .video-stage-container {
+    max-width: 100%;
+    height: 100%;
+    max-height: 100%;
+    margin: 0;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+  }
+}
+
+.video-viewport-wrapper {
   position: relative;
-}
-
-.jyoti-living-avatar-stage {
-  position: relative;
-  width: 230px;
-  height: 230px;
-  margin: 0 auto 1rem;
-}
-
-@media (max-width: 400px) {
-  .jyoti-living-avatar-stage {
-    width: 190px;
-    height: 190px;
-  }
-}
-
-.avatar-breathing-active {
-  animation: organicBreathing 4.5s ease-in-out infinite;
-}
-
-@keyframes organicBreathing {
-  0%, 100% {
-    transform: translateY(0px) scale(1);
-  }
-  50% {
-    transform: translateY(-5px) scale(1.02);
-  }
-}
-
-.jyoti-avatar-frame {
   width: 100%;
   height: 100%;
-  border-radius: 50%;
-  border: 4px solid var(--accent-gold);
+  background: #05060f;
   overflow: hidden;
-  position: relative;
-  box-shadow: 0 0 50px rgba(244, 196, 83, 0.45);
 }
 
-.jyoti-avatar-base {
+/* Dual Seamless Video Streams with Crossfade */
+.jyoti-video-stream {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-}
-
-/* Stochastic Eye Blinking Shutter */
-.jyoti-eyelid-overlay {
-  position: absolute;
-  top: 36%;
-  left: 28%;
-  width: 44%;
-  height: 10%;
-  background: #d4a373;
+  object-position: center 25%;
   opacity: 0;
-  border-radius: 50%;
-  pointer-events: none;
-  transition: opacity 0.05s ease-out;
+  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity;
 }
 
-.jyoti-eyelid-overlay.blink-shutter {
-  opacity: 0.95;
+.jyoti-video-stream.active {
+  opacity: 1;
+  z-index: 1;
 }
 
-/* Speech-Reactive Viseme & Golden Halo */
-.jyoti-viseme-glow {
+/* Reactive Celestial Halo Glow & Ambient Lighting */
+.video-speaking-halo {
   position: absolute;
-  bottom: 22%;
-  left: 36%;
-  width: 28%;
-  height: 12%;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(244, 196, 83, 0.35) 0%, transparent 70%);
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 60px rgba(244, 196, 83, 0.4);
   opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.15s ease;
+  transition: opacity 0.3s ease;
+  z-index: 2;
 }
 
-.viseme-speaking-active {
-  opacity: 0.9;
-  animation: visemePulse 0.4s infinite alternate;
+.video-speaking-halo.active {
+  opacity: 1;
+  animation: videoGlowPulse 1.4s ease-in-out infinite alternate;
 }
 
-@keyframes visemePulse {
-  0% { transform: scale(0.9); opacity: 0.6; }
-  100% { transform: scale(1.15); opacity: 1; }
+@keyframes videoGlowPulse {
+  0% { box-shadow: inset 0 0 40px rgba(244, 196, 83, 0.25); }
+  100% { box-shadow: inset 0 0 85px rgba(244, 196, 83, 0.65); }
 }
 
-.jyoti-golden-aura {
+/* In-Stream Quality & P2P Encryption HUD */
+.video-stream-meta {
   position: absolute;
-  inset: -25px;
+  top: 1rem;
+  left: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.video-meta-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 0.3rem 0.65rem;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.04em;
+}
+
+.live-pulse-dot {
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(244, 196, 83, 0.35) 0%, rgba(244, 196, 83, 0) 70%);
-  z-index: -1;
-  transition: transform 0.3s ease, opacity 0.3s ease;
+  background: #22c55e;
+  box-shadow: 0 0 8px #22c55e;
+  animation: pulseLiveDot 1.4s infinite;
 }
 
-.aura-pulse-active {
-  animation: goldenAuraBloom 1.3s ease-in-out infinite alternate;
+.video-encryption-badge {
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 0.3rem 0.65rem;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.68rem;
+  color: #94a3b8;
 }
 
-@keyframes goldenAuraBloom {
-  0% { transform: scale(1); opacity: 0.4; }
-  100% { transform: scale(1.35); opacity: 0.95); }
+/* Oscilloscope Audio Waveform Visualizer at bottom of video */
+.video-waveform-wrapper {
+  position: absolute;
+  bottom: 0.85rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 0.2rem 0.75rem;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(244, 196, 83, 0.25);
+  display: flex;
+  align-items: center;
 }
 
-/* Oscilloscope Audio Waveform Visualizer */
 .video-audio-visualizer {
   width: 280px;
-  height: 40px;
-  border-radius: var(--radius-sm);
-  background: rgba(0, 0, 0, 0.2);
+  height: 32px;
+  display: block;
 }
 
 /* Floating FaceTime-Style User Camera Feed (Draggable PiP) */
 .user-camera-pip {
   position: absolute;
   top: 5rem;
-  right: 1.25rem;
-  width: 110px;
-  height: 155px;
-  border-radius: 18px;
+  right: 1.5rem;
+  width: 135px;
+  height: 185px;
+  border-radius: 20px;
   overflow: hidden;
   background: #090a16;
-  border: 2px solid rgba(244, 196, 83, 0.45);
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.75);
+  border: 2px solid rgba(244, 196, 83, 0.5);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85);
   z-index: 100;
   cursor: grab;
   touch-action: none;
-  transition: border-color 0.2s ease;
+  transition: transform 0.2s ease, border-color 0.2s ease;
 }
 
 @media (max-width: 480px) {
   .user-camera-pip {
-    width: 95px;
-    height: 135px;
+    width: 105px;
+    height: 145px;
     top: 4.5rem;
     right: 0.85rem;
   }
@@ -3667,6 +3712,11 @@ body.cosmic-theme {
   height: 100%;
   object-fit: cover;
   transform: scaleX(-1); /* FaceTime natural mirror reflection */
+  transition: filter 0.3s ease;
+}
+
+.user-video-stream.aura-filtered {
+  filter: brightness(1.08) contrast(1.06) saturate(1.15) drop-shadow(0 0 12px rgba(244, 196, 83, 0.45));
 }
 
 .user-camera-placeholder {
@@ -3676,13 +3726,26 @@ body.cosmic-theme {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: rgba(15, 23, 42, 0.95);
-  gap: 0.35rem;
+  background: radial-gradient(circle at top, #1e293b 0%, #090a16 100%);
+  padding: 0.5rem;
+  text-align: center;
+  gap: 0.45rem;
+}
+
+.camera-status-ring {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(244, 196, 83, 0.12);
+  border: 1.5px solid rgba(244, 196, 83, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .user-placeholder-icon {
-  font-size: 1.8rem;
-  opacity: 0.6;
+  font-size: 1.6rem;
+  opacity: 0.8;
 }
 
 .user-placeholder-text {
@@ -3691,13 +3754,30 @@ body.cosmic-theme {
   font-weight: 600;
 }
 
+.btn-quick-cam-enable {
+  background: rgba(244, 196, 83, 0.2);
+  border: 1px solid rgba(244, 196, 83, 0.5);
+  color: #f4c453;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.25rem 0.55rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-quick-cam-enable:hover {
+  background: rgba(244, 196, 83, 0.4);
+  color: #ffffff;
+}
+
 .pip-badge {
   position: absolute;
   top: 8px;
   left: 8px;
-  background: rgba(0, 0, 0, 0.65);
+  background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(8px);
-  padding: 2px 7px;
+  padding: 2px 8px;
   border-radius: 10px;
   font-size: 0.68rem;
   color: #ffffff;
@@ -3712,6 +3792,11 @@ body.cosmic-theme {
   background: #22c55e;
   border-radius: 50%;
   box-shadow: 0 0 6px #22c55e;
+}
+
+.pip-dot.offline {
+  background: #f59e0b;
+  box-shadow: 0 0 6px #f59e0b;
 }
 
 /* Video Consultation Subtitles & Teleprompter */

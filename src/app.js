@@ -282,19 +282,21 @@ const elements = {
   videoCallOverlay: document.getElementById("videoCallOverlay"),
   videoCallStatus: document.getElementById("videoCallStatus"),
   videoCallTimer: document.getElementById("videoCallTimer"),
-  jyotiAvatarLiving: document.getElementById("jyotiAvatarLiving"),
-  jyotiAuraRing: document.getElementById("jyotiAuraRing"),
-  jyotiEyelidShutter: document.getElementById("jyotiEyelidShutter"),
-  jyotiVisemeGlow: document.getElementById("jyotiVisemeGlow"),
+  jyotiVideoIdle: document.getElementById("jyotiVideoIdle"),
+  jyotiVideoTalking: document.getElementById("jyotiVideoTalking"),
+  jyotiSpeakingHalo: document.getElementById("jyotiSpeakingHalo"),
   videoAudioVisualizer: document.getElementById("videoAudioVisualizer"),
   userCameraPiP: document.getElementById("userCameraPiP"),
   userCameraFeed: document.getElementById("userCameraFeed"),
   userCameraOffPlaceholder: document.getElementById("userCameraOffPlaceholder"),
+  btnEnableCameraQuick: document.getElementById("btnEnableCameraQuick"),
+  pipStatusDot: document.getElementById("pipStatusDot"),
   videoSubtitlesText: document.getElementById("videoSubtitlesText"),
   videoQuickTopics: document.getElementById("videoQuickTopics"),
   btnVideoToggleMic: document.getElementById("btnVideoToggleMic"),
   btnVideoToggleCam: document.getElementById("btnVideoToggleCam"),
   btnVideoFlipCam: document.getElementById("btnVideoFlipCam"),
+  btnVideoAuraFilter: document.getElementById("btnVideoAuraFilter"),
   btnVideoEndCall: document.getElementById("btnVideoEndCall"),
 
   // Daily Cosmic Battery & Readiness Engine
@@ -587,6 +589,21 @@ function setupEventListeners() {
   if (elements.btnVideoFlipCam) {
     elements.btnVideoFlipCam.addEventListener("click", () => {
       videoCallEngine.flipCamera(elements.userCameraFeed);
+    });
+  }
+  if (elements.btnVideoAuraFilter) {
+    elements.btnVideoAuraFilter.addEventListener("click", () => {
+      const isAura = videoCallEngine.toggleAuraFilter(elements.userCameraFeed);
+      elements.btnVideoAuraFilter.classList.toggle("active", isAura);
+    });
+  }
+  if (elements.btnEnableCameraQuick) {
+    elements.btnEnableCameraQuick.addEventListener("click", async () => {
+      const ok = await videoCallEngine.initUserCamera(elements.userCameraFeed);
+      if (ok && elements.userCameraOffPlaceholder) {
+        elements.userCameraOffPlaceholder.style.display = "none";
+        if (elements.pipStatusDot) elements.pipStatusDot.classList.remove("offline");
+      }
     });
   }
 
@@ -1418,42 +1435,47 @@ async function startLiveVideoCall() {
   }
 
   elements.videoCallOverlay.style.display = "flex";
-  elements.videoCallStatus.innerText = "Connecting live FaceTime-style celestial link...";
+  elements.videoCallStatus.innerText = "Connecting live HD video stream...";
   elements.videoCallTimer.innerText = "00:00";
   elements.videoSubtitlesText.innerText = '"Connecting your camera and soul vibration to Jyoti..."';
 
   videoCallEngine.playConnectChime();
 
-  // 1. Initialize user front camera feed in PiP
-  await videoCallEngine.initUserCamera(elements.userCameraFeed, () => {
+  // 1. Setup dual HD video feeds (seamless crossfade between idle & talking)
+  videoCallEngine.setupVideoFeeds(elements.jyotiVideoIdle, elements.jyotiVideoTalking);
+
+  // 2. Initialize user front camera feed in PiP with clear status indicators
+  const camSuccess = await videoCallEngine.initUserCamera(elements.userCameraFeed, () => {
     if (elements.userCameraOffPlaceholder) elements.userCameraOffPlaceholder.style.display = "flex";
+    if (elements.pipStatusDot) elements.pipStatusDot.classList.add("offline");
   });
+  if (camSuccess && elements.userCameraOffPlaceholder) {
+    elements.userCameraOffPlaceholder.style.display = "none";
+    if (elements.pipStatusDot) elements.pipStatusDot.classList.remove("offline");
+  }
 
-  // 2. Setup draggable PiP
+  // 3. Setup draggable PiP
   videoCallEngine.setupDraggablePiP(elements.userCameraPiP);
-
-  // 3. Start living avatar kinematics (breathing + blinking)
-  videoCallEngine.startLivingAvatar(elements.jyotiAvatarLiving, elements.jyotiEyelidShutter);
 
   // 4. Start oscilloscope audio waveform visualizer
   videoCallEngine.startVisualizer(elements.videoAudioVisualizer);
 
   // 5. Start call timer
   videoCallEngine.startCallTimer(elements.videoCallTimer);
-  elements.videoCallStatus.innerText = "Connected • Live Face-to-Face Consultation";
+  elements.videoCallStatus.innerText = "HD Video Stream Active • 1080p";
 
   const greeting = state.activeChart
     ? `Namaste ${state.activeChart.user.name}! I am gazing directly into your planetary aura. Your Lagna is ${state.activeChart.lagna.english}. What cosmic truth do you wish to reveal today?`
     : "Namaste seeker! I am Jyoti, your personal Vedic astrologer. I see your prana shining bright. Speak freely about your life, career, or soulmate.";
 
   elements.videoSubtitlesText.innerText = `"${greeting}"`;
-  videoCallEngine.setAvatarSpeaking(true, elements.jyotiVisemeGlow, elements.jyotiAuraRing);
+  videoCallEngine.setAvatarSpeaking(true, elements.jyotiSpeakingHalo);
 
   voiceEngine.speak(
     greeting,
     state.currentLang,
     () => {
-      videoCallEngine.setAvatarSpeaking(false, elements.jyotiVisemeGlow, elements.jyotiAuraRing);
+      videoCallEngine.setAvatarSpeaking(false, elements.jyotiSpeakingHalo);
       if (videoCallEngine.isCallActive && !videoCallEngine.isMicMuted) {
         voiceEngine.startListening(
           transcript => handleVideoCallTranscript(transcript),
@@ -1462,7 +1484,7 @@ async function startLiveVideoCall() {
       }
     },
     () => {
-      videoCallEngine.setAvatarSpeaking(false, elements.jyotiVisemeGlow, elements.jyotiAuraRing);
+      videoCallEngine.setAvatarSpeaking(false, elements.jyotiSpeakingHalo);
     }
   );
 }
@@ -1471,18 +1493,18 @@ async function handleVideoCallTranscript(query) {
   if (!query || !videoCallEngine.isCallActive) return;
   elements.videoSubtitlesText.innerText = `You: "${query}"`;
   voiceEngine.stopListening();
-  videoCallEngine.setAvatarSpeaking(false, elements.jyotiVisemeGlow, elements.jyotiAuraRing);
+  videoCallEngine.setAvatarSpeaking(false, elements.jyotiSpeakingHalo);
 
   try {
     const reply = await aiService.askQuestion(query, state.activeChart, state.chatHistory);
     elements.videoSubtitlesText.innerText = `Jyoti: "${reply}"`;
-    videoCallEngine.setAvatarSpeaking(true, elements.jyotiVisemeGlow, elements.jyotiAuraRing);
+    videoCallEngine.setAvatarSpeaking(true, elements.jyotiSpeakingHalo);
 
     voiceEngine.speak(
       reply,
       state.currentLang,
       () => {
-        videoCallEngine.setAvatarSpeaking(false, elements.jyotiVisemeGlow, elements.jyotiAuraRing);
+        videoCallEngine.setAvatarSpeaking(false, elements.jyotiSpeakingHalo);
         if (videoCallEngine.isCallActive && !videoCallEngine.isMicMuted) {
           voiceEngine.startListening(
             transcript => handleVideoCallTranscript(transcript),
@@ -1491,12 +1513,12 @@ async function handleVideoCallTranscript(query) {
         }
       },
       () => {
-        videoCallEngine.setAvatarSpeaking(false, elements.jyotiVisemeGlow, elements.jyotiAuraRing);
+        videoCallEngine.setAvatarSpeaking(false, elements.jyotiSpeakingHalo);
       }
     );
   } catch (e) {
     elements.videoSubtitlesText.innerText = "Jyoti: I felt a cosmic vibration drift. Could you repeat that?";
-    videoCallEngine.setAvatarSpeaking(false, elements.jyotiVisemeGlow, elements.jyotiAuraRing);
+    videoCallEngine.setAvatarSpeaking(false, elements.jyotiSpeakingHalo);
   }
 }
 

@@ -1,8 +1,9 @@
 /**
- * Jyoti AI - FaceTime-Style Interactive Live Video Consultation Engine
+ * Jyoti AI - FaceTime-Style Interactive Live HD Video Consultation Engine
  * 100% Client-Side, $0 Server Cost, Zero External Streaming Dependencies.
- * Powers real-time front camera PiP, living avatar kinematics, audio waveform visualizer,
- * stochastic eye-blinking, and speech-reactive celestial aura.
+ * Features dual-stream cinematic HD video playback (seamless crossfade between idle & talking),
+ * real-time user webcam PiP with graceful fallback, live oscilloscope waveform visualizer,
+ * Web Audio connection chimes, and cosmic aura filters.
  */
 
 export class VideoCallEngine {
@@ -15,11 +16,16 @@ export class VideoCallEngine {
     this.isCameraOn = true;
     this.isMicMuted = false;
     this.facingMode = "user"; // "user" (front) or "environment" (rear)
+    this.isAuraFilterOn = false;
+
+    // Video streams
+    this.idleVideoEl = null;
+    this.talkingVideoEl = null;
+    this.isSpeaking = false;
 
     // Audio & Visualizer state
     this.audioCtx = null;
     this.animFrameId = null;
-    this.blinkTimeout = null;
     this.ringInterval = null;
 
     // Call state
@@ -72,10 +78,53 @@ export class VideoCallEngine {
     } catch (e) {}
   }
 
-  // 1. Initialize User Camera Stream (FaceTime PiP)
+  // 1. Dual HD Video Stream Setup (Seamless Crossfade)
+  setupVideoFeeds(idleVideoEl, talkingVideoEl) {
+    this.idleVideoEl = idleVideoEl;
+    this.talkingVideoEl = talkingVideoEl;
+
+    if (this.idleVideoEl) {
+      this.idleVideoEl.currentTime = 0;
+      this.idleVideoEl.play().catch(() => {});
+      this.idleVideoEl.classList.add("active");
+    }
+    if (this.talkingVideoEl) {
+      this.talkingVideoEl.currentTime = 0;
+      this.talkingVideoEl.play().catch(() => {});
+      this.talkingVideoEl.classList.remove("active");
+    }
+  }
+
+  // 2. Set Speaking State with Zero-Lag Crossfade
+  setAvatarSpeaking(isSpeaking, haloElement = null) {
+    this.isSpeaking = !!isSpeaking;
+
+    if (this.talkingVideoEl && this.idleVideoEl) {
+      if (this.isSpeaking) {
+        this.talkingVideoEl.currentTime = 0;
+        this.talkingVideoEl.play().catch(() => {});
+        this.talkingVideoEl.classList.add("active");
+        this.idleVideoEl.classList.remove("active");
+      } else {
+        this.idleVideoEl.play().catch(() => {});
+        this.idleVideoEl.classList.add("active");
+        this.talkingVideoEl.classList.remove("active");
+      }
+    }
+
+    if (haloElement) {
+      if (this.isSpeaking) {
+        haloElement.classList.add("active");
+      } else {
+        haloElement.classList.remove("active");
+      }
+    }
+  }
+
+  // 3. Initialize User Camera Stream (FaceTime PiP)
   async initUserCamera(videoElement, onFail) {
     if (typeof navigator === "undefined" || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      if (onFail) onFail(new Error("Camera API not supported on this device"));
+      if (onFail) onFail(new Error("Camera API not supported on this browser or platform"));
       return false;
     }
 
@@ -84,20 +133,29 @@ export class VideoCallEngine {
         this.stopCameraStream();
       }
 
-      const constraints = {
-        video: {
-          facingMode: { ideal: this.facingMode },
-          width: { ideal: 640 },
-          height: { ideal: 480 },
-          frameRate: { ideal: 30 }
-        },
-        audio: false // Audio managed via Web Speech / Web Audio API
-      };
+      let stream;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: this.facingMode ? { ideal: this.facingMode } : undefined,
+            width: { ideal: 640 },
+            height: { ideal: 480 }
+          },
+          audio: false
+        });
+      } catch (eConstraints) {
+        // Fallback to basic unconstrained video for desktop webcams
+        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      }
 
-      this.localStream = await navigator.mediaDevices.getUserMedia(constraints);
+      this.localStream = stream;
       if (videoElement) {
-        videoElement.srcObject = this.localStream;
-        await videoElement.play().catch(() => {});
+        videoElement.srcObject = stream;
+        videoElement.onloadedmetadata = () => {
+          videoElement.play().catch(() => {});
+        };
+        videoElement.style.display = "block";
+        videoElement.style.opacity = "1";
       }
       this.isCameraOn = true;
       return true;
@@ -109,15 +167,20 @@ export class VideoCallEngine {
     }
   }
 
-  // 2. Flip Camera between Front and Rear (Mobile Support)
+  // 4. Flip Camera between Front and Rear (Mobile Support)
   async flipCamera(videoElement) {
     this.facingMode = this.facingMode === "user" ? "environment" : "user";
     return await this.initUserCamera(videoElement);
   }
 
-  // 3. Toggle Camera Privacy
+  // 5. Toggle Camera Privacy
   toggleCamera(videoElement, placeholderElement) {
-    if (!this.localStream) return false;
+    if (!this.localStream) {
+      // If camera wasn't running, attempt to start it
+      this.initUserCamera(videoElement);
+      if (placeholderElement) placeholderElement.style.display = "none";
+      return true;
+    }
     this.isCameraOn = !this.isCameraOn;
     this.localStream.getVideoTracks().forEach(track => {
       track.enabled = this.isCameraOn;
@@ -126,12 +189,25 @@ export class VideoCallEngine {
       placeholderElement.style.display = this.isCameraOn ? "none" : "flex";
     }
     if (videoElement) {
-      videoElement.style.opacity = this.isCameraOn ? "1" : "0.15";
+      videoElement.style.opacity = this.isCameraOn ? "1" : "0.1";
     }
     return this.isCameraOn;
   }
 
-  // 4. Toggle Microphone Mute
+  // 6. Toggle Cosmic Aura Filter
+  toggleAuraFilter(videoElement) {
+    this.isAuraFilterOn = !this.isAuraFilterOn;
+    if (videoElement) {
+      if (this.isAuraFilterOn) {
+        videoElement.classList.add("aura-filtered");
+      } else {
+        videoElement.classList.remove("aura-filtered");
+      }
+    }
+    return this.isAuraFilterOn;
+  }
+
+  // 7. Toggle Microphone Mute
   toggleMute() {
     this.isMicMuted = !this.isMicMuted;
     if (this.voiceEngine) {
@@ -142,42 +218,7 @@ export class VideoCallEngine {
     return this.isMicMuted;
   }
 
-  // 5. Living Avatar Engine (Breathing + Stochastic Poisson Blinking)
-  startLivingAvatar(avatarContainer, eyelidElement) {
-    if (!avatarContainer) return;
-
-    avatarContainer.classList.add("avatar-breathing-active");
-
-    // Stochastic eye blinking scheduler (Poisson-distributed every 2.8s - 5.5s)
-    const scheduleNextBlink = () => {
-      if (!this.isCallActive) return;
-      const nextInterval = 2800 + Math.random() * 2700;
-      this.blinkTimeout = setTimeout(() => {
-        if (eyelidElement) {
-          eyelidElement.classList.add("blink-shutter");
-          setTimeout(() => {
-            eyelidElement.classList.remove("blink-shutter");
-            scheduleNextBlink();
-          }, 140); // 140ms natural eye blink
-        }
-      }, nextInterval);
-    };
-
-    scheduleNextBlink();
-  }
-
-  // 6. Speech-Reactive Viseme & Golden Aura Glow
-  setAvatarSpeaking(isSpeaking, visemeElement, auraElement) {
-    if (isSpeaking) {
-      if (visemeElement) visemeElement.classList.add("viseme-speaking-active");
-      if (auraElement) auraElement.classList.add("aura-pulse-active");
-    } else {
-      if (visemeElement) visemeElement.classList.remove("viseme-speaking-active");
-      if (auraElement) auraElement.classList.remove("aura-pulse-active");
-    }
-  }
-
-  // 7. Real-Time Oscilloscope Waveform Visualizer
+  // 8. Real-Time Oscilloscope Waveform Visualizer
   startVisualizer(canvas) {
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
@@ -188,7 +229,7 @@ export class VideoCallEngine {
       if (!this.isCallActive) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      const isSpeaking = this.voiceEngine?.isSpeaking;
+      const isSpeaking = this.voiceEngine?.isSpeaking || this.isSpeaking;
       const isListening = this.voiceEngine?.isListening;
 
       ctx.lineWidth = 2.5;
@@ -196,7 +237,7 @@ export class VideoCallEngine {
         ? "rgba(244, 196, 83, 0.95)"
         : isListening
           ? "rgba(56, 189, 248, 0.95)"
-          : "rgba(255, 255, 255, 0.25)";
+          : "rgba(255, 255, 255, 0.3)";
 
       ctx.beginPath();
       const points = 40;
@@ -204,7 +245,7 @@ export class VideoCallEngine {
       let x = 0;
 
       for (let i = 0; i < points; i++) {
-        const baseAmp = isSpeaking ? 16 : isListening ? 10 : 3;
+        const baseAmp = isSpeaking ? 14 : isListening ? 9 : 2.5;
         const envelope = Math.sin((i / points) * Math.PI);
         const y = (canvas.height / 2) + Math.sin(phase + i * 0.35) * baseAmp * envelope;
         if (i === 0) ctx.moveTo(x, y);
@@ -220,7 +261,7 @@ export class VideoCallEngine {
     render();
   }
 
-  // 8. Call Duration Timer HUD
+  // 9. Call Duration Timer HUD
   startCallTimer(timerElement) {
     this.callDurationSec = 0;
     this.isCallActive = true;
@@ -234,7 +275,7 @@ export class VideoCallEngine {
     }, 1000);
   }
 
-  // 9. Floating PiP Drag Logic with Boundary Clamping
+  // 10. Floating PiP Drag Logic with Boundary Clamping
   setupDraggablePiP(pipElement) {
     if (!pipElement) return;
 
@@ -243,6 +284,8 @@ export class VideoCallEngine {
     let initialLeft = 0, initialTop = 0;
 
     const onPointerDown = (e) => {
+      // Don't drag if clicking buttons inside PiP
+      if (e.target.closest("button")) return;
       isDragging = true;
       startX = e.clientX;
       startY = e.clientY;
@@ -252,7 +295,7 @@ export class VideoCallEngine {
       pipElement.style.cursor = "grabbing";
       pipElement.style.transition = "none";
       if (e.target.setPointerCapture && e.pointerId) {
-        e.target.setPointerCapture(e.pointerId);
+        try { e.target.setPointerCapture(e.pointerId); } catch(err) {}
       }
     };
 
@@ -264,7 +307,6 @@ export class VideoCallEngine {
       let newLeft = initialLeft + dx;
       let newTop = initialTop + dy;
 
-      // Clamp within viewport
       const pad = 12;
       const maxLeft = window.innerWidth - pipElement.offsetWidth - pad;
       const maxTop = window.innerHeight - pipElement.offsetHeight - pad;
@@ -281,9 +323,9 @@ export class VideoCallEngine {
       if (!isDragging) return;
       isDragging = false;
       pipElement.style.cursor = "grab";
-      pipElement.style.transition = "transform 0.2s ease, border-color 0.2s ease";
+      pipElement.style.transition = "border-color 0.2s ease, box-shadow 0.2s ease";
       if (e.target.releasePointerCapture && e.pointerId) {
-        e.target.releasePointerCapture(e.pointerId);
+        try { e.target.releasePointerCapture(e.pointerId); } catch(err) {}
       }
     };
 
@@ -292,13 +334,18 @@ export class VideoCallEngine {
     window.addEventListener("pointerup", onPointerUp);
   }
 
-  // 10. End Consultation and Clean Up Hardware Tracks
+  // 11. End Consultation and Clean Up Hardware Tracks
   endCall() {
     this.isCallActive = false;
     if (this.callTimerInterval) clearInterval(this.callTimerInterval);
-    if (this.blinkTimeout) clearTimeout(this.blinkTimeout);
     if (this.animFrameId) cancelAnimationFrame(this.animFrameId);
     this.stopCameraStream();
+    if (this.idleVideoEl) {
+      this.idleVideoEl.pause();
+    }
+    if (this.talkingVideoEl) {
+      this.talkingVideoEl.pause();
+    }
     if (this.voiceEngine) {
       this.voiceEngine.stopListening();
       this.voiceEngine.stopSpeaking();

@@ -2,13 +2,15 @@
  * Jyoti AI - Service Worker for 100% Offline Resilience
  * Zero external network dependency for core calculation & local reading.
  */
-const CACHE_NAME = "jyoti-ai-v8";
+const CACHE_NAME = "jyoti-ai-v9";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
   "./manifest.json",
   "./src/styles.css",
   "./src/avatar.jpg",
+  "./src/jyoti-idle.mp4",
+  "./src/jyoti-talking.mp4",
   "./src/vedic-engine.js",
   "./src/cities.js",
   "./src/ai-service.js",

@@ -227,6 +227,20 @@ videoEngine.facingMode = "environment";
 if (videoEngine.facingMode !== "environment") {
   throw new Error("VideoCallEngine camera flip failed!");
 }
+// Test Aura filter toggle
+const auraState = videoEngine.toggleAuraFilter(null);
+if (!auraState) {
+  throw new Error("VideoCallEngine aura toggle failed!");
+}
+console.log(`✅ Aura filter toggle tested: ${auraState}`);
+
+// Test Speaking state
+videoEngine.setAvatarSpeaking(true, null);
+if (!videoEngine.isSpeaking) {
+  throw new Error("VideoCallEngine speaking state failed!");
+}
+console.log(`✅ Avatar speaking crossfade state verified: ${videoEngine.isSpeaking}`);
+
 videoEngine.endCall();
 console.log(`✅ Video Call Engine endCall lifecycle executed successfully`);
 
