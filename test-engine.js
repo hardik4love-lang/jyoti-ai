@@ -241,6 +241,17 @@ if (!videoEngine.isSpeaking) {
 }
 console.log(`✅ Avatar speaking crossfade state verified: ${videoEngine.isSpeaking}`);
 
+// Test Simli Avatar integration
+if (!videoEngine.simliEngine) {
+  throw new Error("SimliAvatarEngine not attached to VideoCallEngine!");
+}
+videoEngine.simliEngine.saveConfig("test_simli_key_1234567890", "custom_face_id_1");
+if (!videoEngine.simliEngine.isConfigured()) {
+  throw new Error("SimliAvatarEngine config test failed!");
+}
+console.log(`✅ Simli Neural Avatar integration initialized & configured (Free 50m tier ready)`);
+videoEngine.simliEngine.clearConfig();
+
 videoEngine.endCall();
 console.log(`✅ Video Call Engine endCall lifecycle executed successfully`);
 

@@ -1004,6 +1004,7 @@
         </div>
       </div>
       <div class="video-header-right">
+        <button id="btnNeuralAvatarSettings" class="btn-neural-settings" title="Connect Real Neural Avatar (Simli WebRTC)">🔮 Neural AI (50m Free)</button>
         <span class="video-latency-badge">📶 18ms</span>
         <div id="videoCallTimer" class="video-call-timer">00:00</div>
       </div>
@@ -1019,6 +1020,10 @@
         <video id="jyotiVideoTalking" class="jyoti-video-stream" autoplay loop playsinline muted poster="./src/avatar.jpg">
           <source src="./src/jyoti-talking.mp4" type="video/mp4">
         </video>
+
+        <!-- Real-Time WebRTC Neural Streaming Avatar (Simli) -->
+        <video id="simliVideoStream" class="jyoti-video-stream neural-stream" autoplay playsinline style="display: none;"></video>
+        <audio id="simliAudioStream" autoplay style="display: none;"></audio>
 
         <!-- Reactive Celestial Halo Glow & Ambient Lighting -->
         <div id="jyotiSpeakingHalo" class="video-speaking-halo"></div>
@@ -1094,6 +1099,51 @@
         <span class="video-dock-label">End</span>
       </button>
     </footer>
+  </div>
+
+  <!-- Simli Real-Time Neural Avatar Configuration Modal -->
+  <div id="simliConfigModal" class="modal-overlay" style="display: none;">
+    <div class="modal-card simli-modal-card">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-badge-pill">🔮 100% Genuine AI Video</span>
+          <h2 class="modal-title">Real Neural Streaming Avatar</h2>
+        </div>
+        <button id="btnCloseSimliModal" class="btn-modal-close" type="button">×</button>
+      </div>
+
+      <div class="modal-body">
+        <p class="simli-modal-desc">
+          Connect an authentic, photorealistic neural talking video avatar powered by <strong>Simli WebRTC</strong> with sub-300ms latency.
+        </p>
+
+        <div class="simli-free-tier-callout">
+          <div class="callout-icon">🎁</div>
+          <div class="callout-content">
+            <h4>50 Free Minutes Every Month ($0 Cost)</h4>
+            <p>Simli provides 50 free minutes every month with <strong>zero credit card required</strong>.</p>
+            <a href="https://www.simli.com" target="_blank" rel="noopener noreferrer" class="simli-signup-link">
+              👉 Click here to get your Free Simli API Key on Simli.com
+            </a>
+          </div>
+        </div>
+
+        <div class="simli-form-group">
+          <label for="inputSimliApiKey" class="simli-label">Your Free Simli API Key</label>
+          <input type="password" id="inputSimliApiKey" class="simli-input" placeholder="Paste your API Key (e.g. simli_api_...)" autocomplete="off">
+        </div>
+
+        <div class="simli-form-group">
+          <label for="inputSimliFaceId" class="simli-label">Avatar Face ID (Optional)</label>
+          <input type="text" id="inputSimliFaceId" class="simli-input" placeholder="Leave empty for default Jyoti Avatar" autocomplete="off">
+        </div>
+
+        <div class="simli-actions-row">
+          <button id="btnSaveSimliConfig" class="btn-primary-simli" type="button">Connect Live Neural Video Stream</button>
+          <button id="btnSimliAudioFallback" class="btn-secondary-simli" type="button">Use Celestial Voice Mode ($0 Forever)</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Fixed Bottom Navigation Dock (Thumb-Zone) -->

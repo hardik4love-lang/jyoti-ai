@@ -6,10 +6,13 @@
  * Web Audio connection chimes, and cosmic aura filters.
  */
 
+import { SimliAvatarEngine } from "./simli-avatar.js";
+
 export class VideoCallEngine {
   constructor(voiceEngine, aiService) {
     this.voiceEngine = voiceEngine;
     this.aiService = aiService;
+    this.simliEngine = new SimliAvatarEngine();
 
     // User camera state
     this.localStream = null;
@@ -21,7 +24,9 @@ export class VideoCallEngine {
     // Video streams
     this.idleVideoEl = null;
     this.talkingVideoEl = null;
+    this.neuralVideoEl = null;
     this.isSpeaking = false;
+    this.isNeuralMode = false;
 
     // Audio & Visualizer state
     this.audioCtx = null;
@@ -340,6 +345,9 @@ export class VideoCallEngine {
     if (this.callTimerInterval) clearInterval(this.callTimerInterval);
     if (this.animFrameId) cancelAnimationFrame(this.animFrameId);
     this.stopCameraStream();
+    if (this.simliEngine) {
+      this.simliEngine.stopStream();
+    }
     if (this.idleVideoEl) {
       this.idleVideoEl.pause();
     }

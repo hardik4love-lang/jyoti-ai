@@ -298,6 +298,15 @@ const elements = {
   btnVideoFlipCam: document.getElementById("btnVideoFlipCam"),
   btnVideoAuraFilter: document.getElementById("btnVideoAuraFilter"),
   btnVideoEndCall: document.getElementById("btnVideoEndCall"),
+  btnNeuralAvatarSettings: document.getElementById("btnNeuralAvatarSettings"),
+  simliVideoStream: document.getElementById("simliVideoStream"),
+  simliAudioStream: document.getElementById("simliAudioStream"),
+  simliConfigModal: document.getElementById("simliConfigModal"),
+  btnCloseSimliModal: document.getElementById("btnCloseSimliModal"),
+  inputSimliApiKey: document.getElementById("inputSimliApiKey"),
+  inputSimliFaceId: document.getElementById("inputSimliFaceId"),
+  btnSaveSimliConfig: document.getElementById("btnSaveSimliConfig"),
+  btnSimliAudioFallback: document.getElementById("btnSimliAudioFallback"),
 
   // Daily Cosmic Battery & Readiness Engine
   cosmicBatteryCard: document.getElementById("cosmicBatteryCard"),
@@ -603,6 +612,57 @@ function setupEventListeners() {
       if (ok && elements.userCameraOffPlaceholder) {
         elements.userCameraOffPlaceholder.style.display = "none";
         if (elements.pipStatusDot) elements.pipStatusDot.classList.remove("offline");
+      }
+    });
+  }
+
+  // Simli Neural Avatar Controls & Free Modal
+  if (elements.btnNeuralAvatarSettings) {
+    elements.btnNeuralAvatarSettings.addEventListener("click", () => {
+      if (elements.simliConfigModal) {
+        if (elements.inputSimliApiKey) {
+          elements.inputSimliApiKey.value = videoCallEngine.simliEngine.apiKey || "";
+        }
+        if (elements.inputSimliFaceId) {
+          elements.inputSimliFaceId.value = videoCallEngine.simliEngine.faceId || "";
+        }
+        elements.simliConfigModal.style.display = "flex";
+      }
+    });
+  }
+  if (elements.btnCloseSimliModal) {
+    elements.btnCloseSimliModal.addEventListener("click", () => {
+      if (elements.simliConfigModal) elements.simliConfigModal.style.display = "none";
+    });
+  }
+  if (elements.btnSimliAudioFallback) {
+    elements.btnSimliAudioFallback.addEventListener("click", () => {
+      if (elements.simliConfigModal) elements.simliConfigModal.style.display = "none";
+    });
+  }
+  if (elements.btnSaveSimliConfig) {
+    elements.btnSaveSimliConfig.addEventListener("click", async () => {
+      const key = (elements.inputSimliApiKey?.value || "").trim();
+      const face = (elements.inputSimliFaceId?.value || "").trim();
+      if (!key) {
+        alert("Please enter a Simli API key, or click 'Use Celestial Voice Mode'.");
+        return;
+      }
+      videoCallEngine.simliEngine.saveConfig(key, face);
+      if (elements.simliConfigModal) elements.simliConfigModal.style.display = "none";
+      alert("✅ Simli Neural Avatar configuration saved! Now starting live neural stream...");
+      if (videoCallEngine.isCallActive) {
+        try {
+          await videoCallEngine.simliEngine.startStream(elements.simliVideoStream, elements.simliAudioStream, status => {
+            if (elements.videoCallStatus) elements.videoCallStatus.innerText = status;
+          });
+          if (elements.simliVideoStream) elements.simliVideoStream.style.display = "block";
+          if (elements.jyotiVideoIdle) elements.jyotiVideoIdle.style.display = "none";
+          if (elements.jyotiVideoTalking) elements.jyotiVideoTalking.style.display = "none";
+        } catch (e) {
+          console.warn("Simli live connect error:", e);
+          alert("Neural stream connection note: " + e.message);
+        }
       }
     });
   }
@@ -1460,9 +1520,30 @@ async function startLiveVideoCall() {
   // 4. Start oscilloscope audio waveform visualizer
   videoCallEngine.startVisualizer(elements.videoAudioVisualizer);
 
-  // 5. Start call timer
+  // 5. Connect Real Simli Neural Stream if API key is present
+  if (videoCallEngine.simliEngine.isConfigured()) {
+    try {
+      elements.videoCallStatus.innerText = "Connecting live Simli WebRTC neural stream...";
+      await videoCallEngine.simliEngine.startStream(elements.simliVideoStream, elements.simliAudioStream, status => {
+        if (elements.videoCallStatus) elements.videoCallStatus.innerText = status;
+      });
+      if (elements.simliVideoStream) elements.simliVideoStream.style.display = "block";
+      if (elements.jyotiVideoIdle) elements.jyotiVideoIdle.style.display = "none";
+      if (elements.jyotiVideoTalking) elements.jyotiVideoTalking.style.display = "none";
+    } catch (e) {
+      console.warn("Simli auto-start error:", e);
+      if (elements.jyotiVideoIdle) elements.jyotiVideoIdle.style.display = "block";
+    }
+  } else {
+    if (elements.simliVideoStream) elements.simliVideoStream.style.display = "none";
+    if (elements.jyotiVideoIdle) elements.jyotiVideoIdle.style.display = "block";
+  }
+
+  // 6. Start call timer
   videoCallEngine.startCallTimer(elements.videoCallTimer);
-  elements.videoCallStatus.innerText = "HD Video Stream Active • 1080p";
+  if (!videoCallEngine.simliEngine.isConnected) {
+    elements.videoCallStatus.innerText = "Live Face-to-Face • Tap '🔮 Neural AI' for Simli Stream";
+  }
 
   const greeting = state.activeChart
     ? `Namaste ${state.activeChart.user.name}! I am gazing directly into your planetary aura. Your Lagna is ${state.activeChart.lagna.english}. What cosmic truth do you wish to reveal today?`
