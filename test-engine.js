@@ -12,6 +12,8 @@ import { drawPrashnaCards, VEDIC_TAROT_DECK } from "./src/tarot-engine.js";
 import { HOUSE_DEFINITIONS } from "./src/house-details.js";
 import { getDailyRashifal, getAllRashifalList } from "./src/rashifal-engine.js";
 import { calculateGemstones } from "./src/gemstone-engine.js";
+import { auditCosmicRedFlags } from "./src/redflag-engine.js";
+import { getDailyOracleProphecy } from "./src/yantra-scanner.js";
 
 console.log("=== Testing Vedic Astronomical Calculation Engine ===");
 console.log("\n=== Testing City Geocoding & Prefix Ranking ===");
@@ -161,5 +163,24 @@ const gandantaTest = detectBoundaryDegrees({
 });
 console.log(`✅ Gandanta & Boundary Degrees detected: ${gandantaTest.length} alerts`);
 gandantaTest.forEach(g => console.log(`  • ${g.title}`));
+
+console.log("\n=== Testing Cosmic Red Flags & Unfiltered Roast Engine ===");
+const redFlags = auditCosmicRedFlags(boyChart);
+console.log(`✅ Moon Red Flag Archetype: "${redFlags.archetype}"`);
+console.log(`- Toxic Dating Loop: ${redFlags.flags[0].text}`);
+console.log(`- Share Quote: ${redFlags.shareQuote}`);
+if (!redFlags.flags.length || !redFlags.archetype) {
+  throw new Error("Red flag audit failed!");
+}
+
+console.log("\n=== Testing Biometric Yantra Daily Oracle Prophecy ===");
+const dailyOracle = getDailyOracleProphecy(boyChart);
+console.log(`✅ Prana Score: ${dailyOracle.pranaScore}% | Aura: ${dailyOracle.auraType}`);
+console.log(`- Ruling Graha: ${dailyOracle.rulingGraha}`);
+console.log(`- Blessed Action: "${dailyOracle.blessedAction}"`);
+console.log(`- Forbidden Action: "${dailyOracle.forbiddenAction}"`);
+if (dailyOracle.pranaScore < 50 || !dailyOracle.blessedAction) {
+  throw new Error("Daily Oracle generation failed!");
+}
 
 console.log("\n🎉 ALL ADVANCED TESTS PASSED! Production-ready at 100% free and $0 cost.");

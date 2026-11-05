@@ -25,6 +25,9 @@ import { TempleBellEngine } from "./temple-bell.js";
 import { ProfileManager } from "./profile-manager.js";
 import { ReportGenerator } from "./report-generator.js";
 import { QrGenerator } from "./qr-generator.js";
+import { SynastryLinkManager } from "./synastry-link.js";
+import { auditCosmicRedFlags } from "./redflag-engine.js";
+import { YantraScanner, getDailyOracleProphecy } from "./yantra-scanner.js";
 
 // Global State
 const state = {
@@ -135,6 +138,7 @@ const elements = {
   printReportBtn: document.getElementById("printReportBtn"),
   metricsBadges: document.getElementById("metricsBadges"),
   btnDownloadCard: document.getElementById("btnDownloadCard"),
+  btnAuditRedFlags: document.getElementById("btnAuditRedFlags"),
 
   // Chat
   chatMessages: document.getElementById("chatMessages"),
@@ -147,6 +151,10 @@ const elements = {
   matchingForm: document.getElementById("matchingForm"),
   matchResultBox: document.getElementById("matchResultBox"),
   celebChipsContainer: document.getElementById("celebChipsContainer"),
+  btnShareCrushSync: document.getElementById("btnShareCrushSync"),
+  synastryInviteBanner: document.getElementById("synastryInviteBanner"),
+  synastryInviteTitle: document.getElementById("synastryInviteTitle"),
+  synastryInviteDesc: document.getElementById("synastryInviteDesc"),
 
   // Aura Meter
   auraMeterCard: document.getElementById("auraMeterCard"),
@@ -155,7 +163,13 @@ const elements = {
   panchangDateDisplay: document.getElementById("panchangDateDisplay"),
   panchangGrid: document.getElementById("panchangGrid"),
 
-  // Tarot
+  // Biometric Yantra Oracle & Prashna
+  yantraScannerCircle: document.getElementById("yantraScannerCircle"),
+  yantraProgressBar: document.getElementById("yantraProgressBar"),
+  yantraStatusText: document.getElementById("yantraStatusText"),
+  yantraOracleResult: document.getElementById("yantraOracleResult"),
+  btnTogglePrashnaDeck: document.getElementById("btnTogglePrashnaDeck"),
+  prashnaDeckWrapper: document.getElementById("prashnaDeckWrapper"),
   tarotCardsContainer: document.getElementById("tarotCardsContainer"),
   btnShuffleTarot: document.getElementById("btnShuffleTarot"),
   tarotShareBar: document.getElementById("tarotShareBar"),
@@ -234,6 +248,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initProfileVault();
   initRashifalUI();
   primeAudioGesture();
+  checkIncomingSynastryLink();
   registerServiceWorker();
 });
 
@@ -531,6 +546,66 @@ function setupEventListeners() {
     const archetype = archetypes[state.activeChart.moonSign.id % archetypes.length];
     CosmicCardGenerator.downloadCard(state.activeChart, archetype);
   });
+
+  // Download Cosmic Red Flags & Roast Story Card
+  if (elements.btnAuditRedFlags) {
+    elements.btnAuditRedFlags.addEventListener("click", () => {
+      if (!state.activeChart) return;
+      const audit = auditCosmicRedFlags(state.activeChart);
+      if (audit) {
+        templeBell.ring(528);
+        CosmicCardGenerator.downloadRedFlagCard(state.activeChart, audit);
+        appendMessage("bot", `🚩 *Cosmic Red Flags Audited:* "${audit.shareQuote}"\n\nYour 9:16 Story Card has been exported for Instagram & WhatsApp!`);
+      }
+    });
+  }
+
+  // 2-Player Viral Crush Sync Link Button
+  if (elements.btnShareCrushSync) {
+    elements.btnShareCrushSync.addEventListener("click", () => {
+      if (state.activeChart) {
+        const shareUrl = SynastryLinkManager.getWhatsAppShareUrl(state.activeChart);
+        window.open(shareUrl, "_blank");
+      } else {
+        const bName = document.getElementById("boyName")?.value || "Aarav";
+        const bDob = document.getElementById("boyDob")?.value || "1996-08-20";
+        const bTob = document.getElementById("boyTob")?.value || "10:15";
+        const dummyChart = {
+          user: { name: bName, dob: bDob, tob: bTob, city: "India" },
+          lagna: { english: "Aries" },
+          moonSign: { english: "Libra" },
+          nakshatra: { name: "Swati" }
+        };
+        const shareUrl = SynastryLinkManager.getWhatsAppShareUrl(dummyChart);
+        window.open(shareUrl, "_blank");
+      }
+    });
+  }
+
+  // Biometric Sacred Yantra Scanner
+  if (elements.yantraScannerCircle) {
+    new YantraScanner({
+      containerEl: document.querySelector(".yantra-hub-container"),
+      circleEl: elements.yantraScannerCircle,
+      progressBarEl: elements.yantraProgressBar,
+      statusEl: elements.yantraStatusText,
+      onComplete: () => {
+        templeBell.ring(528);
+        renderYantraOracleRevelation();
+      }
+    });
+  }
+
+  // Toggle Classical Prashna Deck
+  if (elements.btnTogglePrashnaDeck && elements.prashnaDeckWrapper) {
+    elements.btnTogglePrashnaDeck.addEventListener("click", () => {
+      const isHidden = elements.prashnaDeckWrapper.style.display === "none";
+      elements.prashnaDeckWrapper.style.display = isHidden ? "block" : "none";
+      elements.btnTogglePrashnaDeck.innerText = isHidden
+        ? "📜 Hide Classical Prashna Cards"
+        : "📜 Looking for Classical 3-Card Prashna?";
+    });
+  }
 
   // Print Comprehensive Kundli PDF Report
   if (elements.printReportBtn) {
@@ -1133,6 +1208,96 @@ function initPWA() {
   );
 }
 
+// Biometric Sacred Yantra Revelation
+function renderYantraOracleRevelation() {
+  if (!elements.yantraOracleResult) return;
+  const oracle = getDailyOracleProphecy(state.activeChart);
+
+  elements.yantraOracleResult.innerHTML = `
+    <div style="text-align: center; margin-bottom: 1rem;">
+      <span style="font-size: 0.72rem; letter-spacing: 0.15em; color: var(--accent-gold); font-weight: 800; text-transform: uppercase;">
+        ⚡ Prana Frequency Aligned (528Hz Solfeggio)
+      </span>
+      <h3 style="color: #fff; font-size: 1.45rem; margin-top: 0.35rem;">
+        ${oracle.auraType}
+      </h3>
+    </div>
+
+    <div class="oracle-stat-grid">
+      <div class="oracle-stat-card">
+        <div class="oracle-stat-val">${oracle.pranaScore}%</div>
+        <div class="oracle-stat-label">Prana Radiance</div>
+      </div>
+      <div class="oracle-stat-card">
+        <div class="oracle-stat-val" style="font-size: 1.05rem;">${oracle.rulingGraha}</div>
+        <div class="oracle-stat-label">Ruling Cosmic Graha</div>
+      </div>
+      <div class="oracle-stat-card">
+        <div class="oracle-stat-val" style="color: #34d399; font-size: 1.05rem;">${oracle.favorableDirection}</div>
+        <div class="oracle-stat-label">Sacred Direction</div>
+      </div>
+    </div>
+
+    <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-md); padding: 0.85rem; margin-bottom: 0.75rem; text-align: left;">
+      <strong style="color: #34d399; font-size: 0.85rem;">✅ Blessed Action Today:</strong>
+      <div style="color: #e2e8f0; font-size: 0.88rem; margin-top: 0.25rem;">${oracle.blessedAction}</div>
+    </div>
+
+    <div style="background: rgba(244, 63, 94, 0.1); border: 1px solid rgba(244, 63, 94, 0.3); border-radius: var(--radius-md); padding: 0.85rem; text-align: left;">
+      <strong style="color: #f43f5e; font-size: 0.85rem;">🚫 Forbidden Action Today:</strong>
+      <div style="color: #e2e8f0; font-size: 0.88rem; margin-top: 0.25rem;">${oracle.forbiddenAction}</div>
+    </div>
+
+    <div style="text-align: center; margin-top: 1.25rem;">
+      <button id="btnShareOracleWhatsApp" class="btn-share-story" style="background: linear-gradient(135deg, #25D366, #128C7E); margin: 0 auto; font-size: 0.85rem; padding: 0.6rem 1.25rem;">
+        📲 Share Today's Alignment on WhatsApp
+      </button>
+    </div>
+  `;
+
+  elements.yantraOracleResult.style.display = "block";
+  elements.yantraOracleResult.scrollIntoView({ behavior: "smooth", block: "nearest" });
+
+  const shareBtn = document.getElementById("btnShareOracleWhatsApp");
+  if (shareBtn) {
+    shareBtn.onclick = () => {
+      const text = encodeURIComponent(
+        `✨ My Daily Cosmic Prana score is ${oracle.pranaScore}% (${oracle.auraType}) under ${oracle.rulingGraha}!\n\nBlessed Action: "${oracle.blessedAction}"\nForbidden Action: "${oracle.forbiddenAction}"\n\nAlign your energy on Jyoti AI: https://hardik4love-lang.github.io/jyoti-ai/`
+      );
+      window.open(`https://api.whatsapp.com/send?text=${text}`, "_blank");
+    };
+  }
+}
+
+function checkIncomingSynastryLink() {
+  const incoming = SynastryLinkManager.checkIncomingLink();
+  if (!incoming) return;
+
+  switchNavTab("matching");
+
+  const boyNameInput = document.getElementById("boyName");
+  const boyDobInput = document.getElementById("boyDob");
+  const boyTobInput = document.getElementById("boyTob");
+  const boyCityInput = document.getElementById("boyCity");
+
+  if (boyNameInput) boyNameInput.value = incoming.name;
+  if (boyDobInput) boyDobInput.value = incoming.dob;
+  if (boyTobInput) boyTobInput.value = incoming.tob;
+  if (boyCityInput) boyCityInput.value = incoming.city;
+
+  if (elements.synastryInviteBanner) {
+    elements.synastryInviteBanner.style.display = "block";
+    if (elements.synastryInviteTitle) {
+      elements.synastryInviteTitle.innerText = `✨ ${incoming.name} has summoned your Vedic Synastry!`;
+    }
+    if (elements.synastryInviteDesc) {
+      elements.synastryInviteDesc.innerText = `${incoming.name} (${incoming.moon || "Moon"} Rashi) has pre-loaded their chart coordinates. Enter your details in Partner 2 to reveal your 36-Gunas match score!`;
+    }
+  }
+
+  templeBell.ring(528);
+}
+
 // Render Daily Vedic Tarot & Prashna
 function renderTarotCards() {
   if (!elements.tarotCardsContainer) return;
@@ -1728,13 +1893,28 @@ function handleMatchingSubmit(e) {
         </tbody>
       </table>
 
-      <div style="text-align: center; margin-top: 1.25rem;">
-        <a href="https://api.whatsapp.com/send?text=${encodeURIComponent(`💑 Kundli Milan Score for ${boyName} & ${girlName}: ${result.totalScore}/36 Gunas (${result.statusText})!\n\nCalculate yours 100% free with zero subscriptions on Jyoti AI: https://hardik4love-lang.github.io/jyoti-ai/`)}" target="_blank" class="btn-whatsapp-share">
+      <div style="text-align: center; margin-top: 1.25rem; display: flex; flex-direction: column; align-items: center; gap: 0.75rem;">
+        <a href="https://api.whatsapp.com/send?text=${encodeURIComponent(`💑 Kundli Milan Score for ${boyName} & ${girlName}: ${result.totalScore}/36 Gunas (${result.statusText})!\n\nCalculate yours on Jyoti AI: https://hardik4love-lang.github.io/jyoti-ai/`)}" target="_blank" class="btn-whatsapp-share">
           💬 Share Match Score on WhatsApp
         </a>
+        <button type="button" id="btnDownloadDualSynastry" class="btn-share-story" style="background: linear-gradient(135deg, #ec4899, #8b5cf6); font-size: 0.85rem; padding: 0.65rem 1.25rem;">
+          📸 Download 2-Player Story Bond Card
+        </button>
       </div>
     </div>
   `;
+
+  const dualCardBtn = document.getElementById("btnDownloadDualSynastry");
+  if (dualCardBtn) {
+    dualCardBtn.onclick = () => {
+      templeBell.ring(528);
+      CosmicCardGenerator.downloadDualSynastryCard(boyChart, girlChart, {
+        totalPoints: result.totalScore,
+        status: result.statusText,
+        nadiPoints: result.breakdown.find(b => b.name === "Nadi")?.score || 0
+      });
+    };
+  }
 
   elements.matchResultBox.style.display = "block";
   elements.matchResultBox.scrollIntoView({ behavior: "smooth" });

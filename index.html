@@ -317,18 +317,23 @@
       <!-- Dashboard Grid (Revealed after calculation) -->
       <section id="dashboardSection" style="display: none;">
         
-        <!-- Viral Top Banner: Cosmic Passport Share -->
+        <!-- Viral Top Banner: Cosmic Passport & Red Flags -->
         <div class="viral-banner">
           <div class="viral-banner-content">
             <img src="./src/avatar.jpg" alt="Jyoti" class="banner-avatar-thumbnail">
             <div>
-              <h3 class="viral-title">Your Cosmic Identity Passport is Ready</h3>
-              <p class="viral-desc">Export your custom 9:16 Instagram Story card with your Archetype, Rising, Moon & Dasha.</p>
+              <h3 class="viral-title">Your Cosmic Identity Blueprint is Ready</h3>
+              <p class="viral-desc">Export your custom 9:16 Instagram Story card or audit your unfiltered cosmic red flags.</p>
             </div>
           </div>
-          <button id="btnDownloadCard" class="btn-share-story">
-            📸 Download Story Card (PNG)
-          </button>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button id="btnDownloadCard" class="btn-share-story">
+              📸 Story Passport
+            </button>
+            <button id="btnAuditRedFlags" class="btn-share-story" style="background: linear-gradient(135deg, #f43f5e, #be123c);">
+              🚩 Red Flag Audit
+            </button>
+          </div>
         </div>
 
         <div class="dashboard-grid">
@@ -462,6 +467,23 @@
           </p>
         </div>
 
+        <!-- 2-Player Viral Crush & Partner Sync Loop -->
+        <div class="crush-sync-banner" style="background: linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%); border: 1px solid rgba(236, 72, 153, 0.35); border-radius: var(--radius-md); padding: 1rem 1.25rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
+          <div>
+            <div style="font-size: 0.95rem; font-weight: 700; color: #fff;">🔗 2-Player Crush & Partner Sync</div>
+            <div style="font-size: 0.8rem; color: #cbd5e1; margin-top: 0.2rem;">Send a private sync link to your crush/partner. Their chart matches with yours automatically!</div>
+          </div>
+          <button type="button" id="btnShareCrushSync" class="btn-share-story" style="background: linear-gradient(135deg, #25D366, #128C7E); padding: 0.6rem 1.1rem; font-size: 0.85rem;">
+            📲 Share Link on WhatsApp
+          </button>
+        </div>
+
+        <!-- Incoming Shared Synastry Invitation Banner -->
+        <div id="synastryInviteBanner" style="display: none; background: rgba(244, 196, 83, 0.15); border: 1px solid var(--accent-gold); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1.5rem; text-align: center;">
+          <h4 id="synastryInviteTitle" style="color: var(--accent-gold); font-size: 1.1rem; margin-bottom: 0.35rem;">✨ Synastry Summoned!</h4>
+          <p id="synastryInviteDesc" style="color: #cbd5e1; font-size: 0.85rem;">Partner 1 is pre-loaded from your invite. Enter your birth details in Partner 2 to reveal your 36-Gunas match score.</p>
+        </div>
+
         <!-- Celebrity Quick Match Carousel -->
         <div class="celeb-banner">
           <div style="font-size: 0.75rem; font-weight: 800; color: var(--accent-gold); letter-spacing: 0.15em; margin-bottom: 0.35rem;">
@@ -554,29 +576,61 @@
       </section>
     </div>
 
-    <!-- VIEW 5: DAILY VEDIC TAROT & PRASHNA ("PICK-A-CARD") -->
+    <!-- VIEW 5: BIOMETRIC SACRED YANTRA TOUCH ORACLE -->
     <div id="viewTarot" style="display: none;">
-      <section class="glass-card" style="max-width: 920px; margin: 0 auto;">
-        <div style="text-align: center; margin-bottom: 2rem;">
+      <section class="glass-card" style="max-width: 920px; margin: 0 auto; text-align: center;">
+        <div style="max-width: 620px; margin: 0 auto 1.5rem;">
           <h2 style="font-size: 1.85rem; font-weight: 800; background: linear-gradient(90deg, #fff, var(--accent-gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-            🔮 Daily Vedic Prashna & Tarot Oracle
+            ✨ Sacred Biometric Yantra Oracle
           </h2>
           <p style="color: var(--text-secondary); margin-top: 0.5rem; font-size: 0.95rem;">
-            Hold your question in your heart and draw 3 sacred celestial cards for Past Root, Present Energy, and Future Outcome.
+            Align your physical prana with the 9 celestial Grahas. Hold your thumb firmly on the Golden Sri Yantra for 3 seconds to resonate at 528Hz.
           </p>
-          <button id="btnShuffleTarot" class="btn-celestial" style="margin-top: 1.25rem;">
-            🔀 Draw 3 Sacred Cards
-          </button>
         </div>
 
-        <div id="tarotCardsContainer" class="tarot-cards-grid">
-          <!-- 3 Interactive 3D Flip Cards -->
+        <!-- Biometric Yantra Hub -->
+        <div class="yantra-hub-container">
+          <div id="yantraScannerCircle" class="yantra-touch-circle" title="Press and hold thumb for 3 seconds">
+            <svg class="yantra-progress-svg" viewBox="0 0 100 100">
+              <circle class="ring-track" cx="50" cy="50" r="45" />
+              <circle id="yantraProgressBar" class="ring-fill" cx="50" cy="50" r="45" />
+            </svg>
+            <div class="yantra-visual-art">
+              <!-- Sacred Sri Yantra Sacred Geometry Vectors -->
+              <svg viewBox="0 0 100 100" class="sri-yantra-svg">
+                <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(244, 196, 83, 0.4)" stroke-width="1.5" />
+                <circle cx="50" cy="50" r="36" fill="none" stroke="rgba(244, 196, 83, 0.25)" stroke-width="1" />
+                <polygon points="50,15 82,72 18,72" fill="none" stroke="#f4c453" stroke-width="1.2" opacity="0.85" />
+                <polygon points="50,85 18,28 82,28" fill="none" stroke="#f4c453" stroke-width="1.2" opacity="0.85" />
+                <polygon points="50,22 76,68 24,68" fill="none" stroke="#c084fc" stroke-width="1" opacity="0.75" />
+                <polygon points="50,78 24,32 76,32" fill="none" stroke="#c084fc" stroke-width="1" opacity="0.75" />
+                <circle cx="50" cy="50" r="4" fill="#ffdf7e" />
+              </svg>
+              <div class="touch-thumb-glyph">🖐️</div>
+            </div>
+          </div>
+          <p id="yantraStatusText" class="yantra-guide-text">Press and hold thumb firmly for 3 full seconds</p>
         </div>
 
-        <div id="tarotShareBar" style="text-align: center; margin-top: 2rem; display: none;">
-          <button id="btnShareTarotWhatsApp" class="btn-share-story" style="background: linear-gradient(135deg, #25D366, #128C7E); margin: 0 auto;">
-            📲 Share Tarot Reading to WhatsApp
+        <!-- Oracle Revelation Container (Appears after 3s hold) -->
+        <div id="yantraOracleResult" class="yantra-oracle-box" style="display: none;"></div>
+
+        <!-- Optional Classical Prashna Deck Toggle -->
+        <div style="margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+          <button id="btnTogglePrashnaDeck" class="btn-subtle" style="font-size: 0.8rem; margin: 0 auto;">
+            📜 Looking for Classical 3-Card Prashna?
           </button>
+          <div id="prashnaDeckWrapper" style="display: none; margin-top: 1.5rem;">
+            <button id="btnShuffleTarot" class="btn-celestial" style="margin-bottom: 1.5rem;">
+              🔀 Draw 3 Classical Prashna Cards
+            </button>
+            <div id="tarotCardsContainer" class="tarot-cards-grid"></div>
+            <div id="tarotShareBar" style="text-align: center; margin-top: 2rem; display: none;">
+              <button id="btnShareTarotWhatsApp" class="btn-share-story" style="background: linear-gradient(135deg, #25D366, #128C7E); margin: 0 auto;">
+                📲 Share Reading to WhatsApp
+              </button>
+            </div>
+          </div>
         </div>
       </section>
     </div>
@@ -694,7 +748,7 @@
     </button>
     <button id="dockTarot" class="dock-item" data-tab="tarot">
       <span class="dock-icon">✨</span>
-      <span class="dock-label">Tarot</span>
+      <span class="dock-label">Oracle</span>
     </button>
   </nav>
 
