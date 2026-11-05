@@ -30,6 +30,7 @@ import { auditCosmicRedFlags } from "./redflag-engine.js";
 import { YantraScanner, getDailyOracleProphecy } from "./yantra-scanner.js";
 import { PrashnaEngine } from "./prashna-engine.js";
 import { CrushRadarEngine } from "./radar-engine.js";
+import { VideoCallEngine } from "./video-call-engine.js";
 
 // Global State
 const state = {
@@ -52,6 +53,7 @@ const aiService = new AIService();
 const audioEngine = new AmbientAudioEngine();
 const voiceEngine = new VoiceEngine();
 const callEngine = new CallEngine(voiceEngine, aiService);
+const videoCallEngine = new VideoCallEngine(voiceEngine, aiService);
 const templeBell = new TempleBellEngine();
 
 // DOM Elements
@@ -271,7 +273,27 @@ const elements = {
   callSubtitles: document.getElementById("callSubtitles"),
   btnCallMute: document.getElementById("btnCallMute"),
   btnCallEnd: document.getElementById("btnCallEnd"),
-  btnCallSpeaker: document.getElementById("btnCallSpeaker")
+  btnCallSpeaker: document.getElementById("btnCallSpeaker"),
+
+  // Interactive FaceTime-Style Live Video Consultation
+  btnQuickLiveVideoCall: document.getElementById("btnQuickLiveVideoCall"),
+  videoCallOverlay: document.getElementById("videoCallOverlay"),
+  videoCallStatus: document.getElementById("videoCallStatus"),
+  videoCallTimer: document.getElementById("videoCallTimer"),
+  jyotiAvatarLiving: document.getElementById("jyotiAvatarLiving"),
+  jyotiAuraRing: document.getElementById("jyotiAuraRing"),
+  jyotiEyelidShutter: document.getElementById("jyotiEyelidShutter"),
+  jyotiVisemeGlow: document.getElementById("jyotiVisemeGlow"),
+  videoAudioVisualizer: document.getElementById("videoAudioVisualizer"),
+  userCameraPiP: document.getElementById("userCameraPiP"),
+  userCameraFeed: document.getElementById("userCameraFeed"),
+  userCameraOffPlaceholder: document.getElementById("userCameraOffPlaceholder"),
+  videoSubtitlesText: document.getElementById("videoSubtitlesText"),
+  videoQuickTopics: document.getElementById("videoQuickTopics"),
+  btnVideoToggleMic: document.getElementById("btnVideoToggleMic"),
+  btnVideoToggleCam: document.getElementById("btnVideoToggleCam"),
+  btnVideoFlipCam: document.getElementById("btnVideoFlipCam"),
+  btnVideoEndCall: document.getElementById("btnVideoEndCall")
 };
 
 // Initialize App
@@ -483,7 +505,7 @@ function setupEventListeners() {
   // Bottom Navigation Dock (Native Mobile Thumb-Zone)
   if (elements.dockHome) elements.dockHome.addEventListener("click", () => switchNavTab("personal"));
   if (elements.dockRashifal) elements.dockRashifal.addEventListener("click", () => switchNavTab("rashifal"));
-  if (elements.dockCall) elements.dockCall.addEventListener("click", () => startLiveCall());
+  if (elements.dockCall) elements.dockCall.addEventListener("click", () => startLiveVideoCall());
   if (elements.dockUpaya) elements.dockUpaya.addEventListener("click", () => switchNavTab("upaya"));
   if (elements.dockMilan) elements.dockMilan.addEventListener("click", () => switchNavTab("matching"));
   if (elements.dockTarot) elements.dockTarot.addEventListener("click", () => switchNavTab("tarot"));
@@ -503,6 +525,49 @@ function setupEventListeners() {
       elements.btnCallSpeaker.classList.toggle("active", callEngine.isSpeakerOn);
     });
   }
+
+  // Live FaceTime-Style Video Call Controls
+  if (elements.btnQuickLiveVideoCall) {
+    elements.btnQuickLiveVideoCall.addEventListener("click", () => startLiveVideoCall());
+  }
+  if (elements.btnVideoEndCall) {
+    elements.btnVideoEndCall.addEventListener("click", () => endLiveVideoCall());
+  }
+  if (elements.btnVideoToggleMic) {
+    elements.btnVideoToggleMic.addEventListener("click", () => {
+      const isMuted = videoCallEngine.toggleMute();
+      elements.btnVideoToggleMic.classList.toggle("active", isMuted);
+      const icon = elements.btnVideoToggleMic.querySelector(".video-dock-icon");
+      const label = elements.btnVideoToggleMic.querySelector(".video-dock-label");
+      if (icon) icon.innerText = isMuted ? "🔇" : "🎤";
+      if (label) label.innerText = isMuted ? "Unmute" : "Mute";
+    });
+  }
+  if (elements.btnVideoToggleCam) {
+    elements.btnVideoToggleCam.addEventListener("click", () => {
+      const isCamOn = videoCallEngine.toggleCamera(elements.userCameraFeed, elements.userCameraOffPlaceholder);
+      elements.btnVideoToggleCam.classList.toggle("active", !isCamOn);
+      const icon = elements.btnVideoToggleCam.querySelector(".video-dock-icon");
+      const label = elements.btnVideoToggleCam.querySelector(".video-dock-label");
+      if (icon) icon.innerText = isCamOn ? "📹" : "🚫";
+      if (label) label.innerText = isCamOn ? "Camera" : "Paused";
+    });
+  }
+  if (elements.btnVideoFlipCam) {
+    elements.btnVideoFlipCam.addEventListener("click", () => {
+      videoCallEngine.flipCamera(elements.userCameraFeed);
+    });
+  }
+
+  // Live Video Call Quick Topic Chips
+  document.querySelectorAll("#videoQuickTopics .video-topic-chip").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const q = btn.dataset.query;
+      if (q && videoCallEngine.isCallActive) {
+        handleVideoCallTranscript(q);
+      }
+    });
+  });
 
   // Live Call Quick Question Chips (iOS & No-Mic Resilience)
   document.querySelectorAll(".call-chip-btn").forEach(btn => {
@@ -1233,6 +1298,107 @@ function endLiveCall() {
   callEngine.endCall();
   if (elements.callOverlay) {
     elements.callOverlay.style.display = "none";
+  }
+}
+
+// ==========================================================================
+// FaceTime-Style Interactive Live Video Consultation
+// ==========================================================================
+async function startLiveVideoCall() {
+  if (!elements.videoCallOverlay) return;
+
+  // Stop any active audio call first
+  if (callEngine.isCallActive) {
+    endLiveCall();
+  }
+
+  elements.videoCallOverlay.style.display = "flex";
+  elements.videoCallStatus.innerText = "Connecting live FaceTime-style celestial link...";
+  elements.videoCallTimer.innerText = "00:00";
+  elements.videoSubtitlesText.innerText = '"Connecting your camera and soul vibration to Jyoti..."';
+
+  videoCallEngine.playConnectChime();
+
+  // 1. Initialize user front camera feed in PiP
+  await videoCallEngine.initUserCamera(elements.userCameraFeed, () => {
+    if (elements.userCameraOffPlaceholder) elements.userCameraOffPlaceholder.style.display = "flex";
+  });
+
+  // 2. Setup draggable PiP
+  videoCallEngine.setupDraggablePiP(elements.userCameraPiP);
+
+  // 3. Start living avatar kinematics (breathing + blinking)
+  videoCallEngine.startLivingAvatar(elements.jyotiAvatarLiving, elements.jyotiEyelidShutter);
+
+  // 4. Start oscilloscope audio waveform visualizer
+  videoCallEngine.startVisualizer(elements.videoAudioVisualizer);
+
+  // 5. Start call timer
+  videoCallEngine.startCallTimer(elements.videoCallTimer);
+  elements.videoCallStatus.innerText = "Connected • Live Face-to-Face Consultation";
+
+  const greeting = state.activeChart
+    ? `Namaste ${state.activeChart.user.name}! I am gazing directly into your planetary aura. Your Lagna is ${state.activeChart.lagna.english}. What cosmic truth do you wish to reveal today?`
+    : "Namaste seeker! I am Jyoti, your personal Vedic astrologer. I see your prana shining bright. Speak freely about your life, career, or soulmate.";
+
+  elements.videoSubtitlesText.innerText = `"${greeting}"`;
+  videoCallEngine.setAvatarSpeaking(true, elements.jyotiVisemeGlow, elements.jyotiAuraRing);
+
+  voiceEngine.speak(
+    greeting,
+    state.currentLang,
+    () => {
+      videoCallEngine.setAvatarSpeaking(false, elements.jyotiVisemeGlow, elements.jyotiAuraRing);
+      if (videoCallEngine.isCallActive && !videoCallEngine.isMicMuted) {
+        voiceEngine.startListening(
+          transcript => handleVideoCallTranscript(transcript),
+          () => {}
+        );
+      }
+    },
+    () => {
+      videoCallEngine.setAvatarSpeaking(false, elements.jyotiVisemeGlow, elements.jyotiAuraRing);
+    }
+  );
+}
+
+async function handleVideoCallTranscript(query) {
+  if (!query || !videoCallEngine.isCallActive) return;
+  elements.videoSubtitlesText.innerText = `You: "${query}"`;
+  voiceEngine.stopListening();
+  videoCallEngine.setAvatarSpeaking(false, elements.jyotiVisemeGlow, elements.jyotiAuraRing);
+
+  try {
+    const reply = await aiService.askQuestion(query, state.activeChart, state.chatHistory);
+    elements.videoSubtitlesText.innerText = `Jyoti: "${reply}"`;
+    videoCallEngine.setAvatarSpeaking(true, elements.jyotiVisemeGlow, elements.jyotiAuraRing);
+
+    voiceEngine.speak(
+      reply,
+      state.currentLang,
+      () => {
+        videoCallEngine.setAvatarSpeaking(false, elements.jyotiVisemeGlow, elements.jyotiAuraRing);
+        if (videoCallEngine.isCallActive && !videoCallEngine.isMicMuted) {
+          voiceEngine.startListening(
+            transcript => handleVideoCallTranscript(transcript),
+            () => {}
+          );
+        }
+      },
+      () => {
+        videoCallEngine.setAvatarSpeaking(false, elements.jyotiVisemeGlow, elements.jyotiAuraRing);
+      }
+    );
+  } catch (e) {
+    elements.videoSubtitlesText.innerText = "Jyoti: I felt a cosmic vibration drift. Could you repeat that?";
+    videoCallEngine.setAvatarSpeaking(false, elements.jyotiVisemeGlow, elements.jyotiAuraRing);
+  }
+}
+
+function endLiveVideoCall() {
+  videoCallEngine.endCall();
+  if (elements.videoCallOverlay) {
+    elements.videoCallOverlay.style.display = "none";
   }
 }
 

@@ -226,14 +226,18 @@
         </div>
       </div>
 
-      <!-- Quick Action Hub (Live Voice Call & Instant Demo) -->
+      <!-- Quick Action Hub (Live Video Call, Audio Call & Instant Demo) -->
       <div class="hero-quick-actions">
+        <button id="btnQuickLiveVideoCall" class="btn-hero-video-call" title="1-on-1 FaceTime-Style Live Video Consultation with Jyoti">
+          <span class="call-pulse-dot" style="background: #f43f5e; box-shadow: 0 0 10px #f43f5e;"></span>
+          <span>📹 Live Video Call (Face-to-Face)</span>
+        </button>
         <button id="btnQuickLiveCall" class="btn-hero-call" title="1-on-1 Simulated Voice Call with Jyoti">
           <span class="call-pulse-dot"></span>
-          <span>📞 Call Jyoti Now (1-on-1 Voice)</span>
+          <span>📞 Audio Call</span>
         </button>
         <button id="btnHeroInstantDemo" class="btn-hero-demo" title="1-Tap Demo Kundli">
-          <span>⚡ 1-Tap Demo Chart</span>
+          <span>⚡ 1-Tap Demo</span>
         </button>
       </div>
 
@@ -875,6 +879,88 @@
       <button id="btnCallEnd" class="btn-call-circle btn-call-end" title="End Call">📵</button>
       <button id="btnCallSpeaker" class="btn-call-circle active" title="Speaker">🔊</button>
     </div>
+  </div>
+
+  <!-- Fullscreen Interactive FaceTime-Style Video Consultation -->
+  <div id="videoCallOverlay" class="video-call-overlay" style="display: none;">
+    <!-- Top Consultation Status Header -->
+    <header class="video-call-header">
+      <div class="video-astrologer-badge">
+        <span class="live-indicator-dot"></span>
+        <div>
+          <h3 class="video-astrologer-name">Jyoti AI • Live Video Consultation</h3>
+          <p id="videoCallStatus" class="video-call-status">Celestial video stream connected</p>
+        </div>
+      </div>
+      <div id="videoCallTimer" class="video-call-timer">00:00</div>
+    </header>
+
+    <!-- Central Stage: Jyoti's Living Photorealistic Avatar -->
+    <div class="video-stage-container">
+      <div id="jyotiAvatarLiving" class="jyoti-living-avatar-stage">
+        <!-- Reactive Golden Halo Aura -->
+        <div id="jyotiAuraRing" class="jyoti-golden-aura"></div>
+        
+        <!-- Primary Avatar Canvas / Composite -->
+        <div class="jyoti-avatar-frame">
+          <img id="jyotiBaseImg" src="./src/avatar.jpg" alt="Jyoti" class="jyoti-avatar-base">
+          <!-- Procedural Eyelid Shutter for Natural Blinking -->
+          <div id="jyotiEyelidShutter" class="jyoti-eyelid-overlay"></div>
+          <!-- Speech Reactive Viseme Aura -->
+          <div id="jyotiVisemeGlow" class="jyoti-viseme-glow"></div>
+        </div>
+      </div>
+
+      <!-- Real-time Oscilloscope Audio Waveform Visualizer -->
+      <canvas id="videoAudioVisualizer" class="video-audio-visualizer" width="320" height="48"></canvas>
+    </div>
+
+    <!-- Floating FaceTime-Style User Camera Feed (Draggable PiP) -->
+    <div id="userCameraPiP" class="user-camera-pip">
+      <video id="userCameraFeed" autoplay playsinline muted class="user-video-stream"></video>
+      <div id="userCameraOffPlaceholder" class="user-camera-placeholder" style="display: none;">
+        <span class="user-placeholder-icon">👤</span>
+        <span class="user-placeholder-text">Camera Off</span>
+      </div>
+      <div class="pip-badge">
+        <span class="pip-dot"></span> You
+      </div>
+    </div>
+
+    <!-- Live Teleprompter Subtitles Capsule -->
+    <div class="video-subtitles-container">
+      <div id="videoSubtitlesText" class="video-subtitles-text">
+        "Namaste! I am Jyoti. I am gazing directly into your planetary alignments..."
+      </div>
+    </div>
+
+    <!-- 1-Tap Instant Consultation Quick Topic Chips -->
+    <div class="video-quick-topics" id="videoQuickTopics">
+      <button class="video-topic-chip" data-query="How does my career, promotion, and financial wealth look right now?">💼 Career & Wealth</button>
+      <button class="video-topic-chip" data-query="When will I get married and what does my 7th house reveal about my soulmate?">💍 Marriage & Soulmate</button>
+      <button class="video-topic-chip" data-query="Can you audit my active Vimshottari Mahadasha and Sade Sati balance?">🪐 Sade Sati & Dasha</button>
+      <button class="video-topic-chip" data-query="What sacred gemstone and daily Vedic upaya should I follow for peace and prosperity?">💎 Upaya & Gemstones</button>
+    </div>
+
+    <!-- Bottom Floating FaceTime Call Controls Dock -->
+    <footer class="video-controls-dock">
+      <button id="btnVideoToggleMic" class="video-dock-btn" title="Mute Microphone">
+        <span class="video-dock-icon">🎤</span>
+        <span class="video-dock-label">Mute</span>
+      </button>
+      <button id="btnVideoToggleCam" class="video-dock-btn" title="Toggle Camera">
+        <span class="video-dock-icon">📹</span>
+        <span class="video-dock-label">Camera</span>
+      </button>
+      <button id="btnVideoFlipCam" class="video-dock-btn" title="Flip Camera">
+        <span class="video-dock-icon">🔄</span>
+        <span class="video-dock-label">Flip</span>
+      </button>
+      <button id="btnVideoEndCall" class="video-dock-btn btn-hangup" title="End Consultation">
+        <span class="video-dock-icon">📵</span>
+        <span class="video-dock-label">End</span>
+      </button>
+    </footer>
   </div>
 
   <!-- Fixed Bottom Navigation Dock (Thumb-Zone) -->

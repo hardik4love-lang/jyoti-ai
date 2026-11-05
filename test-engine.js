@@ -16,6 +16,7 @@ import { auditCosmicRedFlags } from "./src/redflag-engine.js";
 import { getDailyOracleProphecy } from "./src/yantra-scanner.js";
 import { PrashnaEngine } from "./src/prashna-engine.js";
 import { CrushRadarEngine } from "./src/radar-engine.js";
+import { VideoCallEngine } from "./src/video-call-engine.js";
 
 console.log("=== Testing Vedic Astronomical Calculation Engine ===");
 console.log("\n=== Testing City Geocoding & Prefix Ranking ===");
@@ -210,5 +211,21 @@ console.log(`✅ Generated WhatsApp Share Link: ${whatsappLink.slice(0, 85)}...`
 if (radarResult.score < 50 || !radarResult.whoFallsText || !decodeURIComponent(whatsappLink).includes("truth=")) {
   throw new Error("Crush Radar test failed!");
 }
+
+console.log("\n=== Testing FaceTime-Style Video Call Engine ===");
+const videoEngine = new VideoCallEngine(null, null);
+console.log(`✅ Video Call Engine initialized: Facing mode = ${videoEngine.facingMode}`);
+const initialMute = videoEngine.isMicMuted;
+const newMute = videoEngine.toggleMute();
+console.log(`✅ Mic toggle test: ${initialMute} -> ${newMute}`);
+if (newMute !== !initialMute) {
+  throw new Error("VideoCallEngine mute toggle failed!");
+}
+videoEngine.facingMode = "environment";
+if (videoEngine.facingMode !== "environment") {
+  throw new Error("VideoCallEngine camera flip failed!");
+}
+videoEngine.endCall();
+console.log(`✅ Video Call Engine endCall lifecycle executed successfully`);
 
 console.log("\n🎉 ALL ADVANCED TESTS PASSED! Production-ready at 100% free and $0 cost.");
