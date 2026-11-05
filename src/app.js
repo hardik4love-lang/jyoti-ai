@@ -31,6 +31,8 @@ import { YantraScanner, getDailyOracleProphecy } from "./yantra-scanner.js";
 import { PrashnaEngine } from "./prashna-engine.js";
 import { CrushRadarEngine } from "./radar-engine.js";
 import { VideoCallEngine } from "./video-call-engine.js";
+import { CosmicBatteryEngine } from "./battery-engine.js";
+import { TransitCountdownEngine } from "./countdown-engine.js";
 
 // Global State
 const state = {
@@ -293,7 +295,35 @@ const elements = {
   btnVideoToggleMic: document.getElementById("btnVideoToggleMic"),
   btnVideoToggleCam: document.getElementById("btnVideoToggleCam"),
   btnVideoFlipCam: document.getElementById("btnVideoFlipCam"),
-  btnVideoEndCall: document.getElementById("btnVideoEndCall")
+  btnVideoEndCall: document.getElementById("btnVideoEndCall"),
+
+  // Daily Cosmic Battery & Readiness Engine
+  cosmicBatteryCard: document.getElementById("cosmicBatteryCard"),
+  batteryDayLord: document.getElementById("batteryDayLord"),
+  batteryDateStr: document.getElementById("batteryDateStr"),
+  batteryScoreVal: document.getElementById("batteryScoreVal"),
+  batteryHeadline: document.getElementById("batteryHeadline"),
+  batteryMicroUpaya: document.getElementById("batteryMicroUpaya"),
+  barMentalVal: document.getElementById("barMentalVal"),
+  barMentalFill: document.getElementById("barMentalFill"),
+  barCareerVal: document.getElementById("barCareerVal"),
+  barCareerFill: document.getElementById("barCareerFill"),
+  barSocialVal: document.getElementById("barSocialVal"),
+  barSocialFill: document.getElementById("barSocialFill"),
+  windowGoldenText: document.getElementById("windowGoldenText"),
+  windowCautionText: document.getElementById("windowCautionText"),
+  btnShareBatteryWhatsApp: document.getElementById("btnShareBatteryWhatsApp"),
+
+  // Dasha & Transit Countdown Clocks
+  dashaCountdownBanner: document.getElementById("dashaCountdownBanner"),
+  countdownEndDateTag: document.getElementById("countdownEndDateTag"),
+  countdownDashaTitle: document.getElementById("countdownDashaTitle"),
+  countdownProgressFill: document.getElementById("countdownProgressFill"),
+  countdownProgressNum: document.getElementById("countdownProgressNum"),
+  countdownDaysLeft: document.getElementById("countdownDaysLeft"),
+  countdownSadeSatiTitle: document.getElementById("countdownSadeSatiTitle"),
+  countdownSadeSatiDesc: document.getElementById("countdownSadeSatiDesc"),
+  countdownShiftTheme: document.getElementById("countdownShiftTheme")
 };
 
 // Initialize App
@@ -313,6 +343,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initTruthRadar();
   initPrashnaOracle();
   initQuickActionsAndAccordion();
+  renderCosmicBattery(state.activeChart);
   primeAudioGesture();
   checkIncomingSynastryLink();
   checkIncomingTruthLink();
@@ -585,6 +616,15 @@ function setupEventListeners() {
   if (elements.iosInstallModal) {
     elements.iosInstallModal.addEventListener("click", (e) => {
       if (e.target === elements.iosInstallModal) elements.iosInstallModal.classList.remove("active");
+    });
+  }
+
+  // Cosmic Battery 1-Tap WhatsApp Share
+  if (elements.btnShareBatteryWhatsApp) {
+    elements.btnShareBatteryWhatsApp.addEventListener("click", () => {
+      const battery = CosmicBatteryEngine.getDailyBattery(state.activeChart);
+      const url = CosmicBatteryEngine.getWhatsAppShareUrl(battery);
+      window.open(url, "_blank");
     });
   }
 
@@ -1044,6 +1084,71 @@ function renderAuraMeter(chart) {
     </p>
   `;
 }
+
+// ==========================================================================
+// Daily Cosmic Battery & Readiness Renderer
+// ==========================================================================
+function renderCosmicBattery(chart = null) {
+  if (!elements.cosmicBatteryCard) return;
+
+  const battery = CosmicBatteryEngine.getDailyBattery(chart);
+
+  if (elements.batteryDayLord) elements.batteryDayLord.innerText = `${battery.dayName} (${battery.dayLord})`;
+  if (elements.batteryDateStr) elements.batteryDateStr.innerText = battery.dateString;
+  if (elements.batteryScoreVal) elements.batteryScoreVal.innerText = `${battery.overallScore}%`;
+  if (elements.batteryHeadline) elements.batteryHeadline.innerText = battery.headline;
+  if (elements.batteryMicroUpaya) elements.batteryMicroUpaya.innerText = `🌿 Upaya: ${battery.microUpaya}`;
+
+  if (elements.barMentalVal) elements.barMentalVal.innerText = `${battery.mentalClarity}%`;
+  if (elements.barMentalFill) elements.barMentalFill.style.width = `${battery.mentalClarity}%`;
+
+  if (elements.barCareerVal) elements.barCareerVal.innerText = `${battery.careerDrive}%`;
+  if (elements.barCareerFill) elements.barCareerFill.style.width = `${battery.careerDrive}%`;
+
+  if (elements.barSocialVal) elements.barSocialVal.innerText = `${battery.socialHarmony}%`;
+  if (elements.barSocialFill) elements.barSocialFill.style.width = `${battery.socialHarmony}%`;
+
+  if (elements.windowGoldenText) elements.windowGoldenText.innerText = battery.goldenWindow;
+  if (elements.windowCautionText) elements.windowCautionText.innerText = battery.cautionWindow;
+}
+
+// ==========================================================================
+// Transit & Dasha Countdown Renderer ("When Will My Phase Shift?")
+// ==========================================================================
+function renderDashaCountdown(chart) {
+  if (!elements.dashaCountdownBanner || !chart) return;
+
+  const metrics = TransitCountdownEngine.getCountdownMetrics(chart);
+  if (!metrics) return;
+
+  if (elements.countdownEndDateTag) {
+    elements.countdownEndDateTag.innerText = `Cycle End: ${metrics.endDateFormatted}`;
+  }
+  if (elements.countdownDashaTitle) {
+    elements.countdownDashaTitle.innerText = `${metrics.currentMahadasha} • ${metrics.currentAntardasha}`;
+  }
+  if (elements.countdownProgressFill) {
+    elements.countdownProgressFill.style.width = `${metrics.progressPercent}%`;
+  }
+  if (elements.countdownProgressNum) {
+    elements.countdownProgressNum.innerText = `${metrics.progressPercent}% Traversed`;
+  }
+  if (elements.countdownDaysLeft) {
+    elements.countdownDaysLeft.innerText = `${metrics.daysRemaining} Days Remaining (~${metrics.yearsRemaining} yrs)`;
+  }
+  if (elements.countdownSadeSatiTitle) {
+    elements.countdownSadeSatiTitle.innerText = metrics.sadeSatiStatus;
+  }
+  if (elements.countdownSadeSatiDesc) {
+    elements.countdownSadeSatiDesc.innerText = metrics.sadeSatiActive
+      ? `Saturn is transiting your Moon sign (${metrics.sadeSatiPhase}). Daily mindfulness and service to elders neutralizes karmic friction.`
+      : "Your Moon sign is currently free from direct Saturnian Sade Sati alignment. Enjoy unobstructed creative and professional progress.";
+  }
+  if (elements.countdownShiftTheme) {
+    elements.countdownShiftTheme.innerText = metrics.shiftTheme;
+  }
+}
+
 function switchNavTab(tabName) {
   state.currentTab = tabName;
 
@@ -2180,6 +2285,8 @@ function displayDashboard(chart) {
 
   renderChartSvg();
   renderAuraMeter(chart);
+  renderCosmicBattery(chart);
+  renderDashaCountdown(chart);
 
   // Render Gandanta & Cusp Sandhi Boundary Alerts
   if (elements.boundaryAlertContainer) {

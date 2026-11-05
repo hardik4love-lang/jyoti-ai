@@ -17,6 +17,8 @@ import { getDailyOracleProphecy } from "./src/yantra-scanner.js";
 import { PrashnaEngine } from "./src/prashna-engine.js";
 import { CrushRadarEngine } from "./src/radar-engine.js";
 import { VideoCallEngine } from "./src/video-call-engine.js";
+import { CosmicBatteryEngine } from "./src/battery-engine.js";
+import { TransitCountdownEngine } from "./src/countdown-engine.js";
 
 console.log("=== Testing Vedic Astronomical Calculation Engine ===");
 console.log("\n=== Testing City Geocoding & Prefix Ranking ===");
@@ -227,5 +229,26 @@ if (videoEngine.facingMode !== "environment") {
 }
 videoEngine.endCall();
 console.log(`✅ Video Call Engine endCall lifecycle executed successfully`);
+
+console.log("\n=== Testing Daily Cosmic Readiness Battery Engine ===");
+const battery = CosmicBatteryEngine.getDailyBattery(boyChart);
+console.log(`✅ Cosmic Battery Overall: ${battery.overallScore}% (${battery.headline})`);
+console.log(`- Day Lord: ${battery.dayName} (${battery.dayLord})`);
+console.log(`- Mental: ${battery.mentalClarity}% | Career: ${battery.careerDrive}% | Harmony: ${battery.socialHarmony}%`);
+console.log(`- Golden Window: ${battery.goldenWindow}`);
+console.log(`- Upaya: "${battery.microUpaya}"`);
+if (battery.overallScore < 50 || !battery.goldenWindow || !battery.microUpaya) {
+  throw new Error("CosmicBatteryEngine calculation failed!");
+}
+
+console.log("\n=== Testing Transit & Dasha Countdown Engine ===");
+const countdown = TransitCountdownEngine.getCountdownMetrics(boyChart);
+console.log(`✅ Current Dasha: ${countdown.currentMahadasha} • ${countdown.currentAntardasha}`);
+console.log(`- Progress: ${countdown.progressPercent}% (${countdown.daysRemaining} days remaining)`);
+console.log(`- Sade Sati Status: ${countdown.sadeSatiStatus}`);
+console.log(`- Next Shift Theme: "${countdown.shiftTheme}"`);
+if (!countdown.currentMahadasha || countdown.progressPercent < 0 || countdown.progressPercent > 100) {
+  throw new Error("TransitCountdownEngine failed!");
+}
 
 console.log("\n🎉 ALL ADVANCED TESTS PASSED! Production-ready at 100% free and $0 cost.");

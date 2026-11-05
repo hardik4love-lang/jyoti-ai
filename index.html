@@ -226,6 +226,74 @@
         </div>
       </div>
 
+      <!-- DAILY HABIT ENGINE: COSMIC READINESS BATTERY (0-100%) -->
+      <section class="cosmic-battery-card" id="cosmicBatteryCard">
+        <div class="battery-top-row">
+          <div class="battery-badge">
+            <span class="battery-bolt">⚡</span>
+            <span id="batteryDayLord">Today's Alignment</span>
+          </div>
+          <span id="batteryDateStr" class="battery-date">Live</span>
+        </div>
+
+        <div class="battery-main-display">
+          <div class="battery-dial-wrap">
+            <div class="battery-dial-circle">
+              <span id="batteryScoreVal" class="battery-score-num">88%</span>
+              <span class="battery-score-lbl">READINESS</span>
+            </div>
+          </div>
+          <div class="battery-summary-wrap">
+            <h3 id="batteryHeadline" class="battery-headline">Cosmic Peak • Exceptional Execution Window</h3>
+            <p id="batteryMicroUpaya" class="battery-upaya">🌿 Upaya: Offer water to Sun and wear light golden hues to fortify vitality.</p>
+          </div>
+        </div>
+
+        <!-- 3 Sub-Metrics -->
+        <div class="battery-bars-grid">
+          <div class="battery-bar-col">
+            <div class="bar-header">
+              <span>🧠 Mental Clarity</span>
+              <strong id="barMentalVal" style="color: #60a5fa;">82%</strong>
+            </div>
+            <div class="battery-progress-track">
+              <div id="barMentalFill" class="battery-progress-fill" style="width: 82%; background: linear-gradient(90deg, #3b82f6, #60a5fa);"></div>
+            </div>
+          </div>
+          <div class="battery-bar-col">
+            <div class="bar-header">
+              <span>💼 Career Drive</span>
+              <strong id="barCareerVal" style="color: #f59e0b;">91%</strong>
+            </div>
+            <div class="battery-progress-track">
+              <div id="barCareerFill" class="battery-progress-fill" style="width: 91%; background: linear-gradient(90deg, #f59e0b, #fbbf24);"></div>
+            </div>
+          </div>
+          <div class="battery-bar-col">
+            <div class="bar-header">
+              <span>💖 Social Harmony</span>
+              <strong id="barSocialVal" style="color: #f472b6;">79%</strong>
+            </div>
+            <div class="battery-progress-track">
+              <div id="barSocialFill" class="battery-progress-fill" style="width: 79%; background: linear-gradient(90deg, #ec4899, #f472b6);"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Time Windows & 1-Tap Share -->
+        <div class="battery-windows-row">
+          <div class="window-pill window-golden">
+            <span>✨ Golden:</span> <strong id="windowGoldenText">11:45 AM – 12:35 PM</strong>
+          </div>
+          <div class="window-pill window-caution">
+            <span>⚠️ Caution:</span> <strong id="windowCautionText">12:00 PM – 1:30 PM (Rahu Kaal)</strong>
+          </div>
+          <button id="btnShareBatteryWhatsApp" class="btn-battery-share" title="Share Daily Battery to WhatsApp">
+            📲 Share Score
+          </button>
+        </div>
+      </section>
+
       <!-- Quick Action Hub (Live Video Call, Audio Call & Instant Demo) -->
       <div class="hero-quick-actions">
         <button id="btnQuickLiveVideoCall" class="btn-hero-video-call" title="1-on-1 FaceTime-Style Live Video Consultation with Jyoti">
@@ -490,6 +558,49 @@
             <button id="btnAuditRedFlags" class="btn-share-story" style="background: linear-gradient(135deg, #f43f5e, #be123c);">
               🚩 Red Flag Audit
             </button>
+          </div>
+        </div>
+
+        <!-- TRANSIT & DASHA COUNTDOWN MODULE ("When Will My Phase Shift?") -->
+        <div class="countdown-banner-card" id="dashaCountdownBanner">
+          <div class="countdown-header-row">
+            <div class="countdown-badge">
+              <span class="countdown-bolt">⏳</span>
+              <span>TRANSIT & DASHA COUNTDOWN</span>
+            </div>
+            <span id="countdownEndDateTag" class="countdown-end-tag">Ends 2028</span>
+          </div>
+
+          <div class="countdown-main-grid">
+            <div class="countdown-stat-box">
+              <span class="countdown-label">ACTIVE DASHA CYCLE</span>
+              <h4 id="countdownDashaTitle" class="countdown-val">Jupiter • Saturn</h4>
+              <div class="countdown-progress-wrap">
+                <div class="countdown-track">
+                  <div id="countdownProgressFill" class="countdown-fill" style="width: 65%;"></div>
+                </div>
+                <div class="countdown-progress-labels">
+                  <span id="countdownProgressNum">65% Traversed</span>
+                  <span id="countdownDaysLeft">142 Days Remaining</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="countdown-stat-box">
+              <span class="countdown-label">SADE SATI TIMELINE</span>
+              <h4 id="countdownSadeSatiTitle" class="countdown-val">Peak Phase (Middle 2.5 Yrs)</h4>
+              <p id="countdownSadeSatiDesc" class="countdown-subtext">Saturn transiting natal Moon. Final transit exit brings massive long-term grounded maturity.</p>
+            </div>
+          </div>
+
+          <div class="countdown-next-shift-banner">
+            <span class="shift-icon">🔮</span>
+            <div>
+              <strong>Next Planetary Inflection Shift:</strong>
+              <p id="countdownShiftTheme" style="margin: 0.2rem 0 0; font-size: 0.85rem; color: #e2e8f0;">
+                Commercial expansion, high intellect, writing/publishing, and sharp trade doors unlock.
+              </p>
+            </div>
           </div>
         </div>
 

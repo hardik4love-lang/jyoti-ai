@@ -3841,6 +3841,327 @@ body.cosmic-theme {
   opacity: 0.85;
 }
 
+/* ==========================================================================
+   Daily Cosmic Readiness Battery & Transit Countdown Cards (v6)
+   ========================================================================== */
+
+/* 1. Daily Cosmic Readiness Battery */
+.cosmic-battery-card {
+  background: linear-gradient(135deg, rgba(20, 24, 52, 0.85) 0%, rgba(10, 12, 28, 0.95) 100%);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+  position: relative;
+  overflow: hidden;
+}
+
+.battery-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.battery-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  color: #38bdf8;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-full);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.battery-bolt {
+  color: #fde047;
+}
+
+.battery-date {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.battery-main-display {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding-bottom: 1.15rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 1rem;
+}
+
+.battery-dial-wrap {
+  min-width: 84px;
+}
+
+.battery-dial-circle {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  border: 3px solid #38bdf8;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, rgba(15, 23, 42, 0.6) 100%);
+  box-shadow: 0 0 25px rgba(56, 189, 248, 0.4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.battery-score-num {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #fde047;
+  line-height: 1;
+}
+
+.battery-score-lbl {
+  font-size: 0.58rem;
+  font-weight: 800;
+  color: #38bdf8;
+  letter-spacing: 0.08em;
+  margin-top: 3px;
+}
+
+.battery-summary-wrap {
+  flex: 1;
+}
+
+.battery-headline {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 0.35rem;
+  line-height: 1.4;
+}
+
+.battery-upaya {
+  font-size: 0.82rem;
+  color: #cbd5e1;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.battery-bars-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 580px) {
+  .battery-bars-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.battery-bar-col {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-sm);
+  padding: 0.65rem 0.85rem;
+}
+
+.bar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  color: #cbd5e1;
+  margin-bottom: 0.4rem;
+}
+
+.battery-progress-track {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.battery-progress-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width 0.6s ease;
+}
+
+.battery-windows-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.window-pill {
+  font-size: 0.78rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.window-golden {
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(74, 222, 128, 0.3);
+  color: #86efac;
+}
+
+.window-caution {
+  background: rgba(244, 63, 94, 0.12);
+  border: 1px solid rgba(244, 63, 94, 0.3);
+  color: #fda4af;
+}
+
+.btn-battery-share {
+  margin-left: auto;
+  background: linear-gradient(135deg, #25D366, #128C7E);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-full);
+  padding: 0.45rem 1rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.btn-battery-share:hover {
+  transform: translateY(-1px);
+}
+
+/* 2. Transit & Dasha Countdown Module */
+.countdown-banner-card {
+  background: linear-gradient(135deg, rgba(28, 20, 50, 0.85) 0%, rgba(12, 10, 28, 0.95) 100%);
+  border: 1px solid rgba(244, 196, 83, 0.4);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+  animation: fadeIn 0.4s ease-out;
+}
+
+.countdown-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.countdown-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(244, 196, 83, 0.15);
+  border: 1px solid rgba(244, 196, 83, 0.4);
+  color: #fde047;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-full);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.countdown-end-tag {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.countdown-main-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 580px) {
+  .countdown-main-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.countdown-stat-box {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+}
+
+.countdown-label {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: var(--accent-gold);
+  letter-spacing: 0.08em;
+  display: block;
+  margin-bottom: 0.35rem;
+}
+
+.countdown-val {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 0.5rem;
+}
+
+.countdown-subtext {
+  font-size: 0.8rem;
+  color: #cbd5e1;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.countdown-progress-wrap {
+  margin-top: 0.65rem;
+}
+
+.countdown-track {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin-bottom: 0.35rem;
+}
+
+.countdown-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #f4c453, #f59e0b);
+  border-radius: var(--radius-full);
+  transition: width 0.6s ease;
+}
+
+.countdown-progress-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.countdown-next-shift-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background: rgba(244, 196, 83, 0.08);
+  border: 1px solid rgba(244, 196, 83, 0.25);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1rem;
+}
+
+.shift-icon {
+  font-size: 1.25rem;
+  line-height: 1.2;
+}
+
+
 
 
 
