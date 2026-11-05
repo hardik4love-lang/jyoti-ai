@@ -516,4 +516,146 @@ export class CosmicCardGenerator {
     link.href = dataUrl;
     link.click();
   }
+
+  // 5. Crush & Ex Truth Radar Card (9:16)
+  static generateTruthRadarCard(truth) {
+    const canvas = document.createElement("canvas");
+    canvas.width = 1080;
+    canvas.height = 1920;
+    const ctx = canvas.getContext("2d");
+
+    // Luxury Seductive Dark Gradient
+    const bg = ctx.createLinearGradient(0, 0, 1080, 1920);
+    bg.addColorStop(0, "#08040f");
+    bg.addColorStop(0.5, "#180a26");
+    bg.addColorStop(1, "#05020a");
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, 1080, 1920);
+
+    // Rose & Violet Halo
+    ctx.save();
+    const halo = ctx.createRadialGradient(540, 600, 50, 540, 600, 500);
+    halo.addColorStop(0, "rgba(244, 63, 94, 0.35)");
+    halo.addColorStop(0.5, "rgba(168, 85, 247, 0.2)");
+    halo.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = halo;
+    ctx.beginPath();
+    ctx.arc(540, 600, 500, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // Top Header
+    ctx.textAlign = "center";
+    ctx.font = "bold 44px system-ui, sans-serif";
+    ctx.fillStyle = "#ffdf7e";
+    ctx.fillText("🔥  C R U S H   &   E X   R A D A R", 540, 170);
+
+    ctx.font = "bold 24px system-ui, sans-serif";
+    ctx.fillStyle = "#f472b6";
+    ctx.letterSpacing = "6px";
+    ctx.fillText("UNSPOKEN CHEMISTRY AUDIT", 540, 220);
+
+    // Couple Names
+    ctx.font = "bold 64px system-ui, sans-serif";
+    ctx.fillStyle = "#ffffff";
+    ctx.fillText(`${truth.name1}  ⚡  ${truth.name2}`, 540, 360);
+
+    // Score Circle
+    ctx.strokeStyle = "#f43f5e";
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.arc(540, 560, 110, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.font = "bold 76px system-ui, sans-serif";
+    ctx.fillStyle = "#f4c453";
+    ctx.fillText(`${truth.score}%`, 540, 575);
+
+    ctx.font = "22px system-ui, sans-serif";
+    ctx.fillStyle = "#fda4af";
+    ctx.fillText("MAGNETISM INDEX", 540, 620);
+
+    ctx.font = "italic bold 38px serif";
+    ctx.fillStyle = "#ffdf7e";
+    ctx.fillText(`"${truth.archetype}"`, 540, 740);
+
+    // 3 Insight Boxes
+    const boxes = [
+      { cat: "WHO FALLS HARDER", text: truth.whoFallsText, color: "#f472b6" },
+      { cat: "THE FATAL FRICTION", text: truth.fatalFriction, color: "#f59e0b" },
+      { cat: "THE SECRET OBSESSION", text: truth.secretObsession, color: "#c084fc" }
+    ];
+
+    let startY = 830;
+    boxes.forEach((b, idx) => {
+      const boxY = startY + (idx * 220);
+      ctx.fillStyle = "rgba(22, 14, 38, 0.85)";
+      ctx.strokeStyle = "rgba(244, 63, 94, 0.35)";
+      ctx.lineWidth = 1.5;
+
+      ctx.beginPath();
+      ctx.roundRect(110, boxY, 860, 190, 24);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.textAlign = "left";
+      ctx.font = "bold 20px system-ui, sans-serif";
+      ctx.fillStyle = b.color;
+      ctx.fillText(`● ${b.cat}`, 150, boxY + 45);
+
+      ctx.font = "26px system-ui, -apple-system, sans-serif";
+      ctx.fillStyle = "#e2e8f0";
+      const words = b.text.split(" ");
+      let line = "";
+      let lineY = boxY + 90;
+      for (const w of words) {
+        const testLine = line + w + " ";
+        if (ctx.measureText(testLine).width > 780) {
+          ctx.fillText(line, 150, lineY);
+          line = w + " ";
+          lineY += 36;
+        } else {
+          line = testLine;
+        }
+      }
+      ctx.fillText(line, 150, lineY);
+    });
+
+    // Cosmic Verdict Footer
+    ctx.fillStyle = "rgba(244, 196, 83, 0.12)";
+    ctx.strokeStyle = "rgba(244, 196, 83, 0.35)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.roundRect(110, 1520, 860, 140, 20);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.textAlign = "center";
+    ctx.font = "bold 22px system-ui, sans-serif";
+    ctx.fillStyle = "#f4c453";
+    ctx.fillText("COSMIC VERDICT", 540, 1565);
+
+    ctx.font = "24px system-ui, sans-serif";
+    ctx.fillStyle = "#cbd5e1";
+    ctx.fillText(truth.cosmicVerdict, 540, 1615);
+
+    // Luxury Watermark
+    ctx.font = "bold 26px system-ui, sans-serif";
+    ctx.fillStyle = "#ffdf7e";
+    ctx.fillText("ॐ  J Y O T I   A I", 540, 1780);
+
+    ctx.font = "20px system-ui, sans-serif";
+    ctx.fillStyle = "#64748b";
+    ctx.fillText("Audit your crush chemistry at hardik4love-lang.github.io/jyoti-ai", 540, 1825);
+
+    return canvas.toDataURL("image/png");
+  }
+
+  static downloadTruthRadarCard(truth) {
+    const dataUrl = this.generateTruthRadarCard(truth);
+    const link = document.createElement("a");
+    link.download = `${truth.name1}_and_${truth.name2}_Truth_Radar.png`;
+    link.href = dataUrl;
+    link.click();
+  }
 }

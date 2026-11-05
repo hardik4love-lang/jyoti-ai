@@ -226,91 +226,244 @@
         </div>
       </div>
 
-      <!-- Conversational Step Onboarding with Jyoti's Avatar Front & Center -->
-      <section id="onboardingSection" class="portal-card">
-        <div class="avatar-hero-container">
-          <div class="avatar-aura-ring"></div>
-          <img src="./src/avatar.jpg" alt="Jyoti - AI Astrologer" class="avatar-hero-img">
-          <div class="avatar-status-badge">
-            <span class="live-dot"></span> LIVE ASTROLOGER
+      <!-- Quick Action Hub (Live Voice Call & Instant Demo) -->
+      <div class="hero-quick-actions">
+        <button id="btnQuickLiveCall" class="btn-hero-call" title="1-on-1 Simulated Voice Call with Jyoti">
+          <span class="call-pulse-dot"></span>
+          <span>📞 Call Jyoti Now (1-on-1 Voice)</span>
+        </button>
+        <button id="btnHeroInstantDemo" class="btn-hero-demo" title="1-Tap Demo Kundli">
+          <span>⚡ 1-Tap Demo Chart</span>
+        </button>
+      </div>
+
+      <!-- VIRAL HOOK 1: CRUSH & EX TRUTH RADAR (Zero Birth Time Required) -->
+      <section class="viral-feature-card radar-card" id="crushRadarSection">
+        <div class="feature-card-header">
+          <div class="badge-pulsing-hot">🔥 VIRAL RADAR</div>
+          <h2 class="feature-title">Crush & Ex Truth Radar</h2>
+          <p class="feature-subtitle">Unspoken Chemistry & Karmic Friction • No Birth Time Required • 100% Free</p>
+        </div>
+        <div class="radar-inputs-grid">
+          <div class="form-group">
+            <label class="form-label" for="radarName1">Your Name</label>
+            <input type="text" id="radarName1" class="form-input" placeholder="e.g. Aarav" value="Aarav">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="radarName2">Their Name (Crush / Ex / Partner)</label>
+            <input type="text" id="radarName2" class="form-input" placeholder="e.g. Ananya" value="Ananya">
           </div>
         </div>
+        <button id="btnScanTruthRadar" class="btn-radar-fire">
+          ⚡ Reveal Unspoken Chemistry
+        </button>
 
-        <div class="dialogue-box">
-          <p id="portalGreeting" class="portal-tagline">1-ON-1 SACRED CONSULTATION</p>
-          <h2 id="stepPromptTitle" class="step-title">"Namaste! What name does the universe call you?"</h2>
-          <p id="stepPromptSubtitle" class="step-subtitle">I'm Jyoti, your personal Vedic astrologer. Let's look into your stars together.</p>
-        </div>
+        <!-- Dynamic Truth Radar Revelation Container -->
+        <div id="radarResultBox" class="radar-result-box" style="display: none;">
+          <div class="radar-score-banner">
+            <div class="radar-score-circle">
+              <span id="radarScoreVal" class="score-digit">91%</span>
+              <span class="score-label">MAGNETISM</span>
+            </div>
+            <div class="radar-archetype-wrap">
+              <div id="radarArchetypeTitle" class="radar-archetype-title">"Twin Flames with Karmic Friction"</div>
+              <div id="radarVerdictText" class="radar-verdict-text">High-intensity bond. You trigger each other's deepest growth points.</div>
+            </div>
+          </div>
 
-        <!-- Step 1: Name & Gender -->
-        <div id="step1" class="step-pane active">
-          <div class="input-glow-group">
-            <input type="text" id="userName" class="portal-input" placeholder="Type your first name..." autofocus value="Aarav">
+          <div class="radar-metrics-list">
+            <div class="radar-metric-item">
+              <span class="radar-metric-icon">💔</span>
+              <div>
+                <strong class="radar-metric-tag" style="color: #f472b6;">WHO FALLS HARDER</strong>
+                <p id="radarWhoFalls" class="radar-metric-desc">Aarav falls first, while Ananya controls the emotional temperature.</p>
+              </div>
+            </div>
+            <div class="radar-metric-item">
+              <span class="radar-metric-icon">⚠️</span>
+              <div>
+                <strong class="radar-metric-tag" style="color: #f59e0b;">THE FATAL FRICTION</strong>
+                <p id="radarFriction" class="radar-metric-desc">Unspoken expectations. One person tests loyalty through silence; the other demands immediate verbal reassurance.</p>
+              </div>
+            </div>
+            <div class="radar-metric-item">
+              <span class="radar-metric-icon">✨</span>
+              <div>
+                <strong class="radar-metric-tag" style="color: #c084fc;">THE SECRET OBSESSION</strong>
+                <p id="radarObsession" class="radar-metric-desc">The electric eye contact and how effortlessly conversations stretch into 3:00 AM.</p>
+              </div>
+            </div>
           </div>
-          <div class="gender-pill-selector">
-            <button type="button" class="gender-btn active" data-gender="Male">Male</button>
-            <button type="button" class="gender-btn" data-gender="Female">Female</button>
-            <button type="button" class="gender-btn" data-gender="Other">Non-Binary</button>
-          </div>
-          <div class="step-actions">
-            <button id="btnNext1" class="btn-celestial">Continue to Birth Date ➔</button>
-          </div>
-          <div style="text-align: center; margin-top: 1rem;">
-            <button type="button" id="btnInstantDemo" class="btn-instant-demo">
-              ⚡ Try 1-Tap Demo Chart (Aarav)
+
+          <div class="radar-actions-row">
+            <button id="btnShareRadarWhatsApp" class="btn-share-story" style="background: linear-gradient(135deg, #25D366, #128C7E);">
+              📲 Share with Them on WhatsApp
+            </button>
+            <button id="btnDownloadRadarStory" class="btn-share-story" style="background: linear-gradient(135deg, #f43f5e, #be123c);">
+              📸 Download 9:16 Story Card
             </button>
           </div>
         </div>
+      </section>
 
-        <!-- Step 2: Date of Birth -->
-        <div id="step2" class="step-pane">
-          <div class="input-glow-group">
-            <input type="date" id="userDob" class="portal-input" value="1998-05-15">
-          </div>
-          <div class="step-actions">
-            <button id="btnBack2" class="btn-subtle">⬅ Back</button>
-            <button id="btnNext2" class="btn-celestial">Continue to Birth Time ➔</button>
-          </div>
+      <!-- VIRAL HOOK 2: INSTANT VEDIC PRASHNA (HORARY) ORACLE (No Birth Time Required) -->
+      <section class="viral-feature-card prashna-card" id="prashnaSection">
+        <div class="feature-card-header">
+          <div class="badge-pulsing-gold">🔮 HORARY ORACLE</div>
+          <h2 class="feature-title">Instant Vedic Prashna Oracle</h2>
+          <p class="feature-subtitle">Don't know your exact birth time? Parashara Prashna casts a chart for this exact minute.</p>
+        </div>
+        <div class="prashna-chips-grid">
+          <button class="prashna-chip" data-category="ex_love">
+            <span class="prashna-chip-icon">💔</span>
+            <span>Will my ex return / does my crush like me?</span>
+          </button>
+          <button class="prashna-chip" data-category="career_job">
+            <span class="prashna-chip-icon">💼</span>
+            <span>Career crossroads & job breakthrough</span>
+          </button>
+          <button class="prashna-chip" data-category="soulmate_marriage">
+            <span class="prashna-chip-icon">💍</span>
+            <span>Soulmate arrival & marriage window</span>
+          </button>
+          <button class="prashna-chip" data-category="wealth_money">
+            <span class="prashna-chip-icon">💸</span>
+            <span>Financial relief & wealth breakthrough</span>
+          </button>
         </div>
 
-        <!-- Step 3: Time of Birth -->
-        <div id="step3" class="step-pane">
-          <div class="input-glow-group">
-            <input type="time" id="userTob" class="portal-input" value="14:30">
-          </div>
-          <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; text-align: center;">
-            Exact time calculates your Ascendant (Lagna) with mathematical precision.
-          </p>
-          <div class="step-actions">
-            <button id="btnBack3" class="btn-subtle">⬅ Back</button>
-            <button id="btnNext3" class="btn-celestial">Continue to Birth City ➔</button>
-          </div>
+        <div class="prashna-custom-input-bar">
+          <input type="text" id="prashnaCustomQuery" class="form-input" placeholder="Or type your burning question here...">
+          <button id="btnAskPrashnaCustom" class="btn-primary" style="white-space: nowrap;">Ask Jyoti ➔</button>
         </div>
 
-        <!-- Step 4: City Search & Reveal -->
-        <div id="step4" class="step-pane">
-          <div class="input-glow-group" style="position: relative;">
-            <input type="text" id="cityInput" class="portal-input" placeholder="Type city (e.g. Delhi, Mumbai, Bengaluru, London...)" autocomplete="off" value="New Delhi, Delhi, India">
-            <div id="cityDropdown" class="autocomplete-dropdown"></div>
+        <!-- Dynamic Prashna Revelation Container -->
+        <div id="prashnaResultBox" class="prashna-result-box" style="display: none;">
+          <div class="prashna-astro-tag">
+            <span id="prashnaCosmicMeta">Ascendant: Aries • Moon: Swati • 7th House</span>
+            <span id="prashnaTimestamp">10:15 AM</span>
           </div>
-          <input type="hidden" id="latInput" value="28.6139">
-          <input type="hidden" id="lonInput" value="77.2090">
-          <input type="hidden" id="tzInput" value="5.5">
-
-          <div class="step-actions">
-            <button id="btnBack4" class="btn-subtle">⬅ Back</button>
-            <button id="btnRevealDestiny" class="btn-celestial pulse-gold">
-              ✨ Consult Jyoti (100% Free)
+          <h3 id="prashnaVerdict" class="prashna-verdict-title">Strong Energetic Pull with Delayed Direct Contact</h3>
+          <div class="prashna-timing-badge">
+            <span>⏳ Predicted Timing:</span> <strong id="prashnaTiming">Within 11 to 24 days</strong>
+          </div>
+          <p id="prashnaInsight" class="prashna-insight-body">Their Moon is currently reflecting nostalgia and unresolved ego resistance...</p>
+          <div class="prashna-remedy-box">
+            <strong>🌿 Divine Vedic Upaya:</strong>
+            <p id="prashnaRemedy">Do not initiate first. Allow the energetic vacuum to pull them to you...</p>
+          </div>
+          <div class="prashna-actions-row">
+            <button id="btnSpeakPrashna" class="btn-subtle" style="font-size: 0.85rem;">
+              🔊 Listen to Jyoti's Voice
+            </button>
+            <button id="btnSharePrashnaWhatsApp" class="btn-share-story" style="background: linear-gradient(135deg, #25D366, #128C7E); font-size: 0.85rem;">
+              📲 Share Prophecy
             </button>
           </div>
         </div>
+      </section>
 
-        <!-- Step Progress Dots -->
-        <div class="step-dots">
-          <span class="dot active"></span>
-          <span class="dot"></span>
-          <span class="dot"></span>
-          <span class="dot"></span>
+      <!-- MODULE 3: FULL JANAM KUNDLI (16-PAGE BLUEPRINT & LIVE CONSULTATION) -->
+      <section class="kundli-accordion-card">
+        <div class="kundli-accordion-header" id="btnToggleFullKundli">
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <span style="font-size: 1.5rem;">📜</span>
+            <div style="text-align: left;">
+              <div style="font-weight: 700; color: #fff; font-size: 1.05rem;">Cast Full Janam Kundli & D-1/D-9 Chart</div>
+              <div style="font-size: 0.8rem; color: var(--text-secondary);">Know your birth time? Generate your full 16-page Vedic blueprint & live avatar chat</div>
+            </div>
+          </div>
+          <span id="kundliExpandIcon" style="font-size: 1.1rem; color: var(--accent-gold); transition: transform 0.3s ease;">▼</span>
+        </div>
+
+        <div id="fullKundliWrapper" class="kundli-accordion-body" style="display: none;">
+          <!-- Conversational Step Onboarding with Jyoti's Avatar Front & Center -->
+          <div id="onboardingSection" class="portal-card" style="box-shadow: none; border: none; background: transparent; padding: 1rem 0;">
+            <div class="avatar-hero-container">
+              <div class="avatar-aura-ring"></div>
+              <img src="./src/avatar.jpg" alt="Jyoti - AI Astrologer" class="avatar-hero-img">
+              <div class="avatar-status-badge">
+                <span class="live-dot"></span> LIVE ASTROLOGER
+              </div>
+            </div>
+
+            <div class="dialogue-box">
+              <p id="portalGreeting" class="portal-tagline">1-ON-1 SACRED CONSULTATION</p>
+              <h2 id="stepPromptTitle" class="step-title">"Namaste! What name does the universe call you?"</h2>
+              <p id="stepPromptSubtitle" class="step-subtitle">I'm Jyoti, your personal Vedic astrologer. Let's look into your stars together.</p>
+            </div>
+
+            <!-- Step 1: Name & Gender -->
+            <div id="step1" class="step-pane active">
+              <div class="input-glow-group">
+                <input type="text" id="userName" class="portal-input" placeholder="Type your first name..." autofocus value="Aarav">
+              </div>
+              <div class="gender-pill-selector">
+                <button type="button" class="gender-btn active" data-gender="Male">Male</button>
+                <button type="button" class="gender-btn" data-gender="Female">Female</button>
+                <button type="button" class="gender-btn" data-gender="Other">Non-Binary</button>
+              </div>
+              <div class="step-actions">
+                <button id="btnNext1" class="btn-celestial">Continue to Birth Date ➔</button>
+              </div>
+              <div style="text-align: center; margin-top: 1rem;">
+                <button type="button" id="btnInstantDemo" class="btn-instant-demo">
+                  ⚡ Try 1-Tap Demo Chart (Aarav)
+                </button>
+              </div>
+            </div>
+
+            <!-- Step 2: Date of Birth -->
+            <div id="step2" class="step-pane">
+              <div class="input-glow-group">
+                <input type="date" id="userDob" class="portal-input" value="1998-05-15">
+              </div>
+              <div class="step-actions">
+                <button id="btnBack2" class="btn-subtle">⬅ Back</button>
+                <button id="btnNext2" class="btn-celestial">Continue to Birth Time ➔</button>
+              </div>
+            </div>
+
+            <!-- Step 3: Time of Birth -->
+            <div id="step3" class="step-pane">
+              <div class="input-glow-group">
+                <input type="time" id="userTob" class="portal-input" value="14:30">
+              </div>
+              <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; text-align: center;">
+                Exact time calculates your Ascendant (Lagna) with mathematical precision.
+              </p>
+              <div class="step-actions">
+                <button id="btnBack3" class="btn-subtle">⬅ Back</button>
+                <button id="btnNext3" class="btn-celestial">Continue to Birth City ➔</button>
+              </div>
+            </div>
+
+            <!-- Step 4: City Search & Reveal -->
+            <div id="step4" class="step-pane">
+              <div class="input-glow-group" style="position: relative;">
+                <input type="text" id="cityInput" class="portal-input" placeholder="Type city (e.g. Delhi, Mumbai, Bengaluru, London...)" autocomplete="off" value="New Delhi, Delhi, India">
+                <div id="cityDropdown" class="autocomplete-dropdown"></div>
+              </div>
+              <input type="hidden" id="latInput" value="28.6139">
+              <input type="hidden" id="lonInput" value="77.2090">
+              <input type="hidden" id="tzInput" value="5.5">
+
+              <div class="step-actions">
+                <button id="btnBack4" class="btn-subtle">⬅ Back</button>
+                <button id="btnRevealDestiny" class="btn-celestial pulse-gold">
+                  ✨ Consult Jyoti (100% Free)
+                </button>
+              </div>
+            </div>
+
+            <!-- Step Progress Dots -->
+            <div class="step-dots">
+              <span class="dot active"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+            </div>
+          </div>
         </div>
       </section>
 

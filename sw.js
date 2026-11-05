@@ -2,7 +2,7 @@
  * Jyoti AI - Service Worker for 100% Offline Resilience
  * Zero external network dependency for core calculation & local reading.
  */
-const CACHE_NAME = "jyoti-ai-v5";
+const CACHE_NAME = "jyoti-ai-v6";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
@@ -33,6 +33,8 @@ const ASSETS_TO_CACHE = [
   "./src/synastry-link.js",
   "./src/redflag-engine.js",
   "./src/yantra-scanner.js",
+  "./src/prashna-engine.js",
+  "./src/radar-engine.js",
   "./src/app.js"
 ];
 

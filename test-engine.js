@@ -14,6 +14,8 @@ import { getDailyRashifal, getAllRashifalList } from "./src/rashifal-engine.js";
 import { calculateGemstones } from "./src/gemstone-engine.js";
 import { auditCosmicRedFlags } from "./src/redflag-engine.js";
 import { getDailyOracleProphecy } from "./src/yantra-scanner.js";
+import { PrashnaEngine } from "./src/prashna-engine.js";
+import { CrushRadarEngine } from "./src/radar-engine.js";
 
 console.log("=== Testing Vedic Astronomical Calculation Engine ===");
 console.log("\n=== Testing City Geocoding & Prefix Ranking ===");
@@ -181,6 +183,32 @@ console.log(`- Blessed Action: "${dailyOracle.blessedAction}"`);
 console.log(`- Forbidden Action: "${dailyOracle.forbiddenAction}"`);
 if (dailyOracle.pranaScore < 50 || !dailyOracle.blessedAction) {
   throw new Error("Daily Oracle generation failed!");
+}
+
+console.log("\n=== Testing Instant Vedic Prashna (Horary) Oracle ===");
+const prashnaResult = PrashnaEngine.castPrashna("ex_love");
+console.log(`✅ Prashna Ascendant: ${prashnaResult.prashnaLagna} | Moon Nakshatra: ${prashnaResult.currentNakshatra}`);
+console.log(`- Query: "${prashnaResult.queryTitle}"`);
+console.log(`- Verdict: "${prashnaResult.verdict}"`);
+console.log(`- Timing: ${prashnaResult.timing}`);
+console.log(`- Insight: ${prashnaResult.insight}`);
+console.log(`- Remedy: ${prashnaResult.remedy}`);
+if (!prashnaResult.prashnaLagna || !prashnaResult.verdict || !prashnaResult.spokenScript) {
+  throw new Error("Prashna calculation failed!");
+}
+
+console.log("\n=== Testing Crush & Ex Truth Radar Engine ===");
+const radarResult = CrushRadarEngine.analyzeTruth("Aarav", "Ananya");
+console.log(`✅ Couple: ${radarResult.name1} & ${radarResult.name2}`);
+console.log(`- Magnetism Score: ${radarResult.score}%`);
+console.log(`- Archetype: "${radarResult.archetype}"`);
+console.log(`- Who Falls Harder: "${radarResult.whoFallsText}"`);
+console.log(`- Fatal Friction: "${radarResult.fatalFriction}"`);
+console.log(`- Secret Obsession: "${radarResult.secretObsession}"`);
+const whatsappLink = CrushRadarEngine.getWhatsAppTruthLink("Aarav", "Ananya");
+console.log(`✅ Generated WhatsApp Share Link: ${whatsappLink.slice(0, 85)}...`);
+if (radarResult.score < 50 || !radarResult.whoFallsText || !decodeURIComponent(whatsappLink).includes("truth=")) {
+  throw new Error("Crush Radar test failed!");
 }
 
 console.log("\n🎉 ALL ADVANCED TESTS PASSED! Production-ready at 100% free and $0 cost.");

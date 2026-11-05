@@ -28,6 +28,8 @@ import { QrGenerator } from "./qr-generator.js";
 import { SynastryLinkManager } from "./synastry-link.js";
 import { auditCosmicRedFlags } from "./redflag-engine.js";
 import { YantraScanner, getDailyOracleProphecy } from "./yantra-scanner.js";
+import { PrashnaEngine } from "./prashna-engine.js";
+import { CrushRadarEngine } from "./radar-engine.js";
 
 // Global State
 const state = {
@@ -41,7 +43,9 @@ const state = {
   selectedRashifalSign: 1,
   chatHistory: [],
   isGenerating: false,
-  lastBotMessage: ""
+  lastBotMessage: "",
+  currentTruthRadarData: null,
+  currentPrashnaData: null
 };
 
 const aiService = new AIService();
@@ -63,6 +67,43 @@ const elements = {
   vnTimer: document.getElementById("vnTimer"),
   btnInstantDemo: document.getElementById("btnInstantDemo"),
   qrCodeContainer: document.getElementById("qrCodeContainer"),
+
+  // Viral Hub Elements
+  btnQuickLiveCall: document.getElementById("btnQuickLiveCall"),
+  btnHeroInstantDemo: document.getElementById("btnHeroInstantDemo"),
+
+  // Crush & Ex Truth Radar
+  radarName1: document.getElementById("radarName1"),
+  radarName2: document.getElementById("radarName2"),
+  btnScanTruthRadar: document.getElementById("btnScanTruthRadar"),
+  radarResultBox: document.getElementById("radarResultBox"),
+  radarScoreVal: document.getElementById("radarScoreVal"),
+  radarArchetypeTitle: document.getElementById("radarArchetypeTitle"),
+  radarVerdictText: document.getElementById("radarVerdictText"),
+  radarWhoFalls: document.getElementById("radarWhoFalls"),
+  radarFriction: document.getElementById("radarFriction"),
+  radarObsession: document.getElementById("radarObsession"),
+  btnShareRadarWhatsApp: document.getElementById("btnShareRadarWhatsApp"),
+  btnDownloadRadarStory: document.getElementById("btnDownloadRadarStory"),
+
+  // Instant Vedic Prashna (Horary) Oracle
+  prashnaChips: document.querySelectorAll(".prashna-chip"),
+  prashnaCustomQuery: document.getElementById("prashnaCustomQuery"),
+  btnAskPrashnaCustom: document.getElementById("btnAskPrashnaCustom"),
+  prashnaResultBox: document.getElementById("prashnaResultBox"),
+  prashnaCosmicMeta: document.getElementById("prashnaCosmicMeta"),
+  prashnaTimestamp: document.getElementById("prashnaTimestamp"),
+  prashnaVerdict: document.getElementById("prashnaVerdict"),
+  prashnaTiming: document.getElementById("prashnaTiming"),
+  prashnaInsight: document.getElementById("prashnaInsight"),
+  prashnaRemedy: document.getElementById("prashnaRemedy"),
+  btnSpeakPrashna: document.getElementById("btnSpeakPrashna"),
+  btnSharePrashnaWhatsApp: document.getElementById("btnSharePrashnaWhatsApp"),
+
+  // Full Kundli Accordion
+  btnToggleFullKundli: document.getElementById("btnToggleFullKundli"),
+  fullKundliWrapper: document.getElementById("fullKundliWrapper"),
+  kundliExpandIcon: document.getElementById("kundliExpandIcon"),
 
   // Multi-Profile Vault
   profileVaultBar: document.getElementById("profileVaultBar"),
@@ -247,8 +288,12 @@ document.addEventListener("DOMContentLoaded", () => {
   initPWA();
   initProfileVault();
   initRashifalUI();
+  initTruthRadar();
+  initPrashnaOracle();
+  initQuickActionsAndAccordion();
   primeAudioGesture();
   checkIncomingSynastryLink();
+  checkIncomingTruthLink();
   registerServiceWorker();
 });
 
@@ -531,6 +576,7 @@ function setupEventListeners() {
   if (elements.editChartBtn) {
     elements.editChartBtn.addEventListener("click", () => {
       elements.dashboardSection.style.display = "none";
+      if (elements.fullKundliWrapper) elements.fullKundliWrapper.style.display = "block";
       elements.onboardingSection.style.display = "block";
       elements.onboardingSection.scrollIntoView({ behavior: "smooth" });
     });
@@ -632,7 +678,7 @@ function setupEventListeners() {
 
     try {
       const savedMode = localStorage.getItem("jyoti_display_mode");
-      if (savedMode === "fullscreen") {
+      if (savedMode === "fullscreen" || (!savedMode && window.innerWidth >= 992)) {
         elements.appStage.classList.add("fullscreen-mode");
         elements.btnViewFull.classList.add("active");
         elements.btnViewPhone.classList.remove("active");
@@ -1208,6 +1254,197 @@ function initPWA() {
   );
 }
 
+// ==========================================================================
+// Crush & Ex Truth Radar
+// ==========================================================================
+function initTruthRadar() {
+  if (elements.btnScanTruthRadar) {
+    elements.btnScanTruthRadar.addEventListener("click", () => {
+      const n1 = elements.radarName1 ? elements.radarName1.value.trim() : "Seeker";
+      const n2 = elements.radarName2 ? elements.radarName2.value.trim() : "Crush";
+      if (!n1 || !n2) {
+        alert("Please enter both names to audit unspoken chemistry.");
+        return;
+      }
+      executeTruthRadar(n1, n2);
+    });
+  }
+
+  if (elements.btnShareRadarWhatsApp) {
+    elements.btnShareRadarWhatsApp.addEventListener("click", () => {
+      const n1 = elements.radarName1 ? elements.radarName1.value.trim() : "Seeker";
+      const n2 = elements.radarName2 ? elements.radarName2.value.trim() : "Crush";
+      const shareUrl = CrushRadarEngine.getWhatsAppTruthLink(n1, n2);
+      window.open(shareUrl, "_blank");
+    });
+  }
+
+  if (elements.btnDownloadRadarStory) {
+    elements.btnDownloadRadarStory.addEventListener("click", () => {
+      if (state.currentTruthRadarData) {
+        CosmicCardGenerator.downloadTruthRadarCard(state.currentTruthRadarData);
+      }
+    });
+  }
+}
+
+function executeTruthRadar(n1, n2) {
+  templeBell.ring(528);
+  const data = CrushRadarEngine.analyzeTruth(n1, n2);
+  state.currentTruthRadarData = data;
+
+  if (elements.radarScoreVal) elements.radarScoreVal.innerText = `${data.score}%`;
+  if (elements.radarArchetypeTitle) elements.radarArchetypeTitle.innerText = `"${data.archetype}"`;
+  if (elements.radarVerdictText) elements.radarVerdictText.innerText = data.cosmicVerdict;
+  if (elements.radarWhoFalls) elements.radarWhoFalls.innerText = data.whoFallsText;
+  if (elements.radarFriction) elements.radarFriction.innerText = data.fatalFriction;
+  if (elements.radarObsession) elements.radarObsession.innerText = data.secretObsession;
+
+  if (elements.radarResultBox) {
+    elements.radarResultBox.style.display = "block";
+    elements.radarResultBox.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+}
+
+function checkIncomingTruthLink() {
+  const incoming = CrushRadarEngine.checkIncomingTruthLink();
+  if (incoming && incoming.n1 && incoming.n2) {
+    if (elements.radarName1) elements.radarName1.value = incoming.n1;
+    if (elements.radarName2) elements.radarName2.value = incoming.n2;
+    switchNavTab("personal");
+    setTimeout(() => {
+      executeTruthRadar(incoming.n1, incoming.n2);
+    }, 400);
+  }
+}
+
+// ==========================================================================
+// Instant Vedic Prashna (Horary) Oracle
+// ==========================================================================
+function initPrashnaOracle() {
+  if (elements.prashnaChips) {
+    elements.prashnaChips.forEach(chip => {
+      chip.addEventListener("click", () => {
+        elements.prashnaChips.forEach(c => c.classList.remove("active"));
+        chip.classList.add("active");
+        const categoryKey = chip.dataset.category;
+        executePrashna(categoryKey, "");
+      });
+    });
+  }
+
+  if (elements.btnAskPrashnaCustom) {
+    elements.btnAskPrashnaCustom.addEventListener("click", () => {
+      const q = elements.prashnaCustomQuery ? elements.prashnaCustomQuery.value.trim() : "";
+      if (!q) {
+        alert("Please enter a question to consult the oracle.");
+        return;
+      }
+      executePrashna("ex_love", q);
+    });
+  }
+
+  if (elements.prashnaCustomQuery) {
+    elements.prashnaCustomQuery.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        const q = elements.prashnaCustomQuery.value.trim();
+        if (q) executePrashna("ex_love", q);
+      }
+    });
+  }
+
+  if (elements.btnSpeakPrashna) {
+    elements.btnSpeakPrashna.addEventListener("click", () => {
+      if (state.currentPrashnaData && state.currentPrashnaData.spokenScript) {
+        voiceEngine.speak(state.currentPrashnaData.spokenScript, state.currentLang);
+      }
+    });
+  }
+
+  if (elements.btnSharePrashnaWhatsApp) {
+    elements.btnSharePrashnaWhatsApp.addEventListener("click", () => {
+      if (!state.currentPrashnaData) return;
+      const p = state.currentPrashnaData;
+      const text = encodeURIComponent(
+        `🔮 Jyoti AI Horary Prashna Oracle Reading:\n\n❓ Question: "${p.queryTitle}"\n✨ Verdict: ${p.verdict}\n⏳ Timing: ${p.timing}\n🌿 Vedic Upaya: ${p.remedy}\n\nAsk your burning question 100% free with zero birth time required:\nhttps://hardik4love-lang.github.io/jyoti-ai/`
+      );
+      window.open(`https://api.whatsapp.com/send?text=${text}`, "_blank");
+    });
+  }
+}
+
+function executePrashna(categoryKey, customQuery = "") {
+  templeBell.ring(432);
+  const data = PrashnaEngine.castPrashna(categoryKey, customQuery);
+  state.currentPrashnaData = data;
+
+  if (elements.prashnaCosmicMeta) {
+    elements.prashnaCosmicMeta.innerText = `Ascendant: ${data.prashnaLagna} • Moon: ${data.currentNakshatra} • ${data.houseGoverned}`;
+  }
+  if (elements.prashnaTimestamp) {
+    elements.prashnaTimestamp.innerText = data.timestamp;
+  }
+  if (elements.prashnaVerdict) {
+    elements.prashnaVerdict.innerText = data.verdict;
+  }
+  if (elements.prashnaTiming) {
+    elements.prashnaTiming.innerText = data.timing;
+  }
+  if (elements.prashnaInsight) {
+    elements.prashnaInsight.innerText = data.insight;
+  }
+  if (elements.prashnaRemedy) {
+    elements.prashnaRemedy.innerText = data.remedy;
+  }
+
+  if (elements.prashnaResultBox) {
+    elements.prashnaResultBox.style.display = "block";
+    elements.prashnaResultBox.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+  // Voice speaks out prophecy
+  voiceEngine.speak(data.spokenScript, state.currentLang);
+}
+
+// ==========================================================================
+// Quick Actions & Kundli Accordion
+// ==========================================================================
+function initQuickActionsAndAccordion() {
+  if (elements.btnQuickLiveCall) {
+    elements.btnQuickLiveCall.addEventListener("click", () => {
+      startLiveCall();
+    });
+  }
+
+  if (elements.btnHeroInstantDemo) {
+    elements.btnHeroInstantDemo.addEventListener("click", () => {
+      if (elements.fullKundliWrapper) elements.fullKundliWrapper.style.display = "block";
+      elements.userName.value = "Aarav";
+      elements.userDob.value = "1998-05-15";
+      elements.userTob.value = "14:30";
+      elements.cityInput.value = "Jamnagar, Gujarat, India";
+      elements.latInput.value = "22.4707";
+      elements.lonInput.value = "70.0577";
+      elements.tzInput.value = "5.5";
+      executeCalculation();
+    });
+  }
+
+  if (elements.btnToggleFullKundli) {
+    elements.btnToggleFullKundli.addEventListener("click", () => {
+      if (!elements.fullKundliWrapper) return;
+      const isHidden = elements.fullKundliWrapper.style.display === "none";
+      elements.fullKundliWrapper.style.display = isHidden ? "block" : "none";
+      if (elements.kundliExpandIcon) {
+        elements.kundliExpandIcon.style.transform = isHidden ? "rotate(180deg)" : "rotate(0deg)";
+      }
+      if (isHidden) {
+        elements.fullKundliWrapper.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    });
+  }
+}
+
 // Biometric Sacred Yantra Revelation
 function renderYantraOracleRevelation() {
   if (!elements.yantraOracleResult) return;
@@ -1744,6 +1981,7 @@ async function fetchGlobalCityFallback(query, existingMatches) {
 // Display Chart, Badges and Initial AI greeting
 function displayDashboard(chart) {
   elements.onboardingSection.style.display = "none";
+  if (elements.fullKundliWrapper) elements.fullKundliWrapper.style.display = "none";
   elements.dashboardSection.style.display = "block";
 
   // Badges
